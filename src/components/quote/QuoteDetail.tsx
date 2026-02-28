@@ -117,7 +117,7 @@ const QuoteDetail = ({ quoteId }: QuoteDetailProps) => {
               </div>
             </AssistantBubble>
           ) : (
-            <AssistantBubble content="Your quote is being reviewed by our team in Bangkok. We'll notify you when it's ready." />
+            <AssistantBubble content="Your quote is being reviewed by our production team. We'll notify you when it's ready." />
           )}
 
           {/* Revision messages */}

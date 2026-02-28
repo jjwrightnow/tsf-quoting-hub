@@ -29,10 +29,10 @@ const Login = () => {
       <div className="w-full max-w-sm px-6">
         <div className="mb-10 text-center">
           <h1 className="text-3xl font-bold tracking-tight text-foreground">
-            The Signage Factory
+            SignMaker
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Wholesale Quoting Portal
+            Professional Sign Quoting Portal
           </p>
         </div>
 

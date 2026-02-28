@@ -40,7 +40,7 @@ const Dashboard = () => {
             </svg>
           </button>
           <span className="ml-3 text-sm font-semibold text-foreground">
-            The Signage Factory
+            SignMaker
           </span>
         </header>
 
