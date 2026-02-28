@@ -49,13 +49,8 @@ const AppSidebar = ({ open, onToggle, onSignOut }: AppSidebarProps) => {
     >
       {/* Logo */}
       <div className="flex h-16 items-center justify-between px-5 border-b border-sidebar-border">
-        <div>
-        <h2 className="text-sm font-bold text-foreground tracking-wide">
-            SIGNMAKER
-          </h2>
-          <p className="text-[10px] text-muted-foreground tracking-widest uppercase">
-            Quoting Portal
-          </p>
+        <div className="flex h-8 w-8 items-center justify-center rounded-md gradient-pink-blue">
+          <div className="h-3.5 w-3.5 rounded-sm bg-primary-foreground/90" />
         </div>
         <button
           onClick={onToggle}

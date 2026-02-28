@@ -170,7 +170,7 @@ const ChatThread = () => {
       msgs.push({
         id: 'a-done',
         role: 'assistant',
-        content: `Your quote request ${wizard.submittedQuoteId} has been submitted! Our team will review your request and get back to you within 1-2 business days.`,
+        content: `Your quote has been submitted. Our team will review and respond within 1-2 business days.`,
       });
     }
 
