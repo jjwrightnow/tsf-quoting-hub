@@ -40,9 +40,9 @@ const WelcomeScreen = () => {
       />
 
       <div className="relative z-10 max-w-lg text-center animate-fade-in-up">
-        <h1 className="text-3xl font-bold text-foreground tracking-tight mb-2">
-          SignMaker
-        </h1>
+        <div className="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-lg gradient-pink-blue">
+          <div className="h-4 w-4 rounded-sm bg-primary-foreground/90" />
+        </div>
         <p className="text-base text-muted-foreground mb-8">
           Describe your sign project or upload your artwork to get started
         </p>
