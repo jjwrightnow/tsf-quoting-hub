@@ -7,7 +7,7 @@ const AssistantBubble = ({ content, children }: AssistantBubbleProps) => (
   <div className="flex gap-3 py-3">
     <div className="flex-shrink-0 mt-1">
       <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
-        TSF
+        SM
       </div>
     </div>
     <div className="min-w-0 flex-1">
