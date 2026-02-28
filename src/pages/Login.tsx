@@ -28,11 +28,11 @@ const Login = () => {
     <div className="flex min-h-screen items-center justify-center bg-background">
       <div className="w-full max-w-sm px-6">
         <div className="mb-10 text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">
-            SignMaker
-          </h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Professional Sign Quoting Portal
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg gradient-pink-blue">
+            <div className="h-5 w-5 rounded-sm bg-primary-foreground/90" />
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Professional Sign Quoting
           </p>
         </div>
 

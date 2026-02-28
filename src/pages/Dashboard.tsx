@@ -39,9 +39,9 @@ const Dashboard = () => {
               <line x1="3" y1="18" x2="21" y2="18" />
             </svg>
           </button>
-          <span className="ml-3 text-sm font-semibold text-foreground">
-            SignMaker
-          </span>
+          <div className="ml-3 flex h-6 w-6 items-center justify-center rounded-md gradient-pink-blue">
+            <div className="h-2.5 w-2.5 rounded-sm bg-primary-foreground/90" />
+          </div>
         </header>
 
         {/* Chat / Content */}
