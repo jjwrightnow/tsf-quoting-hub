@@ -4,14 +4,13 @@ import { useWizardStore } from '@/stores/wizardStore';
 const StepProjectDetails = () => {
   const wizard = useWizardStore();
   const [name, setName] = useState(wizard.projectName || '');
-  const [loc, setLoc] = useState(wizard.location || '');
   const [type, setType] = useState<'Sign Pro' | 'Retail' | null>(wizard.accountType);
   const [showSummary, setShowSummary] = useState(false);
 
-  const canSubmit = name.trim() && loc.trim();
+  const canSubmit = name.trim();
 
   const handleComplete = () => {
-    wizard.setProjectDetails(name, loc, type);
+    wizard.setProjectDetails(name, '', type);
     wizard.completeStep(6);
   };
 
@@ -27,18 +26,6 @@ const StepProjectDetails = () => {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="e.g. Main Street Storefront"
-            className="mt-1 w-full rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
-          />
-        </div>
-        <div>
-          <label className="text-[10px] text-muted-foreground uppercase tracking-wide">
-            Location / City, State *
-          </label>
-          <input
-            type="text"
-            value={loc}
-            onChange={(e) => setLoc(e.target.value)}
-            placeholder="e.g. Austin, TX"
             className="mt-1 w-full rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
           />
         </div>
