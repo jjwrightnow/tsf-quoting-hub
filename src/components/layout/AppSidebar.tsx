@@ -50,8 +50,8 @@ const AppSidebar = ({ open, onToggle, onSignOut }: AppSidebarProps) => {
       {/* Logo */}
       <div className="flex h-16 items-center justify-between px-5 border-b border-sidebar-border">
         <div>
-          <h2 className="text-sm font-bold text-foreground tracking-wide">
-            THE SIGNAGE FACTORY
+        <h2 className="text-sm font-bold text-foreground tracking-wide">
+            SIGNMAKER
           </h2>
           <p className="text-[10px] text-muted-foreground tracking-widest uppercase">
             Quoting Portal

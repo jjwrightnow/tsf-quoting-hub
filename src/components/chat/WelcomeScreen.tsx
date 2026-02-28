@@ -41,7 +41,7 @@ const WelcomeScreen = () => {
 
       <div className="relative z-10 max-w-lg text-center animate-fade-in-up">
         <h1 className="text-3xl font-bold text-foreground tracking-tight mb-2">
-          The Signage Factory
+          SignMaker
         </h1>
         <p className="text-base text-muted-foreground mb-8">
           Describe your sign project or upload your artwork to get started
