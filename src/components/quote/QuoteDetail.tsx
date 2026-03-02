@@ -42,7 +42,7 @@ const QuoteDetail = ({ quoteId }: QuoteDetailProps) => {
           markQuoteSeen(quoteId);
         }
       })
-      .catch(() => {})
+      .catch((err) => { console.error('[QuoteDetail] fetch error:', err); })
       .finally(() => setLoading(false));
   }, [quoteId]);
 
@@ -53,7 +53,7 @@ const QuoteDetail = ({ quoteId }: QuoteDetailProps) => {
       await requestRevision({ quoteId, message: revisionText });
       setRevisionMessages((prev) => [...prev, revisionText]);
       setRevisionText('');
-    } catch {}
+    } catch (err) { console.error('[QuoteDetail] revision error:', err); }
     setSending(false);
   };
 
