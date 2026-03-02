@@ -1,10 +1,7 @@
-import { supabase } from '@/integrations/supabase/client';
 import { invokeWithAuth } from '@/lib/supabase';
 
 export async function getCatalogBundle() {
-  const { data, error } = await supabase.functions.invoke('get-catalog-bundle');
-  if (error) throw error;
-  return data;
+  return invokeWithAuth('get-catalog-bundle');
 }
 
 export async function submitIntake(payload: Record<string, unknown>) {
