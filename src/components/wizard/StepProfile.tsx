@@ -6,6 +6,8 @@ const StepProfile = () => {
   const { setProfile, completeStep, setCurrentStep, profileId } = useWizardStore();
   const catalog = useAppStore((s) => s.catalogBundle);
 
+  console.log('[StepProfile] mounted, catalogBundle:', catalog);
+
   const items = catalog?.profiles || [];
 
   const handleSelect = (id: string, name: string) => {
