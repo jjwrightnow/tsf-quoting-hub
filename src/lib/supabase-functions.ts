@@ -1,9 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
-
-async function getAuthHeaders() {
-  const { data: { session } } = await supabase.auth.getSession();
-  return { Authorization: `Bearer ${session?.access_token}` };
-}
+import { invokeWithAuth } from '@/lib/supabase';
 
 export async function getCatalogBundle() {
   const { data, error } = await supabase.functions.invoke('get-catalog-bundle');
@@ -12,31 +8,13 @@ export async function getCatalogBundle() {
 }
 
 export async function submitIntake(payload: Record<string, unknown>) {
-  const headers = await getAuthHeaders();
-  const { data, error } = await supabase.functions.invoke('submit-intake', {
-    body: payload,
-    headers,
-  });
-  if (error) throw error;
-  return data;
+  return invokeWithAuth('submit-intake', payload);
 }
 
 export async function getQuotePortal(params: { action: 'list' } | { action: 'detail'; quoteId: string }) {
-  const headers = await getAuthHeaders();
-  const { data, error } = await supabase.functions.invoke('get-quote-portal', {
-    body: params,
-    headers,
-  });
-  if (error) throw error;
-  return data;
+  return invokeWithAuth('get-quote-portal', params);
 }
 
 export async function requestRevision(params: { quoteId: string; message: string }) {
-  const headers = await getAuthHeaders();
-  const { data, error } = await supabase.functions.invoke('request-revision', {
-    body: params,
-    headers,
-  });
-  if (error) throw error;
-  return data;
+  return invokeWithAuth('request-revision', params);
 }
