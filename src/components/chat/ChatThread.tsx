@@ -35,8 +35,8 @@ const ChatThread = () => {
         .then((data) => {
           if (data) appStore.setCatalogBundle(data);
         })
-        .catch(() => {
-          // Use fallback empty data
+        .catch((err) => {
+          console.error('[ChatThread] catalog fetch error:', err);
           appStore.setCatalogBundle({
             profiles: [
               { id: '1', name: 'Channel Letters' },
@@ -198,6 +198,7 @@ const ChatThread = () => {
   }, [messages, submitting]);
 
   const handleSubmit = useCallback(async () => {
+    console.log('[ChatThread] handleSubmit called');
     setSubmitting(true);
     setSubmitError(null);
     const key = crypto.randomUUID();
@@ -259,7 +260,7 @@ const ChatThread = () => {
             }))
           );
         }
-      } catch {}
+      } catch (reconcileErr) { console.error('[ChatThread] reconcile error:', reconcileErr); }
     } catch (err: unknown) {
       appStore.removeGhostQuote();
       const msg = err instanceof Error ? err.message : 'Submission failed';
