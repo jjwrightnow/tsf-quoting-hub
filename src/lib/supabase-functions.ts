@@ -8,7 +8,7 @@ export async function submitIntake(payload: Record<string, unknown>) {
   return invokeWithAuth('submit-intake', payload);
 }
 
-export async function getQuotePortal(params: { action: 'list' } | { action: 'detail'; quoteId: string }) {
+export async function getQuotePortal(params: { action: 'list' } | { action: 'detail'; quoteId: string } | { action: 'list_all' }) {
   return invokeWithAuth('get-quote-portal', params);
 }
 
