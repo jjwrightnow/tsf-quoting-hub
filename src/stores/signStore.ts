@@ -6,8 +6,14 @@ export type ChatPhase =
   | 'chat'
   | 'post_upload'
   | 'identify_signs'
+  | 'pick_profile'
   | 'spec_signs'
   | 'done';
+
+/** Tracks the pending sign name before profile is picked */
+export interface PendingSign {
+  name: string;
+}
 
 export interface SignRecord {
   id: string;
@@ -47,6 +53,7 @@ interface SignState {
   userRole: 'customer' | 'assistant';
   autocompleteOptions: AutocompleteOption[];
   postUploadChoice: string | null;
+  pendingSignName: string | null;
 
   setChatPhase: (phase: ChatPhase) => void;
   setSessionId: (id: string | null) => void;
@@ -59,6 +66,7 @@ interface SignState {
   setUserRole: (role: 'customer' | 'assistant') => void;
   setAutocompleteOptions: (opts: AutocompleteOption[]) => void;
   setPostUploadChoice: (choice: string | null) => void;
+  setPendingSignName: (name: string | null) => void;
   reset: () => void;
 }
 
@@ -71,6 +79,7 @@ const initialState = {
   userRole: 'customer' as const,
   autocompleteOptions: [] as AutocompleteOption[],
   postUploadChoice: null as string | null,
+  pendingSignName: null as string | null,
 };
 
 export const useSignStore = create<SignState>((set) => ({
@@ -92,5 +101,6 @@ export const useSignStore = create<SignState>((set) => ({
   setUserRole: (userRole) => set({ userRole }),
   setAutocompleteOptions: (autocompleteOptions) => set({ autocompleteOptions }),
   setPostUploadChoice: (postUploadChoice) => set({ postUploadChoice }),
+  setPendingSignName: (pendingSignName) => set({ pendingSignName }),
   reset: () => set(initialState),
 }));

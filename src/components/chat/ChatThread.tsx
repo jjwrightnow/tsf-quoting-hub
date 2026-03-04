@@ -1,16 +1,18 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useWizardStore } from '@/stores/wizardStore';
 import { useAppStore } from '@/stores/appStore';
-import { useSignStore } from '@/stores/signStore';
+import { useSignStore, type SignRecord } from '@/stores/signStore';
 import { getCatalogBundle, submitIntake, getQuotePortal } from '@/lib/supabase-functions';
 import { checkReviewerAccess } from '@/lib/review-functions';
 import { supabase } from '@/integrations/supabase/client';
+import { PROFILE_DEFAULTS } from '@/lib/sign-constants';
 import AssistantBubble from '@/components/chat/AssistantBubble';
 import UserBubble from '@/components/chat/UserBubble';
 import TypingIndicator from '@/components/chat/TypingIndicator';
 import WelcomeActions from '@/components/chat/WelcomeActions';
 import PostUploadActions from '@/components/chat/PostUploadActions';
-import SignIdentifier from '@/components/chat/SignIdentifier';
+import SignNameInput from '@/components/chat/SignNameInput';
+import ProfileSelector from '@/components/chat/ProfileSelector';
 import SignSpecCard from '@/components/chat/SignSpecCard';
 import AssistantFlagForm from '@/components/chat/AssistantFlagForm';
 // Wizard steps (legacy)
@@ -79,6 +81,7 @@ const ChatThread = () => {
     // sign deps
     signStore.chatPhase, signStore.uploadedFiles, signStore.signs,
     signStore.currentSignIndex, signStore.postUploadChoice,
+    signStore.pendingSignName,
   ]);
 
   const buildSignMessages = () => {
@@ -93,140 +96,232 @@ const ChatThread = () => {
       component: phase === 'welcome' ? <WelcomeActions /> : undefined,
     });
 
-    // After upload or chat start
-    if (phase !== 'welcome') {
-      if (signStore.uploadedFiles.length > 0) {
+    if (phase === 'welcome') { setMessages(msgs); return; }
+
+    // Upload confirmation
+    if (signStore.uploadedFiles.length > 0) {
+      msgs.push({
+        id: 'upload-confirm',
+        role: 'user',
+        content: `Uploaded ${signStore.uploadedFiles.length} file(s): ${signStore.uploadedFiles.map((f) => f.name).join(', ')}`,
+      });
+    }
+
+    // Post-upload choices
+    if (phase === 'post_upload') {
+      msgs.push({
+        id: 'post-upload',
+        role: 'assistant',
+        content: "Your artwork has been uploaded! Our team will review it and get back to you — no further action needed.\n\nBut if you'd like to speed things up, you can specify sign profiles now.",
+        component: <PostUploadActions />,
+      });
+    }
+
+    if (signStore.postUploadChoice === 'done') {
+      msgs.push({
+        id: 'done-msg',
+        role: 'assistant',
+        content: "All set! We'll review your artwork and reach out with a quote. Come back anytime.",
+      });
+    }
+
+    if (phase === 'chat' && signStore.postUploadChoice === 'questions') {
+      msgs.push({
+        id: 'questions-msg',
+        role: 'assistant',
+        content: "Of course! What questions do you have? I'm here to help.",
+      });
+    }
+
+    // === Completed signs (collapsed cards) ===
+    signStore.signs.forEach((sign, i) => {
+      // User said the sign name
+      msgs.push({
+        id: `sign-name-${sign.id}`,
+        role: 'user',
+        content: sign.sign_name,
+      });
+
+      // Profile chosen confirmation
+      if (sign.profile_type) {
         msgs.push({
-          id: 'upload-confirm',
+          id: `sign-profile-${sign.id}`,
           role: 'user',
-          content: `Uploaded ${signStore.uploadedFiles.length} file(s): ${signStore.uploadedFiles.map((f) => f.name).join(', ')}`,
+          content: sign.profile_type,
         });
       }
 
-      if (phase === 'post_upload') {
+      // If this sign is fully saved (collapsed)
+      if (sign.status === 'saved') {
         msgs.push({
-          id: 'post-upload',
+          id: `sign-card-${sign.id}`,
           role: 'assistant',
-          content: "Your artwork has been uploaded! Our team will review it and get back to you — no further action needed on your end.\n\nBut if you'd like to speed things up, you can specify sign profiles now.",
-          component: <PostUploadActions />,
+          content: '',
+          component: (
+            <SignSpecCard
+              key={sign.id}
+              sign={sign}
+              onSaved={() => {}}
+              onAddAnother={() => {}}
+              onDone={() => {}}
+            />
+          ),
         });
       }
+    });
 
-      if (signStore.postUploadChoice === 'done') {
+    // === Active sign: spec editing ===
+    if (phase === 'spec_signs') {
+      const activeSign = signStore.signs[signStore.currentSignIndex];
+      if (activeSign && activeSign.status !== 'saved') {
         msgs.push({
-          id: 'done-msg',
+          id: `sign-active-${activeSign.id}`,
           role: 'assistant',
-          content: "All set! We'll review your artwork and reach out with a quote. Come back anytime.",
+          content: '',
+          component: (
+            <>
+              <SignSpecCard
+                key={activeSign.id}
+                sign={activeSign}
+                onSaved={handleSignSaved}
+                onAddAnother={handleAddAnother}
+                onDone={handleAllDone}
+              />
+              {signStore.userRole === 'assistant' && (
+                <AssistantFlagForm signPageRef={activeSign.page_ref || activeSign.sign_name} />
+              )}
+            </>
+          ),
         });
       }
+    }
 
-      if (phase === 'chat' && signStore.postUploadChoice === 'questions') {
-        msgs.push({
-          id: 'questions-msg',
-          role: 'assistant',
-          content: "Of course! What questions do you have? I'm here to help.",
-        });
-      }
+    // === Identify sign (name input) ===
+    if (phase === 'identify_signs') {
+      const isFirst = signStore.signs.length === 0;
+      msgs.push({
+        id: 'identify',
+        role: 'assistant',
+        content: isFirst
+          ? "Which sign are you working on? Enter a name or page number."
+          : "Next sign — enter a name or page number.",
+        component: (
+          <div className="space-y-3">
+            <SignNameInput
+              isFirst={isFirst}
+              onSubmit={handleSignNameSubmit}
+            />
+            {!isFirst && (
+              <button
+                onClick={handleAllDone}
+                className="w-full rounded-lg border border-border bg-card px-4 py-2.5 text-sm font-medium text-muted-foreground transition-all hover:text-foreground hover:border-primary"
+              >
+                I'm done adding signs
+              </button>
+            )}
+          </div>
+        ),
+      });
+    }
 
-      // In chat mode without post-upload choice, just enable the input — no canned message
+    // === Pick profile ===
+    if (phase === 'pick_profile' && signStore.pendingSignName) {
+      msgs.push({
+        id: 'pick-profile-name',
+        role: 'user',
+        content: signStore.pendingSignName,
+      });
+      msgs.push({
+        id: 'pick-profile',
+        role: 'assistant',
+        content: `What type of sign is "${signStore.pendingSignName}"?`,
+        component: (
+          <ProfileSelector
+            signName={signStore.pendingSignName}
+            onSelect={handleProfileSelect}
+          />
+        ),
+      });
+    }
 
-      // Identify signs phase
-      if (phase === 'identify_signs') {
-        msgs.push({
-          id: 'identify',
-          role: 'assistant',
-          content: "How many signs are in this project? Give each a name, or reference by page number.",
-          component: <SignIdentifier />,
-        });
-      }
-
-      // Spec signs phase
-      if (phase === 'spec_signs' || phase === 'done') {
-        if (signStore.signs.length > 0) {
-          const signNames = signStore.signs.map((s) => s.sign_name).join(', ');
-          msgs.push({
-            id: 'signs-confirmed',
-            role: 'assistant',
-            content: `Got it! I see ${signStore.signs.length} sign(s): ${signNames}. Let's start with ${signStore.signs[0]?.sign_name}.`,
-          });
-        }
-
-        // Render sign cards
-        signStore.signs.forEach((sign, i) => {
-          if (phase === 'done' || i < signStore.currentSignIndex) {
-            // Collapsed cards for completed signs
-            msgs.push({
-              id: `sign-${sign.id}`,
-              role: 'assistant',
-              content: '',
-              component: (
-                <SignSpecCard
-                  key={sign.id}
-                  sign={sign}
-                  onSaved={() => {}}
-                  onAddAnother={() => {}}
-                  onDone={() => {}}
-                />
-              ),
-            });
-
-            if (i < signStore.currentSignIndex - 1 || (i < signStore.signs.length - 1 && phase !== 'done')) {
-              msgs.push({
-                id: `sign-saved-${sign.id}`,
-                role: 'assistant',
-                content: `${sign.sign_name} saved! Next up: ${signStore.signs[i + 1]?.sign_name || 'done'}.`,
-              });
-            }
-          } else if (i === signStore.currentSignIndex && phase === 'spec_signs') {
-            // Active card
-            msgs.push({
-              id: `sign-active-${sign.id}`,
-              role: 'assistant',
-              content: '',
-              component: (
-                <>
-                  <SignSpecCard
-                    key={sign.id}
-                    sign={sign}
-                    onSaved={handleSignSaved}
-                    onAddAnother={handleAddAnother}
-                    onDone={handleAllDone}
-                  />
-                  {signStore.userRole === 'assistant' && (
-                    <AssistantFlagForm signPageRef={sign.page_ref || sign.sign_name} />
-                  )}
-                </>
-              ),
-            });
-          }
-        });
-      }
-
-      if (phase === 'done' && signStore.postUploadChoice !== 'done') {
-        msgs.push({
-          id: 'all-done',
-          role: 'assistant',
-          content: "All set! Our team will review everything and reach out with a quote. Come back anytime.",
-        });
-      }
+    // === Done ===
+    if (phase === 'done' && signStore.postUploadChoice !== 'done') {
+      msgs.push({
+        id: 'all-done',
+        role: 'assistant',
+        content: "All set! Our team will review everything and reach out with a quote. Come back anytime.",
+      });
     }
 
     setMessages(msgs);
   };
 
-  const handleSignSaved = () => {
-    const nextIndex = signStore.currentSignIndex + 1;
-    if (nextIndex < signStore.signs.length) {
-      signStore.setCurrentSignIndex(nextIndex);
-    } else {
-      signStore.setChatPhase('done');
-      if (signStore.sessionId) {
-        supabase
-          .from('review_sessions')
-          .update({ status: 'submitted' })
-          .eq('id', signStore.sessionId);
-      }
+  // === New flow handlers ===
+  const handleSignNameSubmit = (name: string) => {
+    signStore.setPendingSignName(name);
+    signStore.setChatPhase('pick_profile');
+  };
+
+  const handleProfileSelect = async (profile: string) => {
+    const name = signStore.pendingSignName;
+    if (!name || !signStore.sessionId) return;
+
+    // Create the sign record in DB
+    const defaults = PROFILE_DEFAULTS[profile] || {};
+    const insert = {
+      session_id: signStore.sessionId,
+      sign_name: name,
+      sort_order: signStore.signs.length,
+      status: 'draft',
+      specs_source: 'draft',
+      profile_type: profile,
+      ...defaults,
+    };
+
+    const { data, error } = await supabase
+      .from('review_signs')
+      .insert(insert)
+      .select()
+      .single();
+
+    if (error || !data) {
+      console.error('Error creating sign:', error);
+      return;
     }
+
+    const newSign: SignRecord = {
+      id: data.id,
+      session_id: data.session_id,
+      sign_name: data.sign_name,
+      page_ref: data.page_ref,
+      sort_order: data.sort_order,
+      profile_type: data.profile_type,
+      metal_type: data.metal_type,
+      finish: data.finish,
+      depth: data.depth,
+      led_color: data.led_color,
+      mounting: data.mounting,
+      back_type: data.back_type,
+      acrylic_face: data.acrylic_face,
+      lead_wires: data.lead_wires,
+      ul_label: data.ul_label,
+      wire_exit: data.wire_exit,
+      specs_source: data.specs_source,
+      status: data.status,
+      price: data.price,
+      customer_notes: data.customer_notes,
+      flag_count: data.flag_count,
+    };
+
+    signStore.addSign(newSign);
+    signStore.setCurrentSignIndex(signStore.signs.length); // points to newly added
+    signStore.setPendingSignName(null);
+    signStore.setChatPhase('spec_signs');
+  };
+
+  const handleSignSaved = () => {
+    // After saving, go back to identify next sign
+    signStore.setChatPhase('identify_signs');
   };
 
   const handleAddAnother = () => {
