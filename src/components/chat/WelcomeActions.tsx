@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { useSignStore } from '@/stores/signStore';
 import { supabase } from '@/integrations/supabase/client';
 import { createReviewSession } from '@/lib/review-functions';
@@ -9,6 +9,7 @@ const WelcomeActions = () => {
   const setSessionId = useSignStore((s) => s.setSessionId);
   const addUploadedFile = useSignStore((s) => s.addUploadedFile);
   const sessionId = useSignStore((s) => s.sessionId);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   const ensureSession = async (): Promise<string> => {
     if (sessionId) return sessionId;
@@ -30,13 +31,14 @@ const WelcomeActions = () => {
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
+    setUploadError(null);
 
     try {
       const sid = await ensureSession();
       for (const file of Array.from(files)) {
         const ext = file.name.split('.').pop() || 'bin';
         const uuid = crypto.randomUUID();
-        const filePath = `uploads/${sid}/${uuid}.${ext}`;
+        const filePath = `reviews/${sid}/${uuid}.${ext}`;
 
         const { error } = await supabase.storage
           .from('intake-assets')
@@ -44,12 +46,17 @@ const WelcomeActions = () => {
 
         if (error) {
           console.error('Upload error:', error);
+          setUploadError(`Upload failed: ${error.message}`);
           continue;
         }
         addUploadedFile({ name: file.name, path: filePath });
       }
       // Update session artwork_paths
       const currentFiles = useSignStore.getState().uploadedFiles;
+      if (currentFiles.length === 0) {
+        if (!uploadError) setUploadError('No files were uploaded successfully.');
+        return;
+      }
       await supabase
         .from('review_sessions')
         .update({ artwork_paths: currentFiles.map((f) => f.path) })
@@ -57,7 +64,9 @@ const WelcomeActions = () => {
 
       setChatPhase('post_upload');
     } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Unknown error';
       console.error('Upload flow error:', err);
+      setUploadError(`Upload failed: ${msg}`);
     }
     // Reset file input
     if (fileRef.current) fileRef.current.value = '';
@@ -93,6 +102,10 @@ const WelcomeActions = () => {
       >
         Start Chat
       </button>
+
+      {uploadError && (
+        <p className="text-sm text-destructive mt-1">{uploadError}</p>
+      )}
 
       <input
         ref={fileRef}

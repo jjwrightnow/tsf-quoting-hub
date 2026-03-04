@@ -39,7 +39,7 @@ const InputBar = () => {
     for (const file of Array.from(files)) {
       const ext = file.name.split('.').pop() || 'bin';
       const uuid = crypto.randomUUID();
-      const filePath = `uploads/${sessionId}/${uuid}.${ext}`;
+      const filePath = `reviews/${sessionId}/${uuid}.${ext}`;
       const { error } = await supabase.storage.from('intake-assets').upload(filePath, file, { cacheControl: '3600', upsert: false });
       if (!error) {
         addUploadedFile({ name: file.name, path: filePath });
