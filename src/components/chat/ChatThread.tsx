@@ -363,8 +363,9 @@ const ChatThread = () => {
   }, [isWizardMode]);
 
   return (
-    <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-6 md:px-8">
-      <div className="mx-auto max-w-2xl space-y-1">
+    <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-6 md:px-8 flex flex-col">
+      <div className="flex-1" />
+      <div className="mx-auto max-w-2xl space-y-5">
         {messages.map((msg) => (
           <div key={msg.id} className="animate-fade-in-up">
             {msg.role === 'assistant' ? (
