@@ -44,6 +44,141 @@ export type Database = {
         }
         Relationships: []
       }
+      autocomplete_options: {
+        Row: {
+          active: boolean | null
+          category: string
+          display_label: string
+          id: string
+          option_value: string
+          search_terms: string | null
+          source_airtable_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          category: string
+          display_label: string
+          id?: string
+          option_value: string
+          search_terms?: string | null
+          source_airtable_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          category?: string
+          display_label?: string
+          id?: string
+          option_value?: string
+          search_terms?: string | null
+          source_airtable_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      catalog_finishes: {
+        Row: {
+          compatible_materials: string[] | null
+          finish_id: string
+          finish_name: string
+          id: string
+          is_active: boolean
+          updated_at: string
+        }
+        Insert: {
+          compatible_materials?: string[] | null
+          finish_id: string
+          finish_name: string
+          id?: string
+          is_active?: boolean
+          updated_at?: string
+        }
+        Update: {
+          compatible_materials?: string[] | null
+          finish_id?: string
+          finish_name?: string
+          id?: string
+          is_active?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      catalog_last_updated: {
+        Row: {
+          table_name: string
+          updated_at: string
+        }
+        Insert: {
+          table_name: string
+          updated_at?: string
+        }
+        Update: {
+          table_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      catalog_materials: {
+        Row: {
+          id: string
+          is_active: boolean
+          material_id: string
+          material_name: string
+          sort_order: number | null
+          swatch_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          is_active?: boolean
+          material_id: string
+          material_name: string
+          sort_order?: number | null
+          swatch_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          is_active?: boolean
+          material_id?: string
+          material_name?: string
+          sort_order?: number | null
+          swatch_url?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      catalog_profiles: {
+        Row: {
+          defaults_json: Json | null
+          id: string
+          illustration_url: string | null
+          is_active: boolean
+          profile_code: string
+          profile_name: string
+          updated_at: string
+        }
+        Insert: {
+          defaults_json?: Json | null
+          id?: string
+          illustration_url?: string | null
+          is_active?: boolean
+          profile_code: string
+          profile_name: string
+          updated_at?: string
+        }
+        Update: {
+          defaults_json?: Json | null
+          id?: string
+          illustration_url?: string | null
+          is_active?: boolean
+          profile_code?: string
+          profile_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       contacts: {
         Row: {
           account_id: string
@@ -186,6 +321,151 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      review_flags: {
+        Row: {
+          airtable_record_id: string | null
+          created_at: string | null
+          customer_notes: string | null
+          customer_response: string | null
+          customer_value: string | null
+          flag_type: string
+          id: string
+          issue_description: string
+          reason_code: string | null
+          recommended_value: string | null
+          screenshot_path: string | null
+          session_id: string
+          sign_page_ref: string | null
+          sort_order: number
+          spec_field: string | null
+        }
+        Insert: {
+          airtable_record_id?: string | null
+          created_at?: string | null
+          customer_notes?: string | null
+          customer_response?: string | null
+          customer_value?: string | null
+          flag_type?: string
+          id?: string
+          issue_description: string
+          reason_code?: string | null
+          recommended_value?: string | null
+          screenshot_path?: string | null
+          session_id: string
+          sign_page_ref?: string | null
+          sort_order?: number
+          spec_field?: string | null
+        }
+        Update: {
+          airtable_record_id?: string | null
+          created_at?: string | null
+          customer_notes?: string | null
+          customer_response?: string | null
+          customer_value?: string | null
+          flag_type?: string
+          id?: string
+          issue_description?: string
+          reason_code?: string | null
+          recommended_value?: string | null
+          screenshot_path?: string | null
+          session_id?: string
+          sign_page_ref?: string | null
+          sort_order?: number
+          spec_field?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_flags_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "review_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      review_sessions: {
+        Row: {
+          account_id: string | null
+          airtable_record_id: string | null
+          artwork_paths: string[] | null
+          created_at: string | null
+          customer_email: string | null
+          customer_name: string
+          fillout_link: string | null
+          flag_count: number | null
+          id: string
+          markup_paths: string[] | null
+          pg_quote_number: string | null
+          reviewer_email: string
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          account_id?: string | null
+          airtable_record_id?: string | null
+          artwork_paths?: string[] | null
+          created_at?: string | null
+          customer_email?: string | null
+          customer_name: string
+          fillout_link?: string | null
+          flag_count?: number | null
+          id?: string
+          markup_paths?: string[] | null
+          pg_quote_number?: string | null
+          reviewer_email: string
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          account_id?: string | null
+          airtable_record_id?: string | null
+          artwork_paths?: string[] | null
+          created_at?: string | null
+          customer_email?: string | null
+          customer_name?: string
+          fillout_link?: string | null
+          flag_count?: number | null
+          id?: string
+          markup_paths?: string[] | null
+          pg_quote_number?: string | null
+          reviewer_email?: string
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_sessions_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reviewer_whitelist: {
+        Row: {
+          active: boolean | null
+          created_at: string | null
+          email: string
+          id: string
+          name: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          created_at?: string | null
+          email: string
+          id?: string
+          name?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          created_at?: string | null
+          email?: string
+          id?: string
+          name?: string | null
+        }
+        Relationships: []
       }
       submission_queue: {
         Row: {
