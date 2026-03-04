@@ -128,13 +128,7 @@ const ChatThread = () => {
         });
       }
 
-      if (phase === 'chat' && !signStore.postUploadChoice) {
-        msgs.push({
-          id: 'chat-start',
-          role: 'assistant',
-          content: "Great! How can I help you with your sign project? You can upload artwork anytime using the button below.",
-        });
-      }
+      // In chat mode without post-upload choice, just enable the input — no canned message
 
       // Identify signs phase
       if (phase === 'identify_signs') {
