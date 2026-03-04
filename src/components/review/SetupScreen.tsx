@@ -56,11 +56,24 @@ const SetupScreen = () => {
     const idx = uploads.length;
 
     try {
-      const { error } = await supabase.storage.from('intake-assets').upload(filePath, file);
-      if (error) throw error;
-      setUploads((prev) => prev.map((u, i) => (u.file === file ? { ...u, progress: 100, path: filePath } : u)));
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        setUploads((prev) => prev.map((u) => (u.file === file ? { ...u, error: 'Not authenticated — please log in again' } : u)));
+        return;
+      }
+      const { error } = await supabase.storage.from('intake-assets').upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: false,
+      });
+      if (error) {
+        console.error('Storage upload error:', { message: error.message, name: error.name, stack: error.stack });
+        throw error;
+      }
+      setUploads((prev) => prev.map((u) => (u.file === file ? { ...u, progress: 100, path: filePath } : u)));
     } catch (e: any) {
-      setUploads((prev) => prev.map((u) => (u.file === file ? { ...u, error: e.message } : u)));
+      console.error('Upload catch:', e);
+      const msg = e?.message || e?.statusCode || 'Upload failed';
+      setUploads((prev) => prev.map((u) => (u.file === file ? { ...u, error: String(msg) } : u)));
     }
   };
 
