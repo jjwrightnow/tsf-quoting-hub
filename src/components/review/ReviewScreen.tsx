@@ -3,20 +3,19 @@ import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/componen
 import ArtworkViewer from './ArtworkViewer';
 import FlagBot from './FlagBot';
 import { useReviewStore } from '@/stores/reviewStore';
-import { invokeWithAuth } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 
 const ReviewScreen = () => {
   const setAutocompleteOptions = useReviewStore((s) => s.setAutocompleteOptions);
 
-  // Load autocomplete options on mount
   useEffect(() => {
-    invokeWithAuth('get-catalog-bundle')
-      .then((res) => {
-        if (res?.autocompleteOptions) {
-          useReviewStore.getState().setAutocompleteOptions(res.autocompleteOptions);
-        }
-      })
-      .catch(console.error);
+    supabase
+      .from('autocomplete_options')
+      .select('category, option_value, display_label, search_terms')
+      .eq('active', true)
+      .then(({ data }) => {
+        if (data) setAutocompleteOptions(data);
+      });
   }, []);
 
   return (
