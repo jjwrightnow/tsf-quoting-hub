@@ -14,3 +14,15 @@ verify_jwt = false
 
 [functions.sync-submission]
 verify_jwt = false
+
+[functions.check-reviewer-access]
+verify_jwt = false
+
+[functions.get-companies]
+verify_jwt = false
+
+[functions.create-review-session]
+verify_jwt = false
+
+[functions.save-flag]
+verify_jwt = false
