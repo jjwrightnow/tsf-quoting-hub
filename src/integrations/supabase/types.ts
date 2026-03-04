@@ -443,6 +443,95 @@ export type Database = {
           },
         ]
       }
+      review_signs: {
+        Row: {
+          acrylic_face: string | null
+          airtable_record_id: string | null
+          back_type: string | null
+          created_at: string | null
+          customer_notes: string | null
+          depth: string | null
+          finish: string | null
+          flag_count: number | null
+          id: string
+          lead_wires: string | null
+          led_color: string | null
+          metal_type: string | null
+          mounting: string | null
+          page_ref: string | null
+          price: number | null
+          profile_type: string | null
+          session_id: string
+          sign_name: string
+          sort_order: number
+          specs_source: string | null
+          status: string | null
+          ul_label: string | null
+          updated_at: string | null
+          wire_exit: string | null
+        }
+        Insert: {
+          acrylic_face?: string | null
+          airtable_record_id?: string | null
+          back_type?: string | null
+          created_at?: string | null
+          customer_notes?: string | null
+          depth?: string | null
+          finish?: string | null
+          flag_count?: number | null
+          id?: string
+          lead_wires?: string | null
+          led_color?: string | null
+          metal_type?: string | null
+          mounting?: string | null
+          page_ref?: string | null
+          price?: number | null
+          profile_type?: string | null
+          session_id: string
+          sign_name: string
+          sort_order?: number
+          specs_source?: string | null
+          status?: string | null
+          ul_label?: string | null
+          updated_at?: string | null
+          wire_exit?: string | null
+        }
+        Update: {
+          acrylic_face?: string | null
+          airtable_record_id?: string | null
+          back_type?: string | null
+          created_at?: string | null
+          customer_notes?: string | null
+          depth?: string | null
+          finish?: string | null
+          flag_count?: number | null
+          id?: string
+          lead_wires?: string | null
+          led_color?: string | null
+          metal_type?: string | null
+          mounting?: string | null
+          page_ref?: string | null
+          price?: number | null
+          profile_type?: string | null
+          session_id?: string
+          sign_name?: string
+          sort_order?: number
+          specs_source?: string | null
+          status?: string | null
+          ul_label?: string | null
+          updated_at?: string | null
+          wire_exit?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_signs_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "review_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reviewer_whitelist: {
         Row: {
           active: boolean | null
