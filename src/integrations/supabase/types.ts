@@ -400,6 +400,7 @@ export type Database = {
           reviewer_email: string
           status: string
           updated_at: string | null
+          upload_path: string | null
         }
         Insert: {
           account_id?: string | null
@@ -416,6 +417,7 @@ export type Database = {
           reviewer_email: string
           status?: string
           updated_at?: string | null
+          upload_path?: string | null
         }
         Update: {
           account_id?: string | null
@@ -432,6 +434,7 @@ export type Database = {
           reviewer_email?: string
           status?: string
           updated_at?: string | null
+          upload_path?: string | null
         }
         Relationships: [
           {
