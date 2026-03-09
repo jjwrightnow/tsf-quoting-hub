@@ -84,6 +84,7 @@ const initialState = {
   autocompleteOptions: [] as AutocompleteOption[],
   postUploadChoice: null as string | null,
   pendingSignName: null as string | null,
+  uploadPath: null as SignState['uploadPath'],
 };
 
 export const useSignStore = create<SignState>((set) => ({
