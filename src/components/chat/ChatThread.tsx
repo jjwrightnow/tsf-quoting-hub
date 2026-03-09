@@ -136,6 +136,42 @@ const ChatThread = () => {
       });
     }
 
+    // === New upload-path phases ===
+    if (signStore.uploadPath === 'dump_run' && phase === 'done') {
+      msgs.push({
+        id: 'dump-run-done',
+        role: 'assistant',
+        content: "All set! We've got your files. Our team will review everything and reach out with a quote. No action needed on your end.",
+      });
+    }
+
+    if (phase === 'batch_assign') {
+      msgs.push({
+        id: 'batch-assign',
+        role: 'assistant',
+        content: 'Assign a profile to each file below.',
+        component: <BatchAssignGrid onDone={() => signStore.setChatPhase('done')} />,
+      });
+    }
+
+    if (phase === 'one_done_pick') {
+      msgs.push({
+        id: 'one-done-pick',
+        role: 'assistant',
+        content: 'Pick the profile that applies to all your signs.',
+        component: <OneDonePicker />,
+      });
+    }
+
+    if (phase === 'one_done_specs') {
+      msgs.push({
+        id: 'one-done-review',
+        role: 'assistant',
+        content: '',
+        component: <OneDoneReview />,
+      });
+    }
+
     // === Completed signs (collapsed cards) ===
     signStore.signs.forEach((sign, i) => {
       // User said the sign name
