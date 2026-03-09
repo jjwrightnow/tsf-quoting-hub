@@ -26,3 +26,6 @@ verify_jwt = false
 
 [functions.save-flag]
 verify_jwt = false
+
+[functions.check-domain-on-signup]
+verify_jwt = false

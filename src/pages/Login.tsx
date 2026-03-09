@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
@@ -15,6 +16,29 @@ const Login = () => {
     if (!email) return;
     setLoading(true);
     setError('');
+
+    // Domain verification check
+    try {
+      const { data: domainCheck, error: fnError } = await supabase.functions.invoke(
+        'check-domain-on-signup',
+        { body: { email } }
+      );
+      if (fnError) {
+        setLoading(false);
+        setError('Unable to verify your domain. Please try again.');
+        return;
+      }
+      if (!domainCheck?.allowed) {
+        setLoading(false);
+        setError(domainCheck?.reason || 'Your domain is not authorized.');
+        return;
+      }
+    } catch {
+      setLoading(false);
+      setError('Unable to verify your domain. Please try again.');
+      return;
+    }
+
     const { error: err } = await sendMagicLink(email);
     setLoading(false);
     if (err) {
@@ -23,7 +47,6 @@ const Login = () => {
       setSent(true);
     }
   };
-
   return (
     <div className="flex min-h-screen items-center justify-center bg-background">
       <div className="w-full max-w-sm px-6">
