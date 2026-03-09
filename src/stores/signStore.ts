@@ -107,5 +107,6 @@ export const useSignStore = create<SignState>((set) => ({
   setAutocompleteOptions: (autocompleteOptions) => set({ autocompleteOptions }),
   setPostUploadChoice: (postUploadChoice) => set({ postUploadChoice }),
   setPendingSignName: (pendingSignName) => set({ pendingSignName }),
+  setUploadPath: (uploadPath) => set({ uploadPath }),
   reset: () => set(initialState),
 }));
