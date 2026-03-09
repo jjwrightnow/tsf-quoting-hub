@@ -38,9 +38,14 @@ export function useAuth() {
     return { error };
   };
 
+  const signInWithPassword = async (email: string, password: string) => {
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    return { error };
+  };
+
   const signOut = async () => {
     await supabase.auth.signOut();
   };
 
-  return { session, loading, sendMagicLink, signOut };
+  return { session, loading, sendMagicLink, signInWithPassword, signOut };
 }
