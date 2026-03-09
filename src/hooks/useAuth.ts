@@ -21,6 +21,7 @@ export function useAuth() {
 
     // getSession restores session from storage AND processes hash tokens
     supabase.auth.getSession().then(({ data: { session: restored } }) => {
+      console.log('[useAuth] getSession resolved:', !!restored, restored?.user?.email);
       initialised.current = true;
       setSession(restored);
       setLoading(false);
