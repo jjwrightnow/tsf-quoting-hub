@@ -5,6 +5,9 @@ export type ChatPhase =
   | 'welcome'
   | 'chat'
   | 'post_upload'
+  | 'batch_assign'
+  | 'one_done_pick'
+  | 'one_done_specs'
   | 'identify_signs'
   | 'pick_profile'
   | 'spec_signs'
@@ -54,6 +57,7 @@ interface SignState {
   autocompleteOptions: AutocompleteOption[];
   postUploadChoice: string | null;
   pendingSignName: string | null;
+  uploadPath: 'dump_run' | 'tag_go' | 'one_done' | 'letterman_assist' | null;
 
   setChatPhase: (phase: ChatPhase) => void;
   setSessionId: (id: string | null) => void;
@@ -67,6 +71,7 @@ interface SignState {
   setAutocompleteOptions: (opts: AutocompleteOption[]) => void;
   setPostUploadChoice: (choice: string | null) => void;
   setPendingSignName: (name: string | null) => void;
+  setUploadPath: (path: SignState['uploadPath']) => void;
   reset: () => void;
 }
 
@@ -80,6 +85,7 @@ const initialState = {
   autocompleteOptions: [] as AutocompleteOption[],
   postUploadChoice: null as string | null,
   pendingSignName: null as string | null,
+  uploadPath: null as SignState['uploadPath'],
 };
 
 export const useSignStore = create<SignState>((set) => ({
@@ -102,5 +108,6 @@ export const useSignStore = create<SignState>((set) => ({
   setAutocompleteOptions: (autocompleteOptions) => set({ autocompleteOptions }),
   setPostUploadChoice: (postUploadChoice) => set({ postUploadChoice }),
   setPendingSignName: (pendingSignName) => set({ pendingSignName }),
+  setUploadPath: (uploadPath) => set({ uploadPath }),
   reset: () => set(initialState),
 }));
