@@ -559,6 +559,39 @@ export type Database = {
         }
         Relationships: []
       }
+      spec_options: {
+        Row: {
+          field_name: string
+          id: string
+          label: string
+          options: Json
+          profile_type: string
+          required: boolean | null
+          sort_order: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          field_name: string
+          id?: string
+          label: string
+          options?: Json
+          profile_type: string
+          required?: boolean | null
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          field_name?: string
+          id?: string
+          label?: string
+          options?: Json
+          profile_type?: string
+          required?: boolean | null
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       submission_queue: {
         Row: {
           account_id: string
