@@ -1,5 +1,6 @@
 import { useAppStore } from '@/stores/appStore';
 import { useWizardStore } from '@/stores/wizardStore';
+import { useSignStore } from '@/stores/signStore';
 import { useAuth } from '@/hooks/useAuth';
 import { useQuotePolling } from '@/hooks/usePolling';
 import AppSidebar from '@/components/layout/AppSidebar';
