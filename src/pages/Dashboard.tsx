@@ -27,7 +27,7 @@ const Dashboard = () => {
       />
 
       {/* Main area */}
-      <div className="flex flex-1 flex-col min-w-0">
+      <div className="relative flex flex-1 flex-col min-w-0">
         {/* Mobile header */}
         <header className="flex h-12 items-center border-b border-border bg-card px-4 md:hidden">
           <button
