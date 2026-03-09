@@ -1,5 +1,6 @@
 import { useAppStore } from '@/stores/appStore';
 import { useWizardStore } from '@/stores/wizardStore';
+import { useSignStore } from '@/stores/signStore';
 import { useAuth } from '@/hooks/useAuth';
 import { useQuotePolling } from '@/hooks/usePolling';
 import AppSidebar from '@/components/layout/AppSidebar';
@@ -12,6 +13,7 @@ const Dashboard = () => {
   const activeQuoteId = useAppStore((s) => s.activeQuoteId);
   const sidebarOpen = useAppStore((s) => s.sidebarOpen);
   const setSidebarOpen = useAppStore((s) => s.setSidebarOpen);
+  const chatPhase = useSignStore((s) => s.chatPhase);
 
   console.log('[Dashboard] render — session:', !!session, 'email:', session?.user?.email);
 
@@ -52,7 +54,7 @@ const Dashboard = () => {
         </div>
 
         {/* Floating Input bar */}
-        {(wizardActive || activeQuoteId) && (
+        {(wizardActive || activeQuoteId || chatPhase !== 'welcome') && (
           <div className="shrink-0">
             <InputBar />
           </div>
