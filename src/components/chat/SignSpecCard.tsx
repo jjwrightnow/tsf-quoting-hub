@@ -6,6 +6,7 @@ import {
   FIELD_LABELS,
   CATEGORY_MAP,
 } from '@/lib/sign-constants';
+import SpecExamplePlaceholder from '@/components/chat/SpecExamplePlaceholder';
 
 interface SignSpecCardProps {
   sign: SignRecord;
