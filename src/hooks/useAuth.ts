@@ -10,9 +10,9 @@ export function useAuth() {
   useEffect(() => {
     // Set up listener FIRST so we never miss events
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, newSession) => {
+      (event, newSession) => {
+        console.log('[useAuth] onAuthStateChange:', event, !!newSession, newSession?.user?.email);
         setSession(newSession);
-        // Only mark ready after getSession has run once
         if (initialised.current) {
           setLoading(false);
         }
