@@ -47,10 +47,16 @@ const Dashboard = () => {
         </header>
 
         {/* Chat / Content */}
-        <MainPanel />
+        <div className="flex-1 overflow-auto">
+          <MainPanel />
+        </div>
 
-        {/* Input bar */}
-        {(wizardActive || activeQuoteId) && <InputBar />}
+        {/* Floating Input bar */}
+        {(wizardActive || activeQuoteId) && (
+          <div className="shrink-0">
+            <InputBar />
+          </div>
+        )}
       </div>
 
       {/* Mobile overlay */}
