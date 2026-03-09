@@ -52,7 +52,7 @@ const Dashboard = () => {
         </div>
 
         {/* Floating Input bar */}
-        {(wizardActive || activeQuoteId) && (
+        {(wizardActive || activeQuoteId || chatPhase !== 'welcome') && (
           <div className="shrink-0">
             <InputBar />
           </div>
