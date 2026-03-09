@@ -13,6 +13,8 @@ const Dashboard = () => {
   const sidebarOpen = useAppStore((s) => s.sidebarOpen);
   const setSidebarOpen = useAppStore((s) => s.setSidebarOpen);
 
+  console.log('[Dashboard] render — session:', !!session, 'email:', session?.user?.email);
+
   useQuotePolling(!!session);
 
   return (
