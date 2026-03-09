@@ -57,6 +57,7 @@ interface SignState {
   autocompleteOptions: AutocompleteOption[];
   postUploadChoice: string | null;
   pendingSignName: string | null;
+  uploadPath: 'dump_run' | 'tag_go' | 'one_done' | 'letterman_assist' | null;
 
   setChatPhase: (phase: ChatPhase) => void;
   setSessionId: (id: string | null) => void;
