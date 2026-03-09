@@ -1,21 +1,28 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { Session } from '@supabase/supabase-js';
 
 export function useAuth() {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const initialised = useRef(false);
 
   useEffect(() => {
+    // Set up listener FIRST so we never miss events
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setSession(session);
-        setLoading(false);
+      (_event, newSession) => {
+        setSession(newSession);
+        // Only mark ready after getSession has run once
+        if (initialised.current) {
+          setLoading(false);
+        }
       }
     );
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
+    // getSession restores session from storage AND processes hash tokens
+    supabase.auth.getSession().then(({ data: { session: restored } }) => {
+      initialised.current = true;
+      setSession(restored);
       setLoading(false);
     });
 
