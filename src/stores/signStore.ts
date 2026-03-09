@@ -70,6 +70,7 @@ interface SignState {
   setAutocompleteOptions: (opts: AutocompleteOption[]) => void;
   setPostUploadChoice: (choice: string | null) => void;
   setPendingSignName: (name: string | null) => void;
+  setUploadPath: (path: SignState['uploadPath']) => void;
   reset: () => void;
 }
 
