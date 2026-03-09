@@ -27,7 +27,7 @@ const Dashboard = () => {
       />
 
       {/* Main area */}
-      <div className="flex flex-1 flex-col min-w-0">
+      <div className="relative flex flex-1 flex-col min-w-0">
         {/* Mobile header */}
         <header className="flex h-12 items-center border-b border-border bg-card px-4 md:hidden">
           <button
@@ -47,10 +47,16 @@ const Dashboard = () => {
         </header>
 
         {/* Chat / Content */}
-        <MainPanel />
+        <div className="flex-1 overflow-auto">
+          <MainPanel />
+        </div>
 
-        {/* Input bar */}
-        {(wizardActive || activeQuoteId) && <InputBar />}
+        {/* Floating Input bar */}
+        {(wizardActive || activeQuoteId) && (
+          <div className="shrink-0">
+            <InputBar />
+          </div>
+        )}
       </div>
 
       {/* Mobile overlay */}
