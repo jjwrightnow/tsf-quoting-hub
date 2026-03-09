@@ -84,7 +84,7 @@ const ChatThread = () => {
     // sign deps
     signStore.chatPhase, signStore.uploadedFiles, signStore.signs,
     signStore.currentSignIndex, signStore.postUploadChoice,
-    signStore.pendingSignName,
+    signStore.pendingSignName, signStore.uploadPath,
   ]);
 
   const buildSignMessages = () => {
