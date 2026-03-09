@@ -643,6 +643,30 @@ export type Database = {
         }
         Relationships: []
       }
+      verified_domains: {
+        Row: {
+          approved_by: string | null
+          company_name: string | null
+          created_at: string | null
+          domain: string
+          id: string
+        }
+        Insert: {
+          approved_by?: string | null
+          company_name?: string | null
+          created_at?: string | null
+          domain: string
+          id?: string
+        }
+        Update: {
+          approved_by?: string | null
+          company_name?: string | null
+          created_at?: string | null
+          domain?: string
+          id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
