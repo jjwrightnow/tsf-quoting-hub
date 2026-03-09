@@ -15,6 +15,9 @@ import SignNameInput from '@/components/chat/SignNameInput';
 import ProfileSelector from '@/components/chat/ProfileSelector';
 import SignSpecCard from '@/components/chat/SignSpecCard';
 import AssistantFlagForm from '@/components/chat/AssistantFlagForm';
+import BatchAssignGrid from '@/components/chat/BatchAssignGrid';
+import OneDonePicker from '@/components/chat/OneDonePicker';
+import OneDoneReview from '@/components/chat/OneDoneReview';
 // Wizard steps (legacy)
 import StepArtwork from '@/components/wizard/StepArtwork';
 import StepProfile from '@/components/wizard/StepProfile';
