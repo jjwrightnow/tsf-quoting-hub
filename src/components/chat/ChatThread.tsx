@@ -15,6 +15,9 @@ import SignNameInput from '@/components/chat/SignNameInput';
 import ProfileSelector from '@/components/chat/ProfileSelector';
 import SignSpecCard from '@/components/chat/SignSpecCard';
 import AssistantFlagForm from '@/components/chat/AssistantFlagForm';
+import BatchAssignGrid from '@/components/chat/BatchAssignGrid';
+import OneDonePicker from '@/components/chat/OneDonePicker';
+import OneDoneReview from '@/components/chat/OneDoneReview';
 // Wizard steps (legacy)
 import StepArtwork from '@/components/wizard/StepArtwork';
 import StepProfile from '@/components/wizard/StepProfile';
@@ -81,7 +84,7 @@ const ChatThread = () => {
     // sign deps
     signStore.chatPhase, signStore.uploadedFiles, signStore.signs,
     signStore.currentSignIndex, signStore.postUploadChoice,
-    signStore.pendingSignName,
+    signStore.pendingSignName, signStore.uploadPath,
   ]);
 
   const buildSignMessages = () => {
@@ -130,6 +133,42 @@ const ChatThread = () => {
         id: 'questions-msg',
         role: 'assistant',
         content: "Of course! What questions do you have? I'm here to help.",
+      });
+    }
+
+    // === New upload-path phases ===
+    if (signStore.uploadPath === 'dump_run' && phase === 'done') {
+      msgs.push({
+        id: 'dump-run-done',
+        role: 'assistant',
+        content: "All set! We've got your files. Our team will review everything and reach out with a quote. No action needed on your end.",
+      });
+    }
+
+    if (phase === 'batch_assign') {
+      msgs.push({
+        id: 'batch-assign',
+        role: 'assistant',
+        content: 'Assign a profile to each file below.',
+        component: <BatchAssignGrid onDone={() => signStore.setChatPhase('done')} />,
+      });
+    }
+
+    if (phase === 'one_done_pick') {
+      msgs.push({
+        id: 'one-done-pick',
+        role: 'assistant',
+        content: 'Pick the profile that applies to all your signs.',
+        component: <OneDonePicker />,
+      });
+    }
+
+    if (phase === 'one_done_specs') {
+      msgs.push({
+        id: 'one-done-review',
+        role: 'assistant',
+        content: '',
+        component: <OneDoneReview />,
       });
     }
 
