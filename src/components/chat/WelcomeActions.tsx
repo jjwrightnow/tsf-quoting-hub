@@ -22,7 +22,7 @@ const WelcomeActions = () => {
       account_id: '',
       artwork_paths: [],
     });
-    const id = result?.session_id || result?.id;
+    const id = result?.id;
     if (!id) throw new Error('Failed to create session');
     setSessionId(id);
     return id;
