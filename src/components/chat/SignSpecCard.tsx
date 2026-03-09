@@ -136,48 +136,51 @@ const SignSpecCard = ({ sign, onSaved, onAddAnother, onDone }: SignSpecCardProps
           const isOpen = openDropdown === field;
 
           return (
-            <div key={field} className="flex items-center justify-between text-sm py-1">
-              <span className="text-muted-foreground">{FIELD_LABELS[field] || field}</span>
-              <div className="relative">
-                <button
-                  onClick={() => setOpenDropdown(isOpen ? null : field)}
-                  className="flex items-center gap-1.5 rounded-md border border-border bg-secondary px-3 py-1.5 text-xs text-foreground hover:border-primary transition-colors"
-                >
-                  {localSpecs[field] || '—'}
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-muted-foreground">
-                    <polyline points="6 9 12 15 18 9" />
-                  </svg>
-                </button>
+            <div key={field} className="py-1">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">{FIELD_LABELS[field] || field}</span>
+                <div className="relative">
+                  <button
+                    onClick={() => setOpenDropdown(isOpen ? null : field)}
+                    className="flex items-center gap-1.5 rounded-md border border-border bg-secondary px-3 py-1.5 text-xs text-foreground hover:border-primary transition-colors"
+                  >
+                    {localSpecs[field] || '—'}
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-muted-foreground">
+                      <polyline points="6 9 12 15 18 9" />
+                    </svg>
+                  </button>
 
-                {isOpen && options.length > 0 && (
-                  <div className="absolute right-0 top-full z-20 mt-1 max-h-48 w-52 overflow-y-auto rounded-lg border border-border bg-card shadow-lg">
-                    {options.map((opt) => (
-                      <button
-                        key={opt.option_value}
-                        onClick={() => handleSpecChange(field, opt.option_value)}
-                        className="w-full px-3 py-2 text-left text-xs text-foreground hover:bg-secondary transition-colors"
-                      >
-                        {opt.display_label}
-                      </button>
-                    ))}
-                  </div>
-                )}
+                  {isOpen && options.length > 0 && (
+                    <div className="absolute right-0 top-full z-20 mt-1 max-h-48 w-52 overflow-y-auto rounded-lg border border-border bg-card shadow-lg">
+                      {options.map((opt) => (
+                        <button
+                          key={opt.option_value}
+                          onClick={() => handleSpecChange(field, opt.option_value)}
+                          className="w-full px-3 py-2 text-left text-xs text-foreground hover:bg-secondary transition-colors"
+                        >
+                          {opt.display_label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
 
-                {isOpen && options.length === 0 && (
-                  <div className="absolute right-0 top-full z-20 mt-1 w-52 rounded-lg border border-border bg-card p-3 shadow-lg">
-                    <input
-                      type="text"
-                      defaultValue={localSpecs[field] || ''}
-                      onBlur={(e) => handleSpecChange(field, e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') handleSpecChange(field, (e.target as HTMLInputElement).value);
-                      }}
-                      className="w-full rounded border border-border bg-transparent px-2 py-1.5 text-xs text-foreground focus:border-primary focus:outline-none"
-                      autoFocus
-                    />
-                  </div>
-                )}
+                  {isOpen && options.length === 0 && (
+                    <div className="absolute right-0 top-full z-20 mt-1 w-52 rounded-lg border border-border bg-card p-3 shadow-lg">
+                      <input
+                        type="text"
+                        defaultValue={localSpecs[field] || ''}
+                        onBlur={(e) => handleSpecChange(field, e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') handleSpecChange(field, (e.target as HTMLInputElement).value);
+                        }}
+                        className="w-full rounded border border-border bg-transparent px-2 py-1.5 text-xs text-foreground focus:border-primary focus:outline-none"
+                        autoFocus
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
+              <SpecExamplePlaceholder fieldName={FIELD_LABELS[field] || field} />
             </div>
           );
         })}
