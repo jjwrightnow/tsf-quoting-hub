@@ -13,6 +13,7 @@ const Dashboard = () => {
   const activeQuoteId = useAppStore((s) => s.activeQuoteId);
   const sidebarOpen = useAppStore((s) => s.sidebarOpen);
   const setSidebarOpen = useAppStore((s) => s.setSidebarOpen);
+  const chatPhase = useSignStore((s) => s.chatPhase);
 
   console.log('[Dashboard] render — session:', !!session, 'email:', session?.user?.email);
 
