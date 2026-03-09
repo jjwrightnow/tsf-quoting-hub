@@ -1,25 +1,26 @@
 import { useAppStore } from '@/stores/appStore';
 import { useSignStore } from '@/stores/signStore';
-import WelcomeScreen from '@/components/chat/WelcomeScreen';
 import ChatThread from '@/components/chat/ChatThread';
 import QuoteDetail from '@/components/quote/QuoteDetail';
+import ChatErrorBoundary from '@/components/chat/ChatErrorBoundary';
 
 const MainPanel = () => {
   const wizardActive = useAppStore((s) => s.wizardActive);
   const activeQuoteId = useAppStore((s) => s.activeQuoteId);
   const chatPhase = useSignStore((s) => s.chatPhase);
 
-  // Show ChatThread for wizard mode OR sign chat mode
-  if (wizardActive || chatPhase !== 'welcome') {
-    return <ChatThread />;
-  }
+  console.log('[MainPanel] render — wizardActive:', wizardActive, 'activeQuoteId:', activeQuoteId, 'chatPhase:', chatPhase);
 
-  if (activeQuoteId) {
+  if (activeQuoteId && !wizardActive && chatPhase === 'welcome') {
     return <QuoteDetail quoteId={activeQuoteId} />;
   }
 
-  // Welcome phase shows ChatThread with WelcomeActions inline
-  return <ChatThread />;
+  // Always show ChatThread (welcome phase shows WelcomeActions inline)
+  return (
+    <ChatErrorBoundary>
+      <ChatThread />
+    </ChatErrorBoundary>
+  );
 };
 
 export default MainPanel;
