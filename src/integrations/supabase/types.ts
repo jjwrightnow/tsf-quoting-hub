@@ -256,6 +256,36 @@ export type Database = {
         }
         Relationships: []
       }
+      projects: {
+        Row: {
+          created_at: string | null
+          id: string
+          name: string
+          quote_number: string | null
+          status: string
+          updated_at: string | null
+          user_email: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          name: string
+          quote_number?: string | null
+          status?: string
+          updated_at?: string | null
+          user_email: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          name?: string
+          quote_number?: string | null
+          status?: string
+          updated_at?: string | null
+          user_email?: string
+        }
+        Relationships: []
+      }
       quotes: {
         Row: {
           account_id: string
@@ -589,6 +619,47 @@ export type Database = {
         }
         Relationships: []
       }
+      signs: {
+        Row: {
+          created_at: string | null
+          id: string
+          profile_type: string | null
+          project_id: string
+          sort_order: number | null
+          spec_data: Json | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          profile_type?: string | null
+          project_id: string
+          sort_order?: number | null
+          spec_data?: Json | null
+          title?: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          profile_type?: string | null
+          project_id?: string
+          sort_order?: number | null
+          spec_data?: Json | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "signs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       spec_options: {
         Row: {
           field_name: string
@@ -735,6 +806,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      archive_stale_projects: { Args: never; Returns: undefined }
       get_my_account_id: { Args: never; Returns: string }
     }
     Enums: {
