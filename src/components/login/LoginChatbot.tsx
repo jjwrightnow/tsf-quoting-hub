@@ -4,61 +4,30 @@ import { cn } from '@/lib/utils';
 
 /* ── FAQ data ─────────────────────────────────────────── */
 const FAQ: { q: string; a: string }[] = [
-  { q: 'What is SignMaker.ai?', a: 'SignMaker.ai is a wholesale quoting platform for verified sign companies. Upload artwork, spec out your sign, and receive a manufacturer quote — all through a guided chat experience.' },
-  { q: 'Who can sign up?', a: 'Access is limited to verified sign companies. When you enter your work email we check your domain against our approved list. If your company isn\'t listed yet, you can request access on the login page.' },
-  { q: 'How do I get a quote?', a: 'Once logged in, start a new project, upload your artwork, and our guided wizard will walk you through sign specs (profile, material, finish, illumination, etc.). A quote is generated and sent to your dashboard.' },
-  { q: 'What sign types do you support?', a: 'We support channel letters (front lit, back lit, halo lit), cabinet signs, flat cut letters, open-face neon, and more. Each type has its own spec wizard.' },
-  { q: 'How long does quoting take?', a: 'Most quotes are returned within 24 hours. Complex multi-sign projects may take a bit longer.' },
-  { q: 'Is there a cost to use the platform?', a: 'No — SignMaker.ai is free for verified sign companies. You only pay when you approve a quote and place an order.' },
+  { q: 'What is this portal?', a: 'This is the SignMaker.ai intake portal where verified sign shops submit fabrication specs to The Signage Factory for custom sign quoting. for verified sign companies. Upload artwork, spec out your sign, and receive a manufacturer quote — all through a guided chat experience.' },
+  { q: 'How do I get access?', a: 'Email jj@thesignagefactory.co to request access. We verify each shop before granting a login.. When you enter your work email we check your domain against our approved list. If your company isn\'t listed yet, you can request access on the login page.' },
+  { q: 'What sign types do you handle?', a: 'We fabricate Back Lit, Front Lit, Halo Lit, Edge Lit, Flat Cut, Non-Illuminated, and Open Face Neon signs., and our guided wizard will walk you through sign specs (profile, material, finish, illumination, etc.). A quote is generated and sent to your dashboard.' },
+  { q: 'What's the minimum order?', a: '$300 minimum per order. We're a boutique fabricator focused on quality custom work., back lit, halo lit), cabinet signs, flat cut letters, open-face neon, and more. Each type has its own spec wizard.' },
+  { q: 'How long is production?', a: 'Standard lead time is 2–4 weeks. Rush production is available on select products.. Complex multi-sign projects may take a bit longer.' },
+  { q: 'What files do you need?', a: 'Upload PDF, PNG, JPG, or AI files directly in the portal. For upload issues, email quotes@thesignagefactory.co.' },
 ];
 
 type Msg = { role: 'bot' | 'user'; text: string };
 
-const GREETING: Msg = { role: 'bot', text: 'Hi! I can answer common questions about SignMaker.ai. Pick a topic below or type your own question.' };
+const GREETING: Msg = { role: 'bot', text: 'Welcome to the SignMaker portal. I help sign shops submit fabrication specs to The Signage Factory. What can I help you with?.' };
 
 /* ── Component ────────────────────────────────────────── */
-const LoginChatbot = () => {
+const LoginChatbot = () => 
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Msg[]>([GREETING]);
   const [typing, setTyping] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, typing]);
-
   const pushBotReply = (text: string) => {
     setTyping(true);
     setTimeout(() => {
       setMessages((prev) => [...prev, { role: 'bot', text }]);
       setTyping(false);
     }, 600);
-  };
-
-  const handleFaqClick = (faq: (typeof FAQ)[number]) => {
-    setMessages((prev) => [...prev, { role: 'user', text: faq.q }]);
-    pushBotReply(faq.a);
-  };
-
-  const handleFreeText = (text: string) => {
-    const trimmed = text.trim();
-    if (!trimmed) return;
-    setMessages((prev) => [...prev, { role: 'user', text: trimmed }]);
-
-    // Simple keyword match
-    const lower = trimmed.toLowerCase();
-    const match = FAQ.find(
-      (f) =>
-        f.q.toLowerCase().includes(lower) ||
-        lower.includes(f.q.toLowerCase().replace('?', '').split(' ').slice(-2).join(' '))
-    );
-    if (match) {
-      pushBotReply(match.a);
-    } else {
-      pushBotReply(
-        'I don\'t have a specific answer for that yet. For detailed help, email jj@thesignagefactory.co or request access and explore the platform!'
-      );
-    }
   };
 
   return (
@@ -83,7 +52,7 @@ const LoginChatbot = () => {
               <div className="flex h-7 w-7 items-center justify-center rounded-full gradient-pink-blue">
                 <div className="h-2.5 w-2.5 rounded-sm bg-primary-foreground/90" />
               </div>
-              <span className="text-sm font-semibold text-foreground">SignMaker.ai</span>
+              <span className="text-sm font-semibold text-foreground">Hi, I'm LetterMan 👋</span>
             </div>
             <button onClick={() => setOpen(false)} className="text-muted-foreground hover:text-foreground transition-colors" aria-label="Close chat">
               <X className="h-4 w-4" />
