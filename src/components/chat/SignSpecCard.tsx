@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useSignStore, type SignRecord } from '@/stores/signStore';
 import { supabase } from '@/integrations/supabase/client';
+import { useSpecOptions } from '@/hooks/useSpecOptions';
 import {
-  SPEC_FIELDS_BY_PROFILE,
   FIELD_LABELS,
   CATEGORY_MAP,
 } from '@/lib/sign-constants';
