@@ -66,7 +66,8 @@ export const useAppStore = create<AppState & AppActions>((set) => ({
       ),
     })),
   setCatalogBundle: (bundle) => set({ catalogBundle: bundle }),
-  setActiveQuoteId: (id) => set({ activeQuoteId: id, wizardActive: false }),
+  setActiveQuoteId: (id) => set({ activeQuoteId: id, wizardActive: false, activeDraftId: null }),
+  setActiveDraftId: (id) => set({ activeDraftId: id }),
   setWizardActive: (active) =>
     set({ wizardActive: active, activeQuoteId: active ? null : null }),
   setSidebarOpen: (open) => set({ sidebarOpen: open }),
