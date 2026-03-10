@@ -1,5 +1,5 @@
 const HeroMockup = () => (
-  <div className="w-full h-full flex flex-col flex-1 min-h-screen">
+  <div className="w-full h-full flex flex-col flex-1">
     {/* Browser frame */}
     <div className="w-full flex-1 flex flex-col bg-card overflow-hidden">
       {/* Chrome bar */}
