@@ -28,6 +28,8 @@ interface AppState {
   catalogBundle: CatalogBundle | null;
   activeQuoteId: string | null;
   activeDraftId: string | null;
+  activeProjectId: string | null;
+  activeSignId: string | null;
   wizardActive: boolean;
   sidebarOpen: boolean;
 }
@@ -40,6 +42,8 @@ interface AppActions {
   setCatalogBundle: (bundle: CatalogBundle) => void;
   setActiveQuoteId: (id: string | null) => void;
   setActiveDraftId: (id: string | null) => void;
+  setActiveProjectId: (id: string | null) => void;
+  setActiveSignId: (projectId: string | null, signId: string | null) => void;
   setWizardActive: (active: boolean) => void;
   setSidebarOpen: (open: boolean) => void;
 }
