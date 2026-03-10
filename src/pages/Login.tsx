@@ -78,7 +78,7 @@ const Login = () => {
     <div className="relative w-screen h-screen overflow-hidden bg-background" style={{ padding: 0, margin: 0 }}>
       {/* Background mockup — hidden on mobile */}
       <div className="hidden md:block fixed inset-0 w-screen h-screen overflow-hidden pointer-events-none select-none" style={{ zIndex: 0 }} aria-hidden="true">
-        <div className="w-full h-full origin-top" style={{ transform: 'scale(1.2)' }}>
+        <div className="w-full h-full min-h-screen flex flex-col">
           <HeroMockup />
         </div>
       </div>
