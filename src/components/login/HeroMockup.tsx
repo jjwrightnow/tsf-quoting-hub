@@ -1,5 +1,5 @@
 const HeroMockup = () => (
-  <div className="mx-auto mt-12 w-full max-w-3xl px-4">
+  <div className="w-full max-w-4xl mx-auto px-4">
     {/* Browser frame */}
     <div className="rounded-xl border border-border bg-card shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)] overflow-hidden">
       {/* Chrome bar */}
