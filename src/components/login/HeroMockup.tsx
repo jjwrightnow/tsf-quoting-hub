@@ -1,7 +1,7 @@
 const HeroMockup = () => (
-  <div className="w-full max-w-4xl mx-auto px-4">
+  <div className="w-full h-full">
     {/* Browser frame */}
-    <div className="rounded-xl border border-border bg-card shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)] overflow-hidden">
+    <div className="w-full h-full bg-card overflow-hidden">
       {/* Chrome bar */}
       <div className="flex items-center gap-2 bg-[hsl(240,22%,10%)] px-4 py-2.5 border-b border-border">
         <div className="flex gap-1.5">
