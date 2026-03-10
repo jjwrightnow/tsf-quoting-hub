@@ -39,6 +39,7 @@ interface AppActions {
   replaceGhostQuote: (realQuote: QuoteListItem) => void;
   setCatalogBundle: (bundle: CatalogBundle) => void;
   setActiveQuoteId: (id: string | null) => void;
+  setActiveDraftId: (id: string | null) => void;
   setWizardActive: (active: boolean) => void;
   setSidebarOpen: (open: boolean) => void;
 }
