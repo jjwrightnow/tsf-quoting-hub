@@ -102,6 +102,11 @@
   50% { opacity: 1; transform: scale(1.3); }
 }
 
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
 @layer utilities {
   .glow-blue {
     animation: breathe-blue 3s ease-in-out infinite;
