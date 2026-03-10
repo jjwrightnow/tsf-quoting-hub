@@ -26,15 +26,22 @@ const SignSpecCard = ({ sign, onSaved, onAddAnother, onDone }: SignSpecCardProps
   const profileSpecs = specsByProfile[sign.profile_type || ''] || [];
   const fieldNames = profileSpecs.map((s) => s.field_name);
 
-  const [localSpecs, setLocalSpecs] = useState<Record<string, string>>(() => {
+  const buildSpecs = (s: SignRecord): Record<string, string> => {
     const specs: Record<string, string> = {};
-    // Initialize from sign record for all known spec field names
     const allPossible = ['metal_type', 'finish', 'depth', 'led_color', 'mounting', 'back_type', 'acrylic_face', 'lead_wires', 'ul_label', 'wire_exit'];
     allPossible.forEach((f) => {
-      specs[f] = (sign as unknown as Record<string, unknown>)[f] as string || '';
+      specs[f] = (s as unknown as Record<string, unknown>)[f] as string || '';
     });
     return specs;
-  });
+  };
+
+  const [localSpecs, setLocalSpecs] = useState<Record<string, string>>(() => buildSpecs(sign));
+  const [prevSignId, setPrevSignId] = useState(sign.id);
+
+  if (sign.id !== prevSignId) {
+    setPrevSignId(sign.id);
+    setLocalSpecs(buildSpecs(sign));
+  }
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -52,9 +59,14 @@ const SignSpecCard = ({ sign, onSaved, onAddAnother, onDone }: SignSpecCardProps
   const saveSign = async (extraFields: Partial<SignRecord> = {}) => {
     setSaving(true);
     try {
+      // Convert empty strings to null so we don't overwrite DB values with ''
+      const cleanedSpecs: Record<string, string | null> = {};
+      for (const [key, val] of Object.entries(localSpecs)) {
+        cleanedSpecs[key] = val.trim() || null;
+      }
       const updates: Record<string, unknown> = {
         profile_type: sign.profile_type,
-        ...localSpecs,
+        ...cleanedSpecs,
         ...extraFields,
       };
       const { error } = await supabase
