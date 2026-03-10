@@ -53,6 +53,8 @@ export const useAppStore = create<AppState & AppActions>((set) => ({
   catalogBundle: null,
   activeQuoteId: null,
   activeDraftId: null,
+  activeProjectId: null,
+  activeSignId: null,
   wizardActive: false,
   sidebarOpen: true,
 
@@ -72,6 +74,9 @@ export const useAppStore = create<AppState & AppActions>((set) => ({
   setCatalogBundle: (bundle) => set({ catalogBundle: bundle }),
   setActiveQuoteId: (id) => set({ activeQuoteId: id, wizardActive: false, activeDraftId: null }),
   setActiveDraftId: (id) => set({ activeDraftId: id }),
+  setActiveProjectId: (id) => set({ activeProjectId: id }),
+  setActiveSignId: (projectId, signId) =>
+    set({ activeProjectId: projectId, activeSignId: signId, wizardActive: !!signId }),
   setWizardActive: (active) =>
     set({ wizardActive: active, activeQuoteId: active ? null : null }),
   setSidebarOpen: (open) => set({ sidebarOpen: open }),
