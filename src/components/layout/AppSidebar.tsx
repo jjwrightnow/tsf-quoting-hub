@@ -1,11 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAppStore } from '@/stores/appStore';
 import { useWizardStore } from '@/stores/wizardStore';
-import { useDraftQuotes, DraftQuote } from '@/hooks/useDraftQuotes';
+import { useProjects, type Project, type Sign } from '@/hooks/useProjects';
 import { isQuoteUnread, markQuoteSeen } from '@/lib/unread';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import type { QuoteListItem } from '@/stores/appStore';
+import NewProjectModal from './NewProjectModal';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,7 +24,14 @@ interface AppSidebarProps {
   onSignOut: () => void;
 }
 
-const statusColors: Record<string, string> = {
+const statusBadge: Record<string, { bg: string; label: string; lock?: boolean }> = {
+  draft: { bg: 'bg-muted text-muted-foreground', label: 'Draft' },
+  quoted: { bg: 'bg-tsf-status-review text-primary-foreground', label: 'Quoted' },
+  ordered: { bg: 'bg-tsf-status-success text-primary-foreground', label: 'Ordered', lock: true },
+  archived: { bg: 'bg-muted/50 text-muted-foreground/60', label: 'Archived' },
+};
+
+const quoteStatusColors: Record<string, string> = {
   'Intake Submitted': 'bg-primary text-primary-foreground',
   'In Review': 'bg-tsf-status-review text-primary-foreground',
   'Quoted': 'bg-tsf-status-success text-primary-foreground',
@@ -32,40 +40,99 @@ const statusColors: Record<string, string> = {
   'Approved': 'bg-tsf-status-success text-primary-foreground',
 };
 
+const LockIcon = () => (
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="inline ml-1">
+    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+  </svg>
+);
+
+const TrashIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <polyline points="3 6 5 6 21 6" />
+    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+  </svg>
+);
+
+const ChevronIcon = ({ expanded }: { expanded: boolean }) => (
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    className={`transition-transform duration-200 ${expanded ? 'rotate-90' : ''}`}
+  >
+    <polyline points="9 18 15 12 9 6" />
+  </svg>
+);
+
 const AppSidebar = ({ open, onToggle, onSignOut }: AppSidebarProps) => {
-  const quotesList = useAppStore((s) => s.quotesList);
-  const activeQuoteId = useAppStore((s) => s.activeQuoteId);
-  const setActiveQuoteId = useAppStore((s) => s.setActiveQuoteId);
-  const setWizardActive = useAppStore((s) => s.setWizardActive);
-  const resetWizard = useWizardStore((s) => s.resetWizard);
   const { session } = useAuth();
   const navigate = useNavigate();
-  const isAdminUser = session?.user?.email === 'jj@thesignagefactory.co';
   const userEmail = session?.user?.email;
+  const isAdminUser = userEmail === 'jj@thesignagefactory.co';
 
-  const { drafts, deleteDraft, updateTitle } = useDraftQuotes(userEmail);
+  const quotesList = useAppStore((s) => s.quotesList);
+  const activeQuoteId = useAppStore((s) => s.activeQuoteId);
+  const activeProjectId = useAppStore((s) => s.activeProjectId);
+  const activeSignId = useAppStore((s) => s.activeSignId);
+  const setActiveQuoteId = useAppStore((s) => s.setActiveQuoteId);
+  const setActiveSignId = useAppStore((s) => s.setActiveSignId);
+  const setWizardActive = useAppStore((s) => s.setWizardActive);
 
-  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editValue, setEditValue] = useState('');
+  const {
+    projects,
+    signs,
+    fetchSigns,
+    createProject,
+    deleteProject,
+    createSign,
+    deleteSign,
+  } = useProjects(userEmail);
 
-  const handleNewQuote = () => {
-    resetWizard();
-    setWizardActive(true);
-    onToggle();
+  const [expandedProjects, setExpandedProjects] = useState<Set<string>>(new Set());
+  const [showArchived, setShowArchived] = useState(false);
+  const [newProjectOpen, setNewProjectOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<{ type: 'project' | 'sign'; id: string; projectId?: string } | null>(null);
+
+  // Toggle project expansion and lazy-load signs
+  const toggleProject = (projectId: string) => {
+    setExpandedProjects((prev) => {
+      const next = new Set(prev);
+      if (next.has(projectId)) {
+        next.delete(projectId);
+      } else {
+        next.add(projectId);
+        if (!signs[projectId]) fetchSigns(projectId);
+      }
+      return next;
+    });
   };
 
-  const handleSelectQuote = (quote: QuoteListItem) => {
-    markQuoteSeen(quote.quoteId);
-    setActiveQuoteId(quote.quoteId);
-    if (window.innerWidth < 768) onToggle();
+  const handleCreateProject = async (name: string) => {
+    const project = await createProject(name);
+    if (project) {
+      setExpandedProjects((prev) => new Set(prev).add(project.id));
+    }
   };
 
-  const handleSelectDraft = (draft: DraftQuote) => {
+  const handleAddSign = async (projectId: string) => {
+    const sign = await createSign(projectId);
+    if (sign) {
+      handleSelectSign(projectId, sign);
+    }
+  };
+
+  const handleSelectSign = (projectId: string, sign: Sign) => {
+    const project = projects.find((p) => p.id === projectId);
+    if (project?.status === 'ordered') return; // read-only
+
+    // Load spec_data into wizard
     const wizard = useWizardStore.getState();
     wizard.resetWizard();
-    const spec = (draft.spec_data || {}) as Record<string, unknown>;
-    // Restore wizard state from spec_data
+    const spec = (sign.spec_data || {}) as Record<string, unknown>;
     if (spec.profileId) wizard.setProfile(spec.profileId as string, spec.profileName as string | null);
     if (spec.illuminationId) wizard.setIllumination(spec.illuminationId as string, spec.illuminationName as string | null);
     if (spec.materialId) wizard.setMaterial(spec.materialId as string, spec.materialName as string | null);
@@ -84,30 +151,29 @@ const AppSidebar = ({ open, onToggle, onSignOut }: AppSidebarProps) => {
       (spec.completedSteps as number[]).forEach((s) => wizard.completeStep(s));
     }
 
-    // Store the draft id so the wizard can upsert back to it
-    useAppStore.getState().setActiveDraftId(draft.id);
-    useAppStore.getState().setWizardActive(true);
+    setActiveSignId(projectId, sign.id);
+    if (window.innerWidth < 768) onToggle();
+  };
+
+  const handleSelectQuote = (quote: QuoteListItem) => {
+    markQuoteSeen(quote.quoteId);
+    setActiveQuoteId(quote.quoteId);
     if (window.innerWidth < 768) onToggle();
   };
 
   const confirmDelete = async () => {
-    if (deleteTarget) {
-      await deleteDraft(deleteTarget);
-      setDeleteTarget(null);
+    if (!deleteTarget) return;
+    if (deleteTarget.type === 'project') {
+      await deleteProject(deleteTarget.id);
+    } else if (deleteTarget.projectId) {
+      await deleteSign(deleteTarget.id, deleteTarget.projectId);
     }
+    setDeleteTarget(null);
   };
 
-  const startEdit = (draft: DraftQuote) => {
-    setEditingId(draft.id);
-    setEditValue(draft.title);
-  };
-
-  const commitEdit = (id: string) => {
-    if (editValue.trim()) {
-      updateTitle(id, editValue.trim());
-    }
-    setEditingId(null);
-  };
+  const visibleProjects = showArchived
+    ? projects
+    : projects.filter((p) => p.status !== 'archived');
 
   return (
     <>
@@ -137,139 +203,181 @@ const AppSidebar = ({ open, onToggle, onSignOut }: AppSidebarProps) => {
           </button>
         </div>
 
-        {/* New Quote */}
+        {/* New Project */}
         <div className="px-4 py-4">
           <button
-            onClick={handleNewQuote}
+            onClick={() => setNewProjectOpen(true)}
             className="w-full rounded-lg py-2.5 text-sm font-semibold text-foreground gradient-pink-blue transition-all duration-300 hover:opacity-90 hover:shadow-lg"
           >
-            + New Quote
+            + New Project
           </button>
         </div>
 
-        {/* Drafts + Quotes list */}
+        {/* Tree */}
         <div className="flex-1 overflow-y-auto px-2">
-          {/* Draft Quotes */}
+          {/* Projects Section */}
           <p className="px-3 py-2 text-[10px] font-medium uppercase tracking-widest text-muted-foreground">
-            Drafts
+            Projects
           </p>
+
           {!userEmail ? (
             <p className="px-3 py-4 text-xs text-muted-foreground italic">
-              Sign in to save quotes
+              Sign in to manage projects
             </p>
-          ) : drafts.length === 0 ? (
+          ) : visibleProjects.length === 0 ? (
             <p className="px-3 py-2 text-xs text-muted-foreground">
-              No drafts yet.
+              No projects yet.
             </p>
           ) : (
-            <ul className="space-y-1 mb-4">
-              {drafts.map((d) => (
-                <li key={d.id} className="group relative">
-                  <button
-                    onClick={() => handleSelectDraft(d)}
-                    className="w-full rounded-md px-3 py-2.5 text-left transition-all duration-300 border-l-[3px] border-transparent hover:bg-secondary"
-                  >
-                    {editingId === d.id ? (
-                      <input
-                        autoFocus
-                        value={editValue}
-                        onChange={(e) => setEditValue(e.target.value)}
-                        onBlur={() => commitEdit(d.id)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') commitEdit(d.id);
-                          if (e.key === 'Escape') setEditingId(null);
-                        }}
-                        onClick={(e) => e.stopPropagation()}
-                        className="w-full bg-transparent border-b border-primary text-xs font-medium text-foreground outline-none"
-                      />
-                    ) : (
-                      <p
-                        className="text-xs font-medium text-foreground truncate cursor-text"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          startEdit(d);
-                        }}
-                        title="Click to rename"
-                      >
-                        {d.title}
-                      </p>
-                    )}
-                    <div className="mt-1 flex items-center gap-2">
-                      {d.profile_type && (
-                        <span className="rounded px-1.5 py-0.5 text-[9px] font-medium bg-muted text-muted-foreground">
-                          {d.profile_type}
-                        </span>
-                      )}
-                      <span className="text-[10px] text-muted-foreground">
-                        {new Date(d.updated_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                      </span>
-                    </div>
-                  </button>
-                  {/* Trash icon */}
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setDeleteTarget(d.id);
-                    }}
-                    className="absolute right-2 top-2.5 hidden group-hover:flex items-center justify-center h-6 w-6 rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
-                    aria-label="Delete draft"
-                  >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <polyline points="3 6 5 6 21 6" />
-                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                    </svg>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
+            <ul className="space-y-0.5 mb-4">
+              {visibleProjects.map((project) => {
+                const isExpanded = expandedProjects.has(project.id);
+                const isOrdered = project.status === 'ordered';
+                const isArchived = project.status === 'archived';
+                const badge = statusBadge[project.status] || statusBadge.draft;
+                const projectSigns = signs[project.id] || [];
 
-          {/* Synced Quotes */}
-          <p className="px-3 py-2 text-[10px] font-medium uppercase tracking-widest text-muted-foreground">
-            Your Quotes
-          </p>
-          {quotesList.length === 0 ? (
-            <p className="px-3 py-4 text-xs text-muted-foreground">
-              No quotes yet. Start your first one above.
-            </p>
-          ) : (
-            <ul className="space-y-1">
-              {quotesList.map((q) => {
-                const isActive = activeQuoteId === q.quoteId;
-                const unread = !q.isPending && isQuoteUnread(q.quoteId, q.updatedAt);
                 return (
-                  <li key={q.quoteId}>
-                    <button
-                      onClick={() => handleSelectQuote(q)}
-                      className={`
-                        relative w-full rounded-md px-3 py-2.5 text-left transition-all duration-300
-                        ${isActive
-                          ? 'border-l-[3px] border-accent bg-secondary glow-pink'
-                          : 'border-l-[3px] border-transparent hover:bg-secondary'
-                        }
-                      `}
-                    >
-                      {unread && (
-                        <span className="absolute right-3 top-3 h-2 w-2 rounded-full bg-accent unread-dot" />
-                      )}
-                      <p className="text-xs font-medium text-foreground truncate">
-                        {q.projectName || q.quoteDisplayId || 'Untitled Project'}
-                      </p>
-                      <div className="mt-1 flex items-center gap-2">
-                        <span className="text-[10px] text-muted-foreground">
-                          {q.quoteDisplayId || (q.isPending ? 'pending...' : '')}
-                        </span>
-                        {q.status && (
-                          <span className={`rounded px-1.5 py-0.5 text-[9px] font-medium ${statusColors[q.status] || 'bg-muted text-muted-foreground'}`}>
-                            {q.status}
+                  <li key={project.id} className={isArchived ? 'opacity-50' : ''}>
+                    {/* Project row */}
+                    <div className="group relative">
+                      <button
+                        onClick={() => toggleProject(project.id)}
+                        className={`w-full flex items-center gap-2 rounded-md px-3 py-2 text-left transition-all duration-200 hover:bg-secondary ${
+                          activeProjectId === project.id ? 'bg-secondary border-l-[3px] border-accent' : 'border-l-[3px] border-transparent'
+                        }`}
+                      >
+                        <ChevronIcon expanded={isExpanded} />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-medium text-foreground truncate">
+                            {project.name}
+                          </p>
+                          <span className={`inline-block mt-0.5 rounded px-1.5 py-0.5 text-[9px] font-medium ${badge.bg}`}>
+                            {badge.label}
+                            {badge.lock && <LockIcon />}
                           </span>
+                        </div>
+                      </button>
+                      {!isOrdered && !isArchived && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDeleteTarget({ type: 'project', id: project.id });
+                          }}
+                          className="absolute right-2 top-2 hidden group-hover:flex items-center justify-center h-6 w-6 rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                          aria-label="Delete project"
+                        >
+                          <TrashIcon />
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Signs (Level 2) */}
+                    {isExpanded && (
+                      <ul className="ml-5 mt-0.5 space-y-0.5 border-l border-border pl-2">
+                        {projectSigns.map((sign) => (
+                          <li key={sign.id} className="group/sign relative">
+                            <button
+                              onClick={() => handleSelectSign(project.id, sign)}
+                              className={`w-full rounded-md px-3 py-1.5 text-left transition-all duration-200 hover:bg-secondary ${
+                                activeSignId === sign.id ? 'bg-secondary text-accent' : ''
+                              } ${isOrdered ? 'cursor-default' : ''}`}
+                            >
+                              <p className="text-[11px] font-medium text-foreground truncate">
+                                {isOrdered && <LockIcon />} {sign.title}
+                              </p>
+                              {sign.profile_type && (
+                                <span className="mt-0.5 inline-block rounded px-1.5 py-0.5 text-[9px] font-medium bg-muted text-muted-foreground">
+                                  {sign.profile_type}
+                                </span>
+                              )}
+                            </button>
+                            {!isOrdered && !isArchived && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setDeleteTarget({ type: 'sign', id: sign.id, projectId: project.id });
+                                }}
+                                className="absolute right-1 top-1 hidden group-hover/sign:flex items-center justify-center h-5 w-5 rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                                aria-label="Delete sign"
+                              >
+                                <TrashIcon />
+                              </button>
+                            )}
+                          </li>
+                        ))}
+                        {!isOrdered && !isArchived && (
+                          <li>
+                            <button
+                              onClick={() => handleAddSign(project.id)}
+                              className="w-full rounded-md px-3 py-1.5 text-left text-[11px] text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+                            >
+                              + Add Sign
+                            </button>
+                          </li>
                         )}
-                      </div>
-                    </button>
+                      </ul>
+                    )}
                   </li>
                 );
               })}
             </ul>
+          )}
+
+          {/* Archive toggle */}
+          {userEmail && projects.some((p) => p.status === 'archived') && (
+            <button
+              onClick={() => setShowArchived(!showArchived)}
+              className="px-3 py-2 text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+            >
+              {showArchived ? 'Hide Archived' : 'Show Archived'}
+            </button>
+          )}
+
+          {/* Synced Quotes (legacy) */}
+          {quotesList.length > 0 && (
+            <>
+              <p className="px-3 py-2 mt-4 text-[10px] font-medium uppercase tracking-widest text-muted-foreground">
+                Synced Quotes
+              </p>
+              <ul className="space-y-1">
+                {quotesList.map((q) => {
+                  const isActive = activeQuoteId === q.quoteId;
+                  const unread = !q.isPending && isQuoteUnread(q.quoteId, q.updatedAt);
+                  return (
+                    <li key={q.quoteId}>
+                      <button
+                        onClick={() => handleSelectQuote(q)}
+                        className={`
+                          relative w-full rounded-md px-3 py-2.5 text-left transition-all duration-300
+                          ${isActive
+                            ? 'border-l-[3px] border-accent bg-secondary glow-pink'
+                            : 'border-l-[3px] border-transparent hover:bg-secondary'
+                          }
+                        `}
+                      >
+                        {unread && (
+                          <span className="absolute right-3 top-3 h-2 w-2 rounded-full bg-accent unread-dot" />
+                        )}
+                        <p className="text-xs font-medium text-foreground truncate">
+                          {q.projectName || q.quoteDisplayId || 'Untitled Project'}
+                        </p>
+                        <div className="mt-1 flex items-center gap-2">
+                          <span className="text-[10px] text-muted-foreground">
+                            {q.quoteDisplayId || (q.isPending ? 'pending...' : '')}
+                          </span>
+                          {q.status && (
+                            <span className={`rounded px-1.5 py-0.5 text-[9px] font-medium ${quoteStatusColors[q.status] || 'bg-muted text-muted-foreground'}`}>
+                              {q.status}
+                            </span>
+                          )}
+                        </div>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            </>
           )}
         </div>
 
@@ -292,13 +400,24 @@ const AppSidebar = ({ open, onToggle, onSignOut }: AppSidebarProps) => {
         </div>
       </aside>
 
-      {/* Delete confirmation dialog */}
+      {/* New Project Modal */}
+      <NewProjectModal
+        open={newProjectOpen}
+        onClose={() => setNewProjectOpen(false)}
+        onCreate={handleCreateProject}
+      />
+
+      {/* Delete confirmation */}
       <AlertDialog open={!!deleteTarget} onOpenChange={(o) => !o && setDeleteTarget(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete draft?</AlertDialogTitle>
+            <AlertDialogTitle>
+              Delete {deleteTarget?.type === 'project' ? 'project' : 'sign'}?
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              This draft will be permanently removed.
+              {deleteTarget?.type === 'project'
+                ? 'This project and all its signs will be permanently removed.'
+                : 'This sign will be permanently removed.'}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
