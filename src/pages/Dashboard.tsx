@@ -56,7 +56,7 @@ const Dashboard = () => {
         </div>
 
         {/* Floating Input bar */}
-        {(wizardActive || activeQuoteId || chatPhase !== 'welcome') && (
+        {(wizardActive || activeQuoteId || useAppStore.getState().activeSignId || chatPhase !== 'welcome') && (
           <div className="shrink-0">
             <InputBar />
           </div>
