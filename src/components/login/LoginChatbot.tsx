@@ -51,6 +51,21 @@ const LoginChatbot = () => {
     }, 600);
   };
 
+  const handleFaqClick = (faq: { q: string; a: string }) => {
+    setMessages((prev) => [...prev, { role: "user", text: faq.q }]);
+    pushBotReply(faq.a);
+  };
+
+  const handleFreeText = (text: string) => {
+    setMessages((prev) => [...prev, { role: "user", text }]);
+    const match = FAQ.find((f) => text.toLowerCase().includes(f.q.toLowerCase().replace("?", "")));
+    pushBotReply(
+      match
+        ? match.a
+        : "Good question. Try one of the quick-pick questions above, or submit your project specs to get a quote.",
+    );
+  };
+
   return (
     <>
       {/* Floating trigger */}
