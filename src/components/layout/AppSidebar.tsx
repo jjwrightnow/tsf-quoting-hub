@@ -1,6 +1,8 @@
 import { useAppStore, QuoteListItem } from '@/stores/appStore';
 import { useWizardStore } from '@/stores/wizardStore';
 import { isQuoteUnread, markQuoteSeen } from '@/lib/unread';
+import { useAuth } from '@/hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 
 interface AppSidebarProps {
   open: boolean;
@@ -24,6 +26,9 @@ const AppSidebar = ({ open, onToggle, onSignOut }: AppSidebarProps) => {
   const setWizardActive = useAppStore((s) => s.setWizardActive);
   const wizardActive = useAppStore((s) => s.wizardActive);
   const resetWizard = useWizardStore((s) => s.resetWizard);
+  const { session } = useAuth();
+  const navigate = useNavigate();
+  const isAdminUser = session?.user?.email === 'jj@thesignagefactory.co';
 
   const handleNewQuote = () => {
     resetWizard();
@@ -124,8 +129,16 @@ const AppSidebar = ({ open, onToggle, onSignOut }: AppSidebarProps) => {
         )}
       </div>
 
-      {/* Sign out */}
-      <div className="border-t border-sidebar-border p-4">
+      {/* Footer */}
+      <div className="border-t border-sidebar-border p-4 flex items-center gap-3">
+        {isAdminUser && (
+          <button
+            onClick={() => navigate('/admin')}
+            className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Admin
+          </button>
+        )}
         <button
           onClick={onSignOut}
           className="text-xs text-muted-foreground hover:text-foreground transition-colors"

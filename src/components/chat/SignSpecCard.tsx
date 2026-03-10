@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useSignStore, type SignRecord } from '@/stores/signStore';
 import { supabase } from '@/integrations/supabase/client';
+import { useSpecOptions } from '@/hooks/useSpecOptions';
 import {
-  SPEC_FIELDS_BY_PROFILE,
   FIELD_LABELS,
   CATEGORY_MAP,
 } from '@/lib/sign-constants';
@@ -18,14 +18,19 @@ interface SignSpecCardProps {
 const SignSpecCard = ({ sign, onSaved, onAddAnother, onDone }: SignSpecCardProps) => {
   const updateSign = useSignStore((s) => s.updateSign);
   const userRole = useSignStore((s) => s.userRole);
-  const autocompleteOptions = useSignStore((s) => s.autocompleteOptions);
+  const { specsByProfile, loading: specsLoading } = useSpecOptions();
 
   const isCollapsed = sign.status === 'saved';
 
+  // Derive fields from DB-driven spec_options
+  const profileSpecs = specsByProfile[sign.profile_type || ''] || [];
+  const fieldNames = profileSpecs.map((s) => s.field_name);
+
   const [localSpecs, setLocalSpecs] = useState<Record<string, string>>(() => {
-    const fields = SPEC_FIELDS_BY_PROFILE[sign.profile_type || ''] || [];
     const specs: Record<string, string> = {};
-    fields.forEach((f) => {
+    // Initialize from sign record for all known spec field names
+    const allPossible = ['metal_type', 'finish', 'depth', 'led_color', 'mounting', 'back_type', 'acrylic_face', 'lead_wires', 'ul_label', 'wire_exit'];
+    allPossible.forEach((f) => {
       specs[f] = (sign as unknown as Record<string, unknown>)[f] as string || '';
     });
     return specs;
@@ -39,10 +44,9 @@ const SignSpecCard = ({ sign, onSaved, onAddAnother, onDone }: SignSpecCardProps
     setOpenDropdown(null);
   };
 
-  const getOptionsForField = (field: string) => {
-    const category = CATEGORY_MAP[field];
-    if (!category) return [];
-    return autocompleteOptions.filter((o) => o.category === category);
+  const getOptionsForField = (field: string): string[] => {
+    const spec = profileSpecs.find((s) => s.field_name === field);
+    return spec?.options || [];
   };
 
   const saveSign = async (extraFields: Partial<SignRecord> = {}) => {
@@ -118,7 +122,7 @@ const SignSpecCard = ({ sign, onSaved, onAddAnother, onDone }: SignSpecCardProps
   }
 
   // === SPECS EDITING STATE ===
-  const fields = SPEC_FIELDS_BY_PROFILE[sign.profile_type || ''] || [];
+  const fields = fieldNames;
 
   return (
     <div className="rounded-xl border border-border bg-card p-6">
@@ -138,7 +142,9 @@ const SignSpecCard = ({ sign, onSaved, onAddAnother, onDone }: SignSpecCardProps
           return (
             <div key={field} className="py-1">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">{FIELD_LABELS[field] || field}</span>
+                <span className="text-muted-foreground">
+                  {profileSpecs.find((s) => s.field_name === field)?.label || FIELD_LABELS[field] || field}
+                </span>
                 <div className="relative">
                   <button
                     onClick={() => setOpenDropdown(isOpen ? null : field)}
@@ -154,11 +160,11 @@ const SignSpecCard = ({ sign, onSaved, onAddAnother, onDone }: SignSpecCardProps
                     <div className="absolute right-0 top-full z-20 mt-1 max-h-48 w-52 overflow-y-auto rounded-lg border border-border bg-card shadow-lg">
                       {options.map((opt) => (
                         <button
-                          key={opt.option_value}
-                          onClick={() => handleSpecChange(field, opt.option_value)}
+                          key={opt}
+                          onClick={() => handleSpecChange(field, opt)}
                           className="w-full px-3 py-2 text-left text-xs text-foreground hover:bg-secondary transition-colors"
                         >
-                          {opt.display_label}
+                          {opt}
                         </button>
                       ))}
                     </div>
@@ -180,7 +186,7 @@ const SignSpecCard = ({ sign, onSaved, onAddAnother, onDone }: SignSpecCardProps
                   )}
                 </div>
               </div>
-              <SpecExamplePlaceholder fieldName={FIELD_LABELS[field] || field} />
+              <SpecExamplePlaceholder fieldName={profileSpecs.find((s) => s.field_name === field)?.label || FIELD_LABELS[field] || field} />
             </div>
           );
         })}
