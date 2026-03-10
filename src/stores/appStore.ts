@@ -27,6 +27,7 @@ interface AppState {
   quotesList: QuoteListItem[];
   catalogBundle: CatalogBundle | null;
   activeQuoteId: string | null;
+  activeDraftId: string | null;
   wizardActive: boolean;
   sidebarOpen: boolean;
 }
@@ -38,6 +39,7 @@ interface AppActions {
   replaceGhostQuote: (realQuote: QuoteListItem) => void;
   setCatalogBundle: (bundle: CatalogBundle) => void;
   setActiveQuoteId: (id: string | null) => void;
+  setActiveDraftId: (id: string | null) => void;
   setWizardActive: (active: boolean) => void;
   setSidebarOpen: (open: boolean) => void;
 }
@@ -46,6 +48,7 @@ export const useAppStore = create<AppState & AppActions>((set) => ({
   quotesList: [],
   catalogBundle: null,
   activeQuoteId: null,
+  activeDraftId: null,
   wizardActive: false,
   sidebarOpen: true,
 
@@ -63,7 +66,8 @@ export const useAppStore = create<AppState & AppActions>((set) => ({
       ),
     })),
   setCatalogBundle: (bundle) => set({ catalogBundle: bundle }),
-  setActiveQuoteId: (id) => set({ activeQuoteId: id, wizardActive: false }),
+  setActiveQuoteId: (id) => set({ activeQuoteId: id, wizardActive: false, activeDraftId: null }),
+  setActiveDraftId: (id) => set({ activeDraftId: id }),
   setWizardActive: (active) =>
     set({ wizardActive: active, activeQuoteId: active ? null : null }),
   setSidebarOpen: (open) => set({ sidebarOpen: open }),
