@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Upload, Mail } from 'lucide-react';
 import HeroMockup from '@/components/login/HeroMockup';
+import LoginChatbot from '@/components/login/LoginChatbot';
 
 const Login = () => {
   const { sendMagicLink } = useAuth();
