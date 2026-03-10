@@ -59,9 +59,14 @@ const SignSpecCard = ({ sign, onSaved, onAddAnother, onDone }: SignSpecCardProps
   const saveSign = async (extraFields: Partial<SignRecord> = {}) => {
     setSaving(true);
     try {
+      // Convert empty strings to null so we don't overwrite DB values with ''
+      const cleanedSpecs: Record<string, string | null> = {};
+      for (const [key, val] of Object.entries(localSpecs)) {
+        cleanedSpecs[key] = val.trim() || null;
+      }
       const updates: Record<string, unknown> = {
         profile_type: sign.profile_type,
-        ...localSpecs,
+        ...cleanedSpecs,
         ...extraFields,
       };
       const { error } = await supabase
