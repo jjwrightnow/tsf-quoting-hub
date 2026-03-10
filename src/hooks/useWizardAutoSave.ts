@@ -1,32 +1,27 @@
 import { useEffect, useRef } from 'react';
 import { useWizardStore } from '@/stores/wizardStore';
 import { useAppStore } from '@/stores/appStore';
-import { useDraftQuotes } from '@/hooks/useDraftQuotes';
+import { supabase } from '@/integrations/supabase/client';
 
 /**
- * Auto-saves wizard state to draft_quotes whenever a step is completed.
- * Must be rendered inside a component that has access to userEmail.
+ * Auto-saves wizard state to the signs table whenever a step is completed.
+ * Uses activeSignId from appStore as the target record.
  */
-export function useWizardAutoSave(userEmail: string | undefined) {
-  const { upsertDraft } = useDraftQuotes(userEmail);
+export function useWizardAutoSave() {
   const lastSavedStep = useRef(-1);
 
   useEffect(() => {
-    if (!userEmail) return;
-
     const unsub = useWizardStore.subscribe((state, prev) => {
       // Only save when completedSteps changes (a step was completed)
       if (state.completedSteps.length <= prev.completedSteps.length) return;
-      if (state.submittedQuoteId) return; // Already submitted, don't save draft
+      if (state.submittedQuoteId) return;
 
       const latestStep = Math.max(...state.completedSteps);
       if (latestStep === lastSavedStep.current) return;
       lastSavedStep.current = latestStep;
 
-      const draftId = useAppStore.getState().activeDraftId;
-      const profileName = state.profileName || '';
-      const now = new Date();
-      const title = `Quote – ${profileName || 'New'} – ${now.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+      const activeSignId = useAppStore.getState().activeSignId;
+      if (!activeSignId) return;
 
       const specData = {
         artworkPath: state.artworkPath,
@@ -48,20 +43,19 @@ export function useWizardAutoSave(userEmail: string | undefined) {
         completedSteps: state.completedSteps,
       };
 
-      const payload: Record<string, unknown> = {
-        title,
-        profile_type: state.profileName,
-        spec_data: specData,
-      };
-      if (draftId) payload.id = draftId;
-
-      upsertDraft(payload as any).then((saved) => {
-        if (saved && !draftId) {
-          useAppStore.getState().setActiveDraftId(saved.id);
-        }
-      });
+      supabase
+        .from('signs')
+        .update({
+          spec_data: specData as any,
+          profile_type: state.profileName,
+          updated_at: new Date().toISOString(),
+        } as any)
+        .eq('id', activeSignId)
+        .then(({ error }) => {
+          if (error) console.error('[useWizardAutoSave] save failed:', error);
+        });
     });
 
     return unsub;
-  }, [userEmail, upsertDraft]);
+  }, []);
 }

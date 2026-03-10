@@ -7,11 +7,13 @@ import ChatErrorBoundary from '@/components/chat/ChatErrorBoundary';
 const MainPanel = () => {
   const wizardActive = useAppStore((s) => s.wizardActive);
   const activeQuoteId = useAppStore((s) => s.activeQuoteId);
+  const activeSignId = useAppStore((s) => s.activeSignId);
   const chatPhase = useSignStore((s) => s.chatPhase);
 
-  console.log('[MainPanel] render — wizardActive:', wizardActive, 'activeQuoteId:', activeQuoteId, 'chatPhase:', chatPhase);
+  console.log('[MainPanel] render — wizardActive:', wizardActive, 'activeSignId:', activeSignId, 'activeQuoteId:', activeQuoteId, 'chatPhase:', chatPhase);
 
-  if (activeQuoteId && !wizardActive && chatPhase === 'welcome') {
+  // Legacy Airtable quote detail view
+  if (activeQuoteId && !wizardActive && !activeSignId && chatPhase === 'welcome') {
     return <QuoteDetail quoteId={activeQuoteId} />;
   }
 
