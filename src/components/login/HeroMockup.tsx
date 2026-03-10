@@ -1,7 +1,7 @@
 const HeroMockup = () => (
-  <div className="w-full h-full">
+  <div className="w-full h-full flex flex-col flex-1 min-h-screen">
     {/* Browser frame */}
-    <div className="w-full h-full bg-card overflow-hidden">
+    <div className="w-full flex-1 flex flex-col bg-card overflow-hidden">
       {/* Chrome bar */}
       <div className="flex items-center gap-2 bg-[hsl(240,22%,10%)] px-4 py-2.5 border-b border-border">
         <div className="flex gap-1.5">
@@ -15,7 +15,7 @@ const HeroMockup = () => (
       </div>
 
       {/* App interior */}
-      <div className="flex flex-1 bg-background text-foreground">
+      <div className="flex flex-1 bg-background text-foreground min-h-0">
         {/* Sidebar */}
         <div className="w-[180px] shrink-0 border-r border-border bg-[hsl(var(--sidebar-background))] flex flex-col">
           <div className="px-3 pt-4 pb-3">
