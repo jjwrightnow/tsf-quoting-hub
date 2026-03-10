@@ -1,23 +1,44 @@
-import { useState, useRef, useEffect } from 'react';
-import { MessageCircle, X, Send } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { useState, useRef, useEffect } from "react";
+import { MessageCircle, X, Send } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 /* ── FAQ data ─────────────────────────────────────────── */
 const FAQ: { q: string; a: string }[] = [
-  { q: 'What is this portal?', a: 'This is the SignMaker.ai intake portal where verified sign shops submit fabrication specs to The Signage Factory for custom sign quoting. for verified sign companies. Upload artwork, spec out your sign, and receive a manufacturer quote — all through a guided chat experience.' },
-  { q: 'How do I get access?', a: 'Email jj@thesignagefactory.co to request access. We verify each shop before granting a login.. When you enter your work email we check your domain against our approved list. If your company isn\'t listed yet, you can request access on the login page.' },
-  { q: 'What sign types do you handle?', a: 'We fabricate Back Lit, Front Lit, Halo Lit, Edge Lit, Flat Cut, Non-Illuminated, and Open Face Neon signs., and our guided wizard will walk you through sign specs (profile, material, finish, illumination, etc.). A quote is generated and sent to your dashboard.' },
-  { q: "What's the minimum order?", a: "$300 minimum per order. We're a boutique fabricator focused on quality custom work." },
-  { q: 'How long is production?', a: 'Standard lead time is 2–4 weeks. Rush production is available on select products.. Complex multi-sign projects may take a bit longer.' },
-  { q: 'What files do you need?', a: 'Upload PDF, PNG, JPG, or AI files directly in the portal. For upload issues, email quotes@thesignagefactory.co.' },
+  {
+    q: "What is this portal?",
+    a: "This is the SignMaker.ai intake portal where verified sign shops submit fabrication specs to The Signage Factory for custom sign quoting. for verified sign companies. Upload artwork, spec out your sign, and receive a manufacturer quote — all through a guided chat experience.",
+  },
+  {
+    q: "How do I get access?",
+    a: "Email jj@thesignagefactory.co to request access. We verify each shop before granting a login.. When you enter your work email we check your domain against our approved list. If your company isn't listed yet, you can request access on the login page.",
+  },
+  {
+    q: "What sign types do you handle?",
+    a: "We fabricate Back Lit, Front Lit, Halo Lit, Edge Lit, Flat Cut, Non-Illuminated, and Open Face Neon signs., and our guided wizard will walk you through sign specs (profile, material, finish, illumination, etc.). A quote is generated and sent to your dashboard.",
+  },
+  {
+    q: "What's the minimum order?",
+    a: "$300 minimum per order. We're a boutique fabricator focused on quality custom work.",
+  },
+  {
+    q: "How long is production?",
+    a: "Standard lead time is 2–4 weeks. Rush production is available on select products.. Complex multi-sign projects may take a bit longer.",
+  },
+  {
+    q: "What files do you need?",
+    a: "Upload PDF, PNG, JPG, or AI files directly in the portal. For upload issues, email quotes@thesignagefactory.co.",
+  },
 ];
 
-type Msg = { role: 'bot' | 'user'; text: string };
+type Msg = { role: "bot" | "user"; text: string };
 
-const GREETING: Msg = { role: 'bot', text: 'Welcome to the SignMaker portal. I help sign shops submit fabrication specs to The Signage Factory. What can I help you with?.' };
+const GREETING: Msg = {
+  role: "bot",
+  text: "Welcome to the SignMaker portal. I help sign shops submit fabrication specs to The Signage Factory. What can I help you with?.",
+};
 
 /* ── Component ────────────────────────────────────────── */
-const LoginChatbot = () => 
+const LoginChatbot = () => {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Msg[]>([GREETING]);
   const [typing, setTyping] = useState(false);
@@ -25,7 +46,7 @@ const LoginChatbot = () =>
   const pushBotReply = (text: string) => {
     setTyping(true);
     setTimeout(() => {
-      setMessages((prev) => [...prev, { role: 'bot', text }]);
+      setMessages((prev) => [...prev, { role: "bot", text }]);
       setTyping(false);
     }, 600);
   };
@@ -54,7 +75,11 @@ const LoginChatbot = () =>
               </div>
               <span className="text-sm font-semibold text-foreground">Hi, I'm LetterMan 👋</span>
             </div>
-            <button onClick={() => setOpen(false)} className="text-muted-foreground hover:text-foreground transition-colors" aria-label="Close chat">
+            <button
+              onClick={() => setOpen(false)}
+              className="text-muted-foreground hover:text-foreground transition-colors"
+              aria-label="Close chat"
+            >
               <X className="h-4 w-4" />
             </button>
           </div>
@@ -62,13 +87,13 @@ const LoginChatbot = () =>
           {/* Messages */}
           <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3" style={{ maxHeight: 340 }}>
             {messages.map((msg, i) => (
-              <div key={i} className={cn('flex', msg.role === 'user' ? 'justify-end' : 'justify-start')}>
+              <div key={i} className={cn("flex", msg.role === "user" ? "justify-end" : "justify-start")}>
                 <div
                   className={cn(
-                    'max-w-[85%] rounded-lg px-3 py-2 text-xs leading-relaxed',
-                    msg.role === 'bot'
-                      ? 'bg-secondary text-foreground rounded-tl-sm'
-                      : 'bg-tsf-bubble-user text-foreground rounded-tr-sm'
+                    "max-w-[85%] rounded-lg px-3 py-2 text-xs leading-relaxed",
+                    msg.role === "bot"
+                      ? "bg-secondary text-foreground rounded-tl-sm"
+                      : "bg-tsf-bubble-user text-foreground rounded-tr-sm",
                   )}
                 >
                   {msg.text}
@@ -79,9 +104,9 @@ const LoginChatbot = () =>
             {typing && (
               <div className="flex justify-start">
                 <div className="flex items-center gap-1 rounded-lg rounded-tl-sm bg-secondary px-3 py-2">
-                  <span className="h-1.5 w-1.5 rounded-full bg-accent typing-dot" style={{ animationDelay: '0s' }} />
-                  <span className="h-1.5 w-1.5 rounded-full bg-accent typing-dot" style={{ animationDelay: '0.2s' }} />
-                  <span className="h-1.5 w-1.5 rounded-full bg-accent typing-dot" style={{ animationDelay: '0.4s' }} />
+                  <span className="h-1.5 w-1.5 rounded-full bg-accent typing-dot" style={{ animationDelay: "0s" }} />
+                  <span className="h-1.5 w-1.5 rounded-full bg-accent typing-dot" style={{ animationDelay: "0.2s" }} />
+                  <span className="h-1.5 w-1.5 rounded-full bg-accent typing-dot" style={{ animationDelay: "0.4s" }} />
                 </div>
               </div>
             )}
@@ -113,12 +138,12 @@ const LoginChatbot = () =>
 
 /* ── Sub-component: input bar ────────────────────────── */
 const ChatInput = ({ onSend, disabled }: { onSend: (t: string) => void; disabled: boolean }) => {
-  const [value, setValue] = useState('');
+  const [value, setValue] = useState("");
 
   const submit = () => {
     if (!value.trim() || disabled) return;
     onSend(value);
-    setValue('');
+    setValue("");
   };
 
   return (
@@ -127,12 +152,17 @@ const ChatInput = ({ onSend, disabled }: { onSend: (t: string) => void; disabled
         type="text"
         value={value}
         onChange={(e) => setValue(e.target.value)}
-        onKeyDown={(e) => e.key === 'Enter' && submit()}
+        onKeyDown={(e) => e.key === "Enter" && submit()}
         placeholder="Ask a question…"
         disabled={disabled}
         className="flex-1 bg-transparent text-xs text-foreground placeholder:text-muted-foreground outline-none"
       />
-      <button onClick={submit} disabled={disabled || !value.trim()} className="text-primary disabled:opacity-30 transition-opacity" aria-label="Send">
+      <button
+        onClick={submit}
+        disabled={disabled || !value.trim()}
+        className="text-primary disabled:opacity-30 transition-opacity"
+        aria-label="Send"
+      >
         <Send className="h-4 w-4" />
       </button>
     </div>
