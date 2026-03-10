@@ -26,6 +26,9 @@ const AppSidebar = ({ open, onToggle, onSignOut }: AppSidebarProps) => {
   const setWizardActive = useAppStore((s) => s.setWizardActive);
   const wizardActive = useAppStore((s) => s.wizardActive);
   const resetWizard = useWizardStore((s) => s.resetWizard);
+  const { session } = useAuth();
+  const navigate = useNavigate();
+  const isAdminUser = session?.user?.email === 'jj@thesignagefactory.co';
 
   const handleNewQuote = () => {
     resetWizard();
