@@ -186,7 +186,7 @@ const SignSpecCard = ({ sign, onSaved, onAddAnother, onDone }: SignSpecCardProps
                   )}
                 </div>
               </div>
-              <SpecExamplePlaceholder fieldName={FIELD_LABELS[field] || field} />
+              <SpecExamplePlaceholder fieldName={profileSpecs.find((s) => s.field_name === field)?.label || FIELD_LABELS[field] || field} />
             </div>
           );
         })}
