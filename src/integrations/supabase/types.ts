@@ -226,6 +226,36 @@ export type Database = {
           },
         ]
       }
+      draft_quotes: {
+        Row: {
+          created_at: string | null
+          id: string
+          profile_type: string | null
+          spec_data: Json | null
+          title: string
+          updated_at: string | null
+          user_email: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          profile_type?: string | null
+          spec_data?: Json | null
+          title?: string
+          updated_at?: string | null
+          user_email: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          profile_type?: string | null
+          spec_data?: Json | null
+          title?: string
+          updated_at?: string | null
+          user_email?: string
+        }
+        Relationships: []
+      }
       quotes: {
         Row: {
           account_id: string
