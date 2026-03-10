@@ -221,6 +221,7 @@ const Login = () => {
           )}
         </div>
       </div>
+      <LoginChatbot />
     </div>
   );
 };
