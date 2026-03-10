@@ -48,6 +48,7 @@ export const useAppStore = create<AppState & AppActions>((set) => ({
   quotesList: [],
   catalogBundle: null,
   activeQuoteId: null,
+  activeDraftId: null,
   wizardActive: false,
   sidebarOpen: true,
 
