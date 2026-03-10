@@ -1,18 +1,18 @@
-import { useState, useRef } from 'react';
-import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Upload, Mail } from 'lucide-react';
-import HeroMockup from '@/components/login/HeroMockup';
-import LoginChatbot from '@/components/login/LoginChatbot';
+import { useState, useRef } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Upload, Mail } from "lucide-react";
+import HeroMockup from "@/components/login/HeroMockup";
+import LoginChatbot from "@/components/login/LoginChatbot";
 
 const Login = () => {
   const { sendMagicLink } = useAuth();
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [domainBlocked, setDomainBlocked] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadDone, setUploadDone] = useState(false);
@@ -22,17 +22,16 @@ const Login = () => {
     e.preventDefault();
     if (!email) return;
     setLoading(true);
-    setError('');
+    setError("");
     setDomainBlocked(false);
 
     try {
-      const { data: domainCheck, error: fnError } = await supabase.functions.invoke(
-        'check-domain-on-signup',
-        { body: { email } }
-      );
+      const { data: domainCheck, error: fnError } = await supabase.functions.invoke("check-domain-on-signup", {
+        body: { email },
+      });
       if (fnError) {
         setLoading(false);
-        setError('Unable to verify your domain. Please try again.');
+        setError("Unable to verify your domain. Please try again.");
         return;
       }
       if (!domainCheck?.allowed) {
@@ -42,7 +41,7 @@ const Login = () => {
       }
     } catch {
       setLoading(false);
-      setError('Unable to verify your domain. Please try again.');
+      setError("Unable to verify your domain. Please try again.");
       return;
     }
 
@@ -64,12 +63,12 @@ const Login = () => {
       const timestamp = Date.now();
       for (const file of Array.from(files)) {
         const path = `guest-uploads/${timestamp}-${file.name}`;
-        const { error } = await supabase.storage.from('intake-assets').upload(path, file);
+        const { error } = await supabase.storage.from("intake-assets").upload(path, file);
         if (error) throw error;
       }
       setUploadDone(true);
     } catch (err: any) {
-      setError(err.message || 'Upload failed. Please try again.');
+      setError(err.message || "Upload failed. Please try again.");
     } finally {
       setUploading(false);
     }
@@ -78,32 +77,39 @@ const Login = () => {
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-background" style={{ padding: 0, margin: 0 }}>
       {/* Background mockup — hidden on mobile */}
-      <div className="hidden md:flex fixed inset-0 items-center justify-center overflow-hidden pointer-events-none select-none" style={{ zIndex: 0 }} aria-hidden="true">
+      <div
+        className="hidden md:flex fixed inset-0 items-center justify-center overflow-hidden pointer-events-none select-none opacity-25"
+        style={{ zIndex: 0 }}
+        aria-hidden="true"
+      >
         <div className="w-[66vw] max-w-[66vw] aspect-[16/10] flex flex-col overflow-hidden rounded-xl">
           <HeroMockup />
         </div>
       </div>
       {/* Dark overlay */}
-      <div className="hidden md:block fixed inset-0 pointer-events-none" style={{ background: 'rgba(0,0,0,0.65)', zIndex: 1 }} aria-hidden="true" />
+      <div
+        className="hidden md:block fixed inset-0 pointer-events-none"
+        style={{ background: "rgba(0,0,0,0.65)", zIndex: 1 }}
+        aria-hidden="true"
+      />
 
       {/* Floating login card */}
-      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-sm px-6" style={{ zIndex: 10 }}>
+      <div
+        className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-sm px-6"
+        style={{ zIndex: 10 }}
+      >
         <div className="rounded-xl border border-border bg-card/95 backdrop-blur-sm p-8 shadow-[0_8px_40px_rgba(0,0,0,0.4)]">
           <div className="mb-8 text-center">
             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg gradient-pink-blue">
               <div className="h-5 w-5 rounded-sm bg-primary-foreground/90" />
             </div>
-            <p className="text-sm text-muted-foreground">
-              Professional Sign Quoting
-            </p>
+            <p className="text-sm text-muted-foreground">Professional Sign Quoting</p>
           </div>
 
           {sent ? (
             <div className="animate-fade-in-up rounded-lg border border-border bg-secondary p-6 text-center">
               <div className="mb-3 text-2xl">&#9993;</div>
-              <p className="text-sm text-foreground">
-                Check your email &mdash; we've sent you a secure login link.
-              </p>
+              <p className="text-sm text-foreground">Check your email &mdash; we've sent you a secure login link.</p>
             </div>
           ) : (
             <>
@@ -122,16 +128,14 @@ const Login = () => {
                   className="h-12 border-border bg-secondary text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary"
                   autoFocus
                 />
-                {error && !domainBlocked && (
-                  <p className="text-sm text-accent">{error}</p>
-                )}
+                {error && !domainBlocked && <p className="text-sm text-accent">{error}</p>}
                 {!domainBlocked && (
                   <Button
                     type="submit"
                     disabled={loading || !email}
                     className="h-12 w-full gradient-pink-blue text-foreground font-semibold transition-all duration-300 hover:opacity-90"
                   >
-                    {loading ? 'Sending...' : 'Send Magic Link'}
+                    {loading ? "Sending..." : "Send Magic Link"}
                   </Button>
                 )}
               </form>
@@ -142,19 +146,21 @@ const Login = () => {
                     SignMaker.ai is a wholesale platform for verified sign companies.
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    To request access, email{' '}
+                    To request access, email{" "}
                     <a href="mailto:jj@thesignagefactory.co" className="text-primary underline underline-offset-2">
                       jj@thesignagefactory.co
-                    </a>{' '}
+                    </a>{" "}
                     with your company name and domain.
                   </p>
-                  <p className="text-sm text-muted-foreground">
-                    In the meantime, you can still get a quote:
-                  </p>
+                  <p className="text-sm text-muted-foreground">In the meantime, you can still get a quote:</p>
                   <ul className="text-sm text-muted-foreground list-disc pl-5 space-y-1">
                     <li>Upload your artwork below</li>
-                    <li>Or email it directly to{' '}
-                      <a href="mailto:quotes@thesignagefactory.co" className="text-primary underline underline-offset-2">
+                    <li>
+                      Or email it directly to{" "}
+                      <a
+                        href="mailto:quotes@thesignagefactory.co"
+                        className="text-primary underline underline-offset-2"
+                      >
                         quotes@thesignagefactory.co
                       </a>
                     </li>
@@ -176,7 +182,7 @@ const Login = () => {
                       className="flex-1 h-11 gap-2 gradient-pink-blue text-foreground font-semibold transition-all duration-300 hover:opacity-90"
                     >
                       <Upload className="h-4 w-4" />
-                      {uploading ? 'Uploading…' : 'Upload Artwork for a Quote'}
+                      {uploading ? "Uploading…" : "Upload Artwork for a Quote"}
                     </Button>
                     <a
                       href="mailto:quotes@thesignagefactory.co?subject=Quote Request&body=Please find my artwork attached."
@@ -193,26 +199,26 @@ const Login = () => {
                     </a>
                   </div>
 
-                  {error && (
-                    <p className="text-sm text-accent">{error}</p>
-                  )}
+                  {error && <p className="text-sm text-accent">{error}</p>}
                 </div>
               )}
 
               {domainBlocked && uploadDone && (
                 <div className="mt-4 animate-fade-in-up rounded-lg border border-border bg-secondary p-5 space-y-3">
                   <div className="flex items-center gap-2">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/15 text-primary text-lg">✓</div>
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/15 text-primary text-lg">
+                      ✓
+                    </div>
                     <p className="text-sm font-semibold text-foreground">Artwork received.</p>
                   </div>
                   <p className="text-sm text-muted-foreground">
                     A member of our team will review and send a quote to the email you provided within 24 hours.
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    Not a SignMaker.ai member yet? Email{' '}
+                    Not a SignMaker.ai member yet? Email{" "}
                     <a href="mailto:jj@thesignagefactory.co" className="text-primary underline underline-offset-2">
                       jj@thesignagefactory.co
-                    </a>{' '}
+                    </a>{" "}
                     with your company name and domain to request wholesale access.
                   </p>
                 </div>
