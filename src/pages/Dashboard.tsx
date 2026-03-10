@@ -3,6 +3,7 @@ import { useWizardStore } from '@/stores/wizardStore';
 import { useSignStore } from '@/stores/signStore';
 import { useAuth } from '@/hooks/useAuth';
 import { useQuotePolling } from '@/hooks/usePolling';
+import { useWizardAutoSave } from '@/hooks/useWizardAutoSave';
 import AppSidebar from '@/components/layout/AppSidebar';
 import MainPanel from '@/components/layout/MainPanel';
 import InputBar from '@/components/layout/InputBar';
@@ -18,6 +19,7 @@ const Dashboard = () => {
   console.log('[Dashboard] render — session:', !!session, 'email:', session?.user?.email);
 
   useQuotePolling(!!session);
+  useWizardAutoSave(session?.user?.email);
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background">
