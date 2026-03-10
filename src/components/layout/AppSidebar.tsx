@@ -126,8 +126,16 @@ const AppSidebar = ({ open, onToggle, onSignOut }: AppSidebarProps) => {
         )}
       </div>
 
-      {/* Sign out */}
-      <div className="border-t border-sidebar-border p-4">
+      {/* Footer */}
+      <div className="border-t border-sidebar-border p-4 flex items-center gap-3">
+        {isAdminUser && (
+          <button
+            onClick={() => navigate('/admin')}
+            className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Admin
+          </button>
+        )}
         <button
           onClick={onSignOut}
           className="text-xs text-muted-foreground hover:text-foreground transition-colors"
