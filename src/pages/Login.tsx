@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Upload, Mail } from 'lucide-react';
+import HeroMockup from '@/components/login/HeroMockup';
 
 const Login = () => {
   const { sendMagicLink } = useAuth();
