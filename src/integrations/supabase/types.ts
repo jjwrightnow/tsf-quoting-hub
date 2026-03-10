@@ -260,6 +260,7 @@ export type Database = {
         Row: {
           created_at: string | null
           id: string
+          image_url: string | null
           name: string
           quote_number: string | null
           status: string
@@ -269,6 +270,7 @@ export type Database = {
         Insert: {
           created_at?: string | null
           id?: string
+          image_url?: string | null
           name: string
           quote_number?: string | null
           status?: string
@@ -278,6 +280,7 @@ export type Database = {
         Update: {
           created_at?: string | null
           id?: string
+          image_url?: string | null
           name?: string
           quote_number?: string | null
           status?: string
@@ -664,6 +667,7 @@ export type Database = {
         Row: {
           field_name: string
           id: string
+          image_url: string | null
           label: string
           options: Json
           profile_type: string
@@ -674,6 +678,7 @@ export type Database = {
         Insert: {
           field_name: string
           id?: string
+          image_url?: string | null
           label: string
           options?: Json
           profile_type: string
@@ -684,6 +689,7 @@ export type Database = {
         Update: {
           field_name?: string
           id?: string
+          image_url?: string | null
           label?: string
           options?: Json
           profile_type?: string
