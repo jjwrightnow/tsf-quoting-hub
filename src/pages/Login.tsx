@@ -75,16 +75,18 @@ const Login = () => {
   };
 
   return (
-    <div className="relative w-screen h-screen overflow-hidden bg-background">
+    <div className="relative w-screen h-screen overflow-hidden bg-background" style={{ padding: 0, margin: 0 }}>
       {/* Background mockup — hidden on mobile */}
-      <div className="hidden md:block fixed inset-0 w-screen h-screen overflow-hidden z-0 pointer-events-none select-none" aria-hidden="true">
-        <HeroMockup />
-        {/* Dim overlay */}
-        <div className="fixed inset-0 w-screen h-screen bg-background/60" />
+      <div className="hidden md:block fixed inset-0 w-screen h-screen overflow-hidden pointer-events-none select-none" style={{ zIndex: 0 }} aria-hidden="true">
+        <div className="w-full h-full origin-top" style={{ transform: 'scale(1.2)' }}>
+          <HeroMockup />
+        </div>
       </div>
+      {/* Dark overlay */}
+      <div className="hidden md:block fixed inset-0 pointer-events-none" style={{ background: 'rgba(0,0,0,0.65)', zIndex: 1 }} aria-hidden="true" />
 
       {/* Floating login card */}
-      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 w-full max-w-sm px-6">
+      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-sm px-6" style={{ zIndex: 10 }}>
         <div className="rounded-xl border border-border bg-card/95 backdrop-blur-sm p-8 shadow-[0_8px_40px_rgba(0,0,0,0.4)]">
           <div className="mb-8 text-center">
             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg gradient-pink-blue">
