@@ -18,14 +18,19 @@ interface SignSpecCardProps {
 const SignSpecCard = ({ sign, onSaved, onAddAnother, onDone }: SignSpecCardProps) => {
   const updateSign = useSignStore((s) => s.updateSign);
   const userRole = useSignStore((s) => s.userRole);
-  const autocompleteOptions = useSignStore((s) => s.autocompleteOptions);
+  const { specsByProfile, loading: specsLoading } = useSpecOptions();
 
   const isCollapsed = sign.status === 'saved';
 
+  // Derive fields from DB-driven spec_options
+  const profileSpecs = specsByProfile[sign.profile_type || ''] || [];
+  const fieldNames = profileSpecs.map((s) => s.field_name);
+
   const [localSpecs, setLocalSpecs] = useState<Record<string, string>>(() => {
-    const fields = SPEC_FIELDS_BY_PROFILE[sign.profile_type || ''] || [];
     const specs: Record<string, string> = {};
-    fields.forEach((f) => {
+    // Initialize from sign record for all known spec field names
+    const allPossible = ['metal_type', 'finish', 'depth', 'led_color', 'mounting', 'back_type', 'acrylic_face', 'lead_wires', 'ul_label', 'wire_exit'];
+    allPossible.forEach((f) => {
       specs[f] = (sign as unknown as Record<string, unknown>)[f] as string || '';
     });
     return specs;
@@ -39,10 +44,9 @@ const SignSpecCard = ({ sign, onSaved, onAddAnother, onDone }: SignSpecCardProps
     setOpenDropdown(null);
   };
 
-  const getOptionsForField = (field: string) => {
-    const category = CATEGORY_MAP[field];
-    if (!category) return [];
-    return autocompleteOptions.filter((o) => o.category === category);
+  const getOptionsForField = (field: string): string[] => {
+    const spec = profileSpecs.find((s) => s.field_name === field);
+    return spec?.options || [];
   };
 
   const saveSign = async (extraFields: Partial<SignRecord> = {}) => {
