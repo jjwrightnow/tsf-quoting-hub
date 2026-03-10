@@ -1,6 +1,8 @@
 import { useAppStore, QuoteListItem } from '@/stores/appStore';
 import { useWizardStore } from '@/stores/wizardStore';
 import { isQuoteUnread, markQuoteSeen } from '@/lib/unread';
+import { useAuth } from '@/hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 
 interface AppSidebarProps {
   open: boolean;
