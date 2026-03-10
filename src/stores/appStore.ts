@@ -27,6 +27,7 @@ interface AppState {
   quotesList: QuoteListItem[];
   catalogBundle: CatalogBundle | null;
   activeQuoteId: string | null;
+  activeDraftId: string | null;
   wizardActive: boolean;
   sidebarOpen: boolean;
 }
