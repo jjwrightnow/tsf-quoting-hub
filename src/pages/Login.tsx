@@ -208,6 +208,9 @@ const Login = () => {
             )}
           </>
         )}
+        </div>
+
+        <HeroMockup />
       </div>
     </div>
   );
