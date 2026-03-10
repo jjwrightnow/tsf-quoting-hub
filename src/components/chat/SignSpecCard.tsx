@@ -160,11 +160,11 @@ const SignSpecCard = ({ sign, onSaved, onAddAnother, onDone }: SignSpecCardProps
                     <div className="absolute right-0 top-full z-20 mt-1 max-h-48 w-52 overflow-y-auto rounded-lg border border-border bg-card shadow-lg">
                       {options.map((opt) => (
                         <button
-                          key={opt.option_value}
-                          onClick={() => handleSpecChange(field, opt.option_value)}
+                          key={opt}
+                          onClick={() => handleSpecChange(field, opt)}
                           className="w-full px-3 py-2 text-left text-xs text-foreground hover:bg-secondary transition-colors"
                         >
-                          {opt.display_label}
+                          {opt}
                         </button>
                       ))}
                     </div>
