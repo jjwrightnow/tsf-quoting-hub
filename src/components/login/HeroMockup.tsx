@@ -15,7 +15,7 @@ const HeroMockup = () => (
       </div>
 
       {/* App interior */}
-      <div className="flex h-[340px] bg-background text-foreground">
+      <div className="flex flex-1 bg-background text-foreground">
         {/* Sidebar */}
         <div className="w-[180px] shrink-0 border-r border-border bg-[hsl(var(--sidebar-background))] flex flex-col">
           <div className="px-3 pt-4 pb-3">
