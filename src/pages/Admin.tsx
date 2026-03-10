@@ -1,11 +1,12 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { getQuotePortal } from '@/lib/supabase-functions';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Table,
   TableBody,
@@ -16,13 +17,13 @@ import {
 } from '@/components/ui/table';
 import { format } from 'date-fns';
 import { RefreshCw } from 'lucide-react';
+import SpecOptionsEditor from '@/components/admin/SpecOptionsEditor';
 
-const ADMIN_DOMAINS = ['@thesignagefactory.co'];
-const ADMIN_EMAILS: string[] = [];
+const ADMIN_EMAILS = ['jj@thesignagefactory.co'];
 
 function isAdmin(email: string | undefined): boolean {
   if (!email) return false;
-  return ADMIN_DOMAINS.some((d) => email.endsWith(d)) || ADMIN_EMAILS.includes(email);
+  return ADMIN_EMAILS.includes(email);
 }
 
 interface Submission {
@@ -59,6 +60,8 @@ const Admin = () => {
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [loading, setLoading] = useState(true);
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = searchParams.get('tab') || 'queue';
 
   const email = session?.user?.email;
 
@@ -78,10 +81,12 @@ const Admin = () => {
 
   useEffect(() => {
     if (!session || !isAdmin(email)) return;
-    fetchData();
-    const interval = setInterval(fetchData, 30000);
-    return () => clearInterval(interval);
-  }, [session, email, fetchData]);
+    if (activeTab === 'queue') {
+      fetchData();
+      const interval = setInterval(fetchData, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [session, email, fetchData, activeTab]);
 
   if (authLoading) {
     return (
@@ -103,12 +108,14 @@ const Admin = () => {
     <div className="min-h-screen bg-background text-foreground">
       {/* Header */}
       <header className="flex items-center justify-between border-b border-border px-6 py-4">
-        <h1 className="text-xl font-bold tracking-tight">TSF Admin — Submission Queue</h1>
+        <h1 className="text-xl font-bold tracking-tight">TSF Admin</h1>
         <div className="flex items-center gap-3">
-          <Button variant="outline" size="sm" onClick={fetchData} disabled={loading}>
-            <RefreshCw className={`mr-1.5 h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
-            Refresh
-          </Button>
+          {activeTab === 'queue' && (
+            <Button variant="outline" size="sm" onClick={fetchData} disabled={loading}>
+              <RefreshCw className={`mr-1.5 h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
+              Refresh
+            </Button>
+          )}
           <button onClick={signOut} className="text-xs text-muted-foreground hover:text-foreground transition-colors">
             Sign Out
           </button>
@@ -116,86 +123,99 @@ const Admin = () => {
       </header>
 
       <main className="mx-auto max-w-7xl px-6 py-6 space-y-6">
-        {/* Summary strip */}
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-          <Card><CardContent className="py-4 px-5">
-            <p className="text-xs text-muted-foreground">Today</p>
-            <p className="text-2xl font-bold">{todayCount}</p>
-          </CardContent></Card>
-          <Card><CardContent className="py-4 px-5">
-            <p className="text-xs text-muted-foreground">Pending Sync</p>
-            <p className="text-2xl font-bold text-yellow-400">{pendingCount}</p>
-          </CardContent></Card>
-          <Card><CardContent className="py-4 px-5">
-            <p className="text-xs text-muted-foreground">Errors</p>
-            <p className="text-2xl font-bold text-red-400">{errorCount}</p>
-          </CardContent></Card>
-          <Card><CardContent className="py-4 px-5">
-            <p className="text-xs text-muted-foreground">Last Refresh</p>
-            <p className="text-sm font-medium">{lastRefresh ? format(lastRefresh, 'h:mm:ss a') : '—'}</p>
-          </CardContent></Card>
-        </div>
+        <Tabs value={activeTab} onValueChange={(v) => setSearchParams({ tab: v })}>
+          <TabsList>
+            <TabsTrigger value="queue">Submission Queue</TabsTrigger>
+            <TabsTrigger value="spec-options">Spec Options</TabsTrigger>
+          </TabsList>
 
-        {/* Table */}
-        {loading && submissions.length === 0 ? (
-          <div className="space-y-3">
-            {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}
-          </div>
-        ) : (
-          <div className="rounded-lg border border-border overflow-hidden">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Submitted</TableHead>
-                  <TableHead>Company</TableHead>
-                  <TableHead>Project Name</TableHead>
-                  <TableHead>Profile</TableHead>
-                  <TableHead>Illumination</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Airtable Record</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {submissions.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={8} className="text-center py-10 text-muted-foreground">
-                      No submissions found.
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  submissions.map((s) => {
-                    const p = s.payload || {};
-                    return (
-                      <TableRow key={s.id}>
-                        <TableCell className="whitespace-nowrap text-xs">{formatDate(s.created_at)}</TableCell>
-                        <TableCell className="text-xs">{s.company_name}</TableCell>
-                        <TableCell className="text-xs">{p.projectName || p.project_name || '—'}</TableCell>
-                        <TableCell className="text-xs">{p.profile || p.profileType || '—'}</TableCell>
-                        <TableCell className="text-xs">{p.illumination || p.illuminationStyle || '—'}</TableCell>
-                        <TableCell>{statusBadge(s.sync_status)}</TableCell>
-                        <TableCell className="text-xs">
-                          {s.airtable_record_id ? (
-                            <span className="text-emerald-400">✓ Synced</span>
-                          ) : (
-                            <span className="text-muted-foreground">Pending</span>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          {(s.sync_status === 'error' || s.sync_status === 'pending') && (
-                            <Button variant="outline" size="sm" className="text-xs h-7">
-                              Retry Sync
-                            </Button>
-                          )}
+          <TabsContent value="queue" className="space-y-6 mt-4">
+            {/* Summary strip */}
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+              <Card><CardContent className="py-4 px-5">
+                <p className="text-xs text-muted-foreground">Today</p>
+                <p className="text-2xl font-bold">{todayCount}</p>
+              </CardContent></Card>
+              <Card><CardContent className="py-4 px-5">
+                <p className="text-xs text-muted-foreground">Pending Sync</p>
+                <p className="text-2xl font-bold text-yellow-400">{pendingCount}</p>
+              </CardContent></Card>
+              <Card><CardContent className="py-4 px-5">
+                <p className="text-xs text-muted-foreground">Errors</p>
+                <p className="text-2xl font-bold text-red-400">{errorCount}</p>
+              </CardContent></Card>
+              <Card><CardContent className="py-4 px-5">
+                <p className="text-xs text-muted-foreground">Last Refresh</p>
+                <p className="text-sm font-medium">{lastRefresh ? format(lastRefresh, 'h:mm:ss a') : '—'}</p>
+              </CardContent></Card>
+            </div>
+
+            {/* Table */}
+            {loading && submissions.length === 0 ? (
+              <div className="space-y-3">
+                {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}
+              </div>
+            ) : (
+              <div className="rounded-lg border border-border overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Submitted</TableHead>
+                      <TableHead>Company</TableHead>
+                      <TableHead>Project Name</TableHead>
+                      <TableHead>Profile</TableHead>
+                      <TableHead>Illumination</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Airtable Record</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {submissions.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={8} className="text-center py-10 text-muted-foreground">
+                          No submissions found.
                         </TableCell>
                       </TableRow>
-                    );
-                  })
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        )}
+                    ) : (
+                      submissions.map((s) => {
+                        const p = s.payload || {};
+                        return (
+                          <TableRow key={s.id}>
+                            <TableCell className="whitespace-nowrap text-xs">{formatDate(s.created_at)}</TableCell>
+                            <TableCell className="text-xs">{s.company_name}</TableCell>
+                            <TableCell className="text-xs">{p.projectName || p.project_name || '—'}</TableCell>
+                            <TableCell className="text-xs">{p.profile || p.profileType || '—'}</TableCell>
+                            <TableCell className="text-xs">{p.illumination || p.illuminationStyle || '—'}</TableCell>
+                            <TableCell>{statusBadge(s.sync_status)}</TableCell>
+                            <TableCell className="text-xs">
+                              {s.airtable_record_id ? (
+                                <span className="text-emerald-400">✓ Synced</span>
+                              ) : (
+                                <span className="text-muted-foreground">Pending</span>
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              {(s.sync_status === 'error' || s.sync_status === 'pending') && (
+                                <Button variant="outline" size="sm" className="text-xs h-7">
+                                  Retry Sync
+                                </Button>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="spec-options" className="mt-4">
+            <SpecOptionsEditor />
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );
