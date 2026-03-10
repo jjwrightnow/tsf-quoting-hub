@@ -142,7 +142,9 @@ const SignSpecCard = ({ sign, onSaved, onAddAnother, onDone }: SignSpecCardProps
           return (
             <div key={field} className="py-1">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">{FIELD_LABELS[field] || field}</span>
+                <span className="text-muted-foreground">
+                  {profileSpecs.find((s) => s.field_name === field)?.label || FIELD_LABELS[field] || field}
+                </span>
                 <div className="relative">
                   <button
                     onClick={() => setOpenDropdown(isOpen ? null : field)}
