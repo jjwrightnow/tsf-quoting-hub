@@ -75,142 +75,150 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background overflow-auto">
-      <div className="flex flex-col items-center justify-center pt-16 pb-8">
-        <div className="w-full max-w-sm px-6">
-        <div className="mb-10 text-center">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg gradient-pink-blue">
-            <div className="h-5 w-5 rounded-sm bg-primary-foreground/90" />
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Professional Sign Quoting
-          </p>
+    <div className="relative flex min-h-screen items-center justify-center bg-background overflow-hidden">
+      {/* Background mockup — hidden on mobile */}
+      <div className="hidden md:block absolute inset-0 z-0 pointer-events-none select-none" aria-hidden="true">
+        <div className="absolute inset-0 flex items-center justify-center scale-[1.15]">
+          <HeroMockup />
         </div>
+        {/* Dim overlay */}
+        <div className="absolute inset-0 bg-background/60" />
+      </div>
 
-        {sent ? (
-          <div className="animate-fade-in-up rounded-lg border border-border bg-card p-6 text-center">
-            <div className="mb-3 text-2xl">&#9993;</div>
-            <p className="text-sm text-foreground">
-              Check your email &mdash; we've sent you a secure login link.
+      {/* Floating login card */}
+      <div className="relative z-10 w-full max-w-sm px-6">
+        <div className="rounded-xl border border-border bg-card/95 backdrop-blur-sm p-8 shadow-[0_8px_40px_rgba(0,0,0,0.4)]">
+          <div className="mb-8 text-center">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg gradient-pink-blue">
+              <div className="h-5 w-5 rounded-sm bg-primary-foreground/90" />
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Professional Sign Quoting
             </p>
           </div>
-        ) : (
-          <>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <Input
-                type="email"
-                placeholder="you@company.com"
-                value={email}
-                onChange={(e) => {
-                  setEmail(e.target.value);
-                  if (domainBlocked) {
-                    setDomainBlocked(false);
-                    setUploadDone(false);
-                  }
-                }}
-                className="h-12 border-border bg-card text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary"
-                autoFocus
-              />
-              {error && !domainBlocked && (
-                <p className="text-sm text-accent">{error}</p>
-              )}
-              {!domainBlocked && (
-                <Button
-                  type="submit"
-                  disabled={loading || !email}
-                  className="h-12 w-full gradient-pink-blue text-foreground font-semibold transition-all duration-300 hover:opacity-90"
-                >
-                  {loading ? 'Sending...' : 'Send Magic Link'}
-                </Button>
-              )}
-            </form>
 
-            {domainBlocked && !uploadDone && (
-              <div className="mt-4 animate-fade-in-up rounded-lg border border-border bg-card p-5 space-y-4">
-                <p className="text-sm font-semibold text-foreground">
-                  SignMaker.ai is a wholesale platform for verified sign companies.
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  To request access, email{' '}
-                  <a href="mailto:jj@thesignagefactory.co" className="text-primary underline underline-offset-2">
-                    jj@thesignagefactory.co
-                  </a>{' '}
-                  with your company name and domain.
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  In the meantime, you can still get a quote:
-                </p>
-                <ul className="text-sm text-muted-foreground list-disc pl-5 space-y-1">
-                  <li>Upload your artwork below</li>
-                  <li>Or email it directly to{' '}
-                    <a href="mailto:quotes@thesignagefactory.co" className="text-primary underline underline-offset-2">
-                      quotes@thesignagefactory.co
-                    </a>
-                  </li>
-                </ul>
-
-                <div className="flex gap-3 pt-1">
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept=".pdf,.png,.jpg,.jpeg"
-                    multiple
-                    className="hidden"
-                    onChange={handleFileUpload}
-                  />
-                  <Button
-                    type="button"
-                    disabled={uploading}
-                    onClick={() => fileInputRef.current?.click()}
-                    className="flex-1 h-11 gap-2 gradient-pink-blue text-foreground font-semibold transition-all duration-300 hover:opacity-90"
-                  >
-                    <Upload className="h-4 w-4" />
-                    {uploading ? 'Uploading…' : 'Upload Artwork for a Quote'}
-                  </Button>
-                  <a
-                    href="mailto:quotes@thesignagefactory.co?subject=Quote Request&body=Please find my artwork attached."
-                    className="flex-shrink-0"
-                  >
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="h-11 gap-2 border-border text-foreground hover:border-primary hover:shadow-[0_0_12px_hsl(var(--primary)/0.25)]"
-                    >
-                      <Mail className="h-4 w-4" />
-                      Email Your Artwork
-                    </Button>
-                  </a>
-                </div>
-
-                {error && (
+          {sent ? (
+            <div className="animate-fade-in-up rounded-lg border border-border bg-secondary p-6 text-center">
+              <div className="mb-3 text-2xl">&#9993;</div>
+              <p className="text-sm text-foreground">
+                Check your email &mdash; we've sent you a secure login link.
+              </p>
+            </div>
+          ) : (
+            <>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <Input
+                  type="email"
+                  placeholder="you@company.com"
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (domainBlocked) {
+                      setDomainBlocked(false);
+                      setUploadDone(false);
+                    }
+                  }}
+                  className="h-12 border-border bg-secondary text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary"
+                  autoFocus
+                />
+                {error && !domainBlocked && (
                   <p className="text-sm text-accent">{error}</p>
                 )}
-              </div>
-            )}
+                {!domainBlocked && (
+                  <Button
+                    type="submit"
+                    disabled={loading || !email}
+                    className="h-12 w-full gradient-pink-blue text-foreground font-semibold transition-all duration-300 hover:opacity-90"
+                  >
+                    {loading ? 'Sending...' : 'Send Magic Link'}
+                  </Button>
+                )}
+              </form>
 
-            {domainBlocked && uploadDone && (
-              <div className="mt-4 animate-fade-in-up rounded-lg border border-border bg-card p-5 space-y-3">
-                <div className="flex items-center gap-2">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/15 text-primary text-lg">✓</div>
-                  <p className="text-sm font-semibold text-foreground">Artwork received.</p>
+              {domainBlocked && !uploadDone && (
+                <div className="mt-4 animate-fade-in-up rounded-lg border border-border bg-secondary p-5 space-y-4">
+                  <p className="text-sm font-semibold text-foreground">
+                    SignMaker.ai is a wholesale platform for verified sign companies.
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    To request access, email{' '}
+                    <a href="mailto:jj@thesignagefactory.co" className="text-primary underline underline-offset-2">
+                      jj@thesignagefactory.co
+                    </a>{' '}
+                    with your company name and domain.
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    In the meantime, you can still get a quote:
+                  </p>
+                  <ul className="text-sm text-muted-foreground list-disc pl-5 space-y-1">
+                    <li>Upload your artwork below</li>
+                    <li>Or email it directly to{' '}
+                      <a href="mailto:quotes@thesignagefactory.co" className="text-primary underline underline-offset-2">
+                        quotes@thesignagefactory.co
+                      </a>
+                    </li>
+                  </ul>
+
+                  <div className="flex gap-3 pt-1">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept=".pdf,.png,.jpg,.jpeg"
+                      multiple
+                      className="hidden"
+                      onChange={handleFileUpload}
+                    />
+                    <Button
+                      type="button"
+                      disabled={uploading}
+                      onClick={() => fileInputRef.current?.click()}
+                      className="flex-1 h-11 gap-2 gradient-pink-blue text-foreground font-semibold transition-all duration-300 hover:opacity-90"
+                    >
+                      <Upload className="h-4 w-4" />
+                      {uploading ? 'Uploading…' : 'Upload Artwork for a Quote'}
+                    </Button>
+                    <a
+                      href="mailto:quotes@thesignagefactory.co?subject=Quote Request&body=Please find my artwork attached."
+                      className="flex-shrink-0"
+                    >
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="h-11 gap-2 border-border text-foreground hover:border-primary hover:shadow-[0_0_12px_hsl(var(--primary)/0.25)]"
+                      >
+                        <Mail className="h-4 w-4" />
+                        Email Your Artwork
+                      </Button>
+                    </a>
+                  </div>
+
+                  {error && (
+                    <p className="text-sm text-accent">{error}</p>
+                  )}
                 </div>
-                <p className="text-sm text-muted-foreground">
-                  A member of our team will review and send a quote to the email you provided within 24 hours.
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Not a SignMaker.ai member yet? Email{' '}
-                  <a href="mailto:jj@thesignagefactory.co" className="text-primary underline underline-offset-2">
-                    jj@thesignagefactory.co
-                  </a>{' '}
-                  with your company name and domain to request wholesale access.
-                </p>
-              </div>
-            )}
-          </>
-        )}
-        </div>
+              )}
 
-        <HeroMockup />
+              {domainBlocked && uploadDone && (
+                <div className="mt-4 animate-fade-in-up rounded-lg border border-border bg-secondary p-5 space-y-3">
+                  <div className="flex items-center gap-2">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/15 text-primary text-lg">✓</div>
+                    <p className="text-sm font-semibold text-foreground">Artwork received.</p>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    A member of our team will review and send a quote to the email you provided within 24 hours.
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Not a SignMaker.ai member yet? Email{' '}
+                    <a href="mailto:jj@thesignagefactory.co" className="text-primary underline underline-offset-2">
+                      jj@thesignagefactory.co
+                    </a>{' '}
+                    with your company name and domain to request wholesale access.
+                  </p>
+                </div>
+              )}
+            </>
+          )}
+        </div>
       </div>
     </div>
   );
