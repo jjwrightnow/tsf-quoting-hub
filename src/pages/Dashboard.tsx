@@ -12,6 +12,7 @@ const Dashboard = () => {
   const { session, signOut } = useAuth();
   const wizardActive = useAppStore((s) => s.wizardActive);
   const activeQuoteId = useAppStore((s) => s.activeQuoteId);
+  const activeSignId = useAppStore((s) => s.activeSignId);
   const sidebarOpen = useAppStore((s) => s.sidebarOpen);
   const setSidebarOpen = useAppStore((s) => s.setSidebarOpen);
   const chatPhase = useSignStore((s) => s.chatPhase);
@@ -19,7 +20,7 @@ const Dashboard = () => {
   console.log('[Dashboard] render — session:', !!session, 'email:', session?.user?.email);
 
   useQuotePolling(!!session);
-  useWizardAutoSave(session?.user?.email);
+  useWizardAutoSave();
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background">
@@ -56,7 +57,7 @@ const Dashboard = () => {
         </div>
 
         {/* Floating Input bar */}
-        {(wizardActive || activeQuoteId || chatPhase !== 'welcome') && (
+        {(wizardActive || activeQuoteId || activeSignId || chatPhase !== 'welcome') && (
           <div className="shrink-0">
             <InputBar />
           </div>
