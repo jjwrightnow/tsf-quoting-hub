@@ -19,7 +19,7 @@ const Dashboard = () => {
   console.log('[Dashboard] render — session:', !!session, 'email:', session?.user?.email);
 
   useQuotePolling(!!session);
-  useWizardAutoSave(session?.user?.email);
+  useWizardAutoSave();
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background">
