@@ -122,7 +122,7 @@ const SignSpecCard = ({ sign, onSaved, onAddAnother, onDone }: SignSpecCardProps
   }
 
   // === SPECS EDITING STATE ===
-  const fields = SPEC_FIELDS_BY_PROFILE[sign.profile_type || ''] || [];
+  const fields = fieldNames;
 
   return (
     <div className="rounded-xl border border-border bg-card p-6">
