@@ -84,6 +84,7 @@ export type Database = {
           finish_name: string
           id: string
           is_active: boolean
+          swatch_url: string | null
           updated_at: string
         }
         Insert: {
@@ -92,6 +93,7 @@ export type Database = {
           finish_name: string
           id?: string
           is_active?: boolean
+          swatch_url?: string | null
           updated_at?: string
         }
         Update: {
@@ -100,6 +102,7 @@ export type Database = {
           finish_name?: string
           id?: string
           is_active?: boolean
+          swatch_url?: string | null
           updated_at?: string
         }
         Relationships: []
