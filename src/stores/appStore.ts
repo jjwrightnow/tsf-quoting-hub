@@ -23,6 +23,15 @@ export interface CatalogBundle {
   finishes: CatalogItem[];
 }
 
+export interface OperatorConfig {
+  brand_name: string | null;
+  chatbot_name: string | null;
+  logo_url: string | null;
+  primary_color: string | null;
+  support_email: string | null;
+  canned_questions: { q: string; a: string }[];
+}
+
 interface AppState {
   quotesList: QuoteListItem[];
   catalogBundle: CatalogBundle | null;
@@ -32,6 +41,8 @@ interface AppState {
   activeSignId: string | null;
   wizardActive: boolean;
   sidebarOpen: boolean;
+  userTier: 0 | 1 | 2;
+  operatorConfig: OperatorConfig | null;
 }
 
 interface AppActions {
@@ -46,6 +57,8 @@ interface AppActions {
   setActiveSignId: (projectId: string | null, signId: string | null) => void;
   setWizardActive: (active: boolean) => void;
   setSidebarOpen: (open: boolean) => void;
+  setUserTier: (tier: 0 | 1 | 2) => void;
+  setOperatorConfig: (config: OperatorConfig) => void;
 }
 
 export const useAppStore = create<AppState & AppActions>((set) => ({
@@ -57,6 +70,8 @@ export const useAppStore = create<AppState & AppActions>((set) => ({
   activeSignId: null,
   wizardActive: false,
   sidebarOpen: true,
+  userTier: 0,
+  operatorConfig: null,
 
   setQuotesList: (quotes) => set({ quotesList: quotes }),
   addGhostQuote: (quote) =>
@@ -80,4 +95,6 @@ export const useAppStore = create<AppState & AppActions>((set) => ({
   setWizardActive: (active) =>
     set({ wizardActive: active, activeQuoteId: active ? null : null }),
   setSidebarOpen: (open) => set({ sidebarOpen: open }),
+  setUserTier: (tier) => set({ userTier: tier }),
+  setOperatorConfig: (config) => set({ operatorConfig: config }),
 }));
