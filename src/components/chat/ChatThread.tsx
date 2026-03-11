@@ -18,6 +18,9 @@ import AssistantFlagForm from '@/components/chat/AssistantFlagForm';
 import BatchAssignGrid from '@/components/chat/BatchAssignGrid';
 import OneDonePicker from '@/components/chat/OneDonePicker';
 import OneDoneReview from '@/components/chat/OneDoneReview';
+import AccessRequestForm from '@/components/chat/AccessRequestForm';
+import VerifyEmailForm from '@/components/chat/VerifyEmailForm';
+import GuestUpload from '@/components/chat/GuestUpload';
 // Wizard steps (legacy)
 import StepArtwork from '@/components/wizard/StepArtwork';
 import StepProfile from '@/components/wizard/StepProfile';
