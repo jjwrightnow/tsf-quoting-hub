@@ -29,3 +29,9 @@ verify_jwt = false
 
 [functions.check-domain-on-signup]
 verify_jwt = false
+
+[functions.submit-access-request]
+verify_jwt = false
+
+[functions.verify-customer-email]
+verify_jwt = false
