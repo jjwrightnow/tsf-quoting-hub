@@ -96,14 +96,79 @@ const ChatThread = () => {
     const phase = signStore.chatPhase;
 
     // Welcome
+    const chatbotName = appStore.operatorConfig?.chatbot_name || 'your assistant';
+    const userTier = appStore.userTier;
+
+    let welcomeComponent: React.ReactNode | undefined;
+    if (phase === 'welcome') {
+      if (userTier === 0) {
+        welcomeComponent = (
+          <div className="mt-3 flex flex-col gap-2">
+            <button
+              onClick={() => signStore.setChatPhase('access_request')}
+              className="w-full rounded-lg border border-border bg-card px-4 py-3 text-sm font-medium text-foreground transition-all duration-300 hover:border-primary hover:shadow-[0_0_12px_hsl(var(--primary)/0.15)]"
+            >
+              Request Access
+            </button>
+            <button
+              onClick={() => signStore.setChatPhase('verify_email')}
+              className="w-full rounded-lg border border-border bg-card px-4 py-3 text-sm font-medium text-foreground transition-all duration-300 hover:border-primary hover:shadow-[0_0_12px_hsl(var(--primary)/0.15)]"
+            >
+              I'm Already a Customer
+            </button>
+          </div>
+        );
+      } else if (userTier === 1) {
+        welcomeComponent = <GuestUpload />;
+      } else {
+        welcomeComponent = <WelcomeActions />;
+      }
+    }
+
     msgs.push({
       id: 'welcome',
       role: 'assistant',
-      content: "Welcome to Signmaker! I'm LetterMan, your sign spec assistant.",
-      component: phase === 'welcome' ? <WelcomeActions /> : undefined,
+      content: `Welcome! I'm ${chatbotName}, here to help with your sign project.`,
+      component: welcomeComponent,
+    });
+
+    // Canned Q&A history
+    signStore.cannedHistory.forEach((entry, i) => {
+      msgs.push({ id: `canned-q-${i}`, role: 'user', content: entry.q });
+      msgs.push({ id: `canned-a-${i}`, role: 'assistant', content: entry.a });
     });
 
     if (phase === 'welcome') { setMessages(msgs); return; }
+
+    // Access request flow
+    if (phase === 'access_request') {
+      msgs.push({
+        id: 'access-request',
+        role: 'assistant',
+        content: "We'd love to have you! Fill out the form below to request access.",
+        component: <AccessRequestForm onSubmitted={() => signStore.setChatPhase('access_submitted')} />,
+      });
+      setMessages(msgs); return;
+    }
+
+    if (phase === 'verify_email') {
+      msgs.push({
+        id: 'verify-email',
+        role: 'assistant',
+        content: 'Enter the email address associated with your account.',
+        component: <VerifyEmailForm />,
+      });
+      setMessages(msgs); return;
+    }
+
+    if (phase === 'access_submitted') {
+      msgs.push({
+        id: 'access-submitted',
+        role: 'assistant',
+        content: "Your request has been submitted! You'll receive an email once your access is approved.",
+      });
+      setMessages(msgs); return;
+    }
 
     // Upload confirmation
     if (signStore.uploadedFiles.length > 0) {
