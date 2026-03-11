@@ -10,7 +10,7 @@ const HeroMockup = () => (
           <span className="h-2.5 w-2.5 rounded-full bg-[hsl(130,50%,40%)]" />
         </div>
         <div className="ml-3 flex-1 rounded-md bg-[hsl(240,18%,8%)] px-3 py-1 text-[10px] text-muted-foreground truncate">
-          app.signmaker.ai
+          portal.example.com
         </div>
       </div>
 

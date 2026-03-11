@@ -3,6 +3,9 @@ import type { AutocompleteOption } from '@/stores/reviewStore';
 
 export type ChatPhase =
   | 'welcome'
+  | 'access_request'
+  | 'verify_email'
+  | 'access_submitted'
   | 'chat'
   | 'post_upload'
   | 'batch_assign'
@@ -58,6 +61,7 @@ interface SignState {
   postUploadChoice: string | null;
   pendingSignName: string | null;
   uploadPath: 'dump_run' | 'tag_go' | 'one_done' | 'letterman_assist' | null;
+  cannedHistory: { q: string; a: string }[];
 
   setChatPhase: (phase: ChatPhase) => void;
   setSessionId: (id: string | null) => void;
@@ -72,6 +76,7 @@ interface SignState {
   setPostUploadChoice: (choice: string | null) => void;
   setPendingSignName: (name: string | null) => void;
   setUploadPath: (path: SignState['uploadPath']) => void;
+  addCannedEntry: (entry: { q: string; a: string }) => void;
   reset: () => void;
 }
 
@@ -86,6 +91,7 @@ const initialState = {
   postUploadChoice: null as string | null,
   pendingSignName: null as string | null,
   uploadPath: null as SignState['uploadPath'],
+  cannedHistory: [] as { q: string; a: string }[],
 };
 
 export const useSignStore = create<SignState>((set) => ({
@@ -109,5 +115,7 @@ export const useSignStore = create<SignState>((set) => ({
   setPostUploadChoice: (postUploadChoice) => set({ postUploadChoice }),
   setPendingSignName: (pendingSignName) => set({ pendingSignName }),
   setUploadPath: (uploadPath) => set({ uploadPath }),
+  addCannedEntry: (entry) =>
+    set((s) => ({ cannedHistory: [...s.cannedHistory, entry] })),
   reset: () => set(initialState),
 }));

@@ -10,7 +10,7 @@ const STEP_LABELS = [
 ];
 
 const MAX_ROWS = 12;
-const LINE_HEIGHT = 24; // px per row
+const LINE_HEIGHT = 24;
 const MIN_ROWS = 4;
 
 const InputBar = () => {
@@ -18,6 +18,9 @@ const InputBar = () => {
   const [showUploadMenu, setShowUploadMenu] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  const userTier = useAppStore((s) => s.userTier);
+  const operatorConfig = useAppStore((s) => s.operatorConfig);
   const wizardActive = useAppStore((s) => s.wizardActive);
   const currentStep = useWizardStore((s) => s.currentStep);
   const setArtwork = useWizardStore((s) => s.setArtwork);
@@ -25,9 +28,14 @@ const InputBar = () => {
   const chatPhase = useSignStore((s) => s.chatPhase);
   const sessionId = useSignStore((s) => s.sessionId);
   const addUploadedFile = useSignStore((s) => s.addUploadedFile);
+  const addCannedEntry = useSignStore((s) => s.addCannedEntry);
 
   const isSignChat = !wizardActive && chatPhase !== 'welcome';
   const showPersistentUpload = isSignChat && chatPhase !== 'done';
+
+  // Canned questions mode for tier 0/1
+  const isCannedMode = userTier < 2;
+  const cannedQuestions = operatorConfig?.canned_questions || [];
 
   // Auto-resize textarea
   const autoResize = useCallback(() => {
@@ -46,7 +54,6 @@ const InputBar = () => {
 
   const handleSubmit = () => {
     if (!text.trim()) return;
-    // TODO: wire up actual send logic
     console.log('[InputBar] submit:', text);
     setText('');
   };
@@ -84,10 +91,37 @@ const InputBar = () => {
     if (fileRef.current) fileRef.current.value = '';
   };
 
+  const handleCannedClick = (cq: { q: string; a: string }) => {
+    addCannedEntry(cq);
+  };
+
   const stepLabel = wizardActive && currentStep >= 1
     ? `Step ${currentStep} of 6 — ${STEP_LABELS[currentStep - 1] || ''}`
     : null;
 
+  // Canned question chips for tier 0/1
+  if (isCannedMode) {
+    if (cannedQuestions.length === 0) return null;
+    return (
+      <div className="w-full flex justify-center px-4 pb-6 pt-2">
+        <div className="w-full max-w-[680px]">
+          <div className="flex flex-wrap gap-2 justify-center">
+            {cannedQuestions.map((cq, i) => (
+              <button
+                key={i}
+                onClick={() => handleCannedClick(cq)}
+                className="rounded-full border border-border bg-card px-3 py-2 text-sm text-muted-foreground transition-all duration-300 hover:text-foreground hover:border-primary hover:shadow-[0_0_12px_hsl(var(--primary)/0.15)]"
+              >
+                {cq.q}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Full input bar for tier 2
   const placeholderText = (() => {
     if (wizardActive) return 'Describe your sign project...';
     switch (chatPhase) {
@@ -116,8 +150,7 @@ const InputBar = () => {
         )}
 
         {/* Main input container */}
-        <div className="relative rounded-2xl border border-border bg-card transition-all duration-300 focus-within:border-primary/50 focus-within:shadow-[0_0_20px_rgba(0,170,255,0.12)]">
-          {/* Textarea */}
+        <div className="relative rounded-2xl border border-border bg-card transition-all duration-300 focus-within:border-primary/50 focus-within:shadow-[0_0_20px_hsl(var(--primary)/0.12)]">
           <textarea
             ref={textareaRef}
             value={text}
@@ -130,10 +163,8 @@ const InputBar = () => {
             style={{ lineHeight: `${LINE_HEIGHT}px`, minHeight: `${MIN_ROWS * LINE_HEIGHT}px` }}
           />
 
-          {/* Bottom toolbar inside the input */}
           <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between px-3 pb-3">
             <div className="flex items-center gap-1">
-              {/* + button (wizard mode) */}
               {wizardActive && (
                 <div className="relative">
                   <button
@@ -162,7 +193,6 @@ const InputBar = () => {
                 </div>
               )}
 
-              {/* Upload button (sign chat mode) */}
               {showPersistentUpload && (
                 <div>
                   <button
@@ -176,7 +206,6 @@ const InputBar = () => {
               )}
             </div>
 
-            {/* Send button */}
             <button
               onClick={handleSubmit}
               disabled={!text.trim()}
