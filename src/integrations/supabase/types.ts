@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      access_requests: {
+        Row: {
+          company_name: string
+          created_at: string | null
+          email: string
+          full_name: string
+          id: string
+          status: string | null
+        }
+        Insert: {
+          company_name: string
+          created_at?: string | null
+          email: string
+          full_name: string
+          id?: string
+          status?: string | null
+        }
+        Update: {
+          company_name?: string
+          created_at?: string | null
+          email?: string
+          full_name?: string
+          id?: string
+          status?: string | null
+        }
+        Relationships: []
+      }
       accounts: {
         Row: {
           account_type: string
@@ -256,6 +283,39 @@ export type Database = {
           title?: string
           updated_at?: string | null
           user_email?: string
+        }
+        Relationships: []
+      }
+      operator_config: {
+        Row: {
+          brand_name: string | null
+          canned_questions: Json | null
+          chatbot_name: string | null
+          id: string
+          logo_url: string | null
+          primary_color: string | null
+          support_email: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          brand_name?: string | null
+          canned_questions?: Json | null
+          chatbot_name?: string | null
+          id?: string
+          logo_url?: string | null
+          primary_color?: string | null
+          support_email?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          brand_name?: string | null
+          canned_questions?: Json | null
+          chatbot_name?: string | null
+          id?: string
+          logo_url?: string | null
+          primary_color?: string | null
+          support_email?: string | null
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -783,6 +843,27 @@ export type Database = {
           last_polled_at?: string
           last_successful_at?: string | null
           poll_count?: number
+        }
+        Relationships: []
+      }
+      verified_customers: {
+        Row: {
+          company_name: string | null
+          created_at: string | null
+          email: string
+          id: string
+        }
+        Insert: {
+          company_name?: string | null
+          created_at?: string | null
+          email: string
+          id?: string
+        }
+        Update: {
+          company_name?: string | null
+          created_at?: string | null
+          email?: string
+          id?: string
         }
         Relationships: []
       }
