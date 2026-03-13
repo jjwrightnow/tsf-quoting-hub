@@ -319,6 +319,102 @@ export type Database = {
         }
         Relationships: []
       }
+      product_specs: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          dimensions: Json | null
+          edge_profile: string | null
+          embedding: string | null
+          environmental_suitability: string[] | null
+          id: string
+          lighting_style: string | null
+          materials: string[] | null
+          mounting_hardware: string[] | null
+          profile_image_url: string | null
+          sku: string
+          specs_text: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          dimensions?: Json | null
+          edge_profile?: string | null
+          embedding?: string | null
+          environmental_suitability?: string[] | null
+          id?: string
+          lighting_style?: string | null
+          materials?: string[] | null
+          mounting_hardware?: string[] | null
+          profile_image_url?: string | null
+          sku: string
+          specs_text?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          dimensions?: Json | null
+          edge_profile?: string | null
+          embedding?: string | null
+          environmental_suitability?: string[] | null
+          id?: string
+          lighting_style?: string | null
+          materials?: string[] | null
+          mounting_hardware?: string[] | null
+          profile_image_url?: string | null
+          sku?: string
+          specs_text?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      project_library: {
+        Row: {
+          airtable_record_id: string | null
+          created_at: string | null
+          id: string
+          image_url: string
+          is_verified: boolean | null
+          lighting: string[] | null
+          materials: string[] | null
+          mounting: string[] | null
+          sign_profile: string | null
+          sign_types: string[] | null
+          source_base: string | null
+          vibe_description: string | null
+        }
+        Insert: {
+          airtable_record_id?: string | null
+          created_at?: string | null
+          id?: string
+          image_url: string
+          is_verified?: boolean | null
+          lighting?: string[] | null
+          materials?: string[] | null
+          mounting?: string[] | null
+          sign_profile?: string | null
+          sign_types?: string[] | null
+          source_base?: string | null
+          vibe_description?: string | null
+        }
+        Update: {
+          airtable_record_id?: string | null
+          created_at?: string | null
+          id?: string
+          image_url?: string
+          is_verified?: boolean | null
+          lighting?: string[] | null
+          materials?: string[] | null
+          mounting?: string[] | null
+          sign_profile?: string | null
+          sign_types?: string[] | null
+          source_base?: string | null
+          vibe_description?: string | null
+        }
+        Relationships: []
+      }
       projects: {
         Row: {
           created_at: string | null
@@ -515,15 +611,17 @@ export type Database = {
           account_id: string | null
           airtable_record_id: string | null
           artwork_paths: string[] | null
+          confirmation_token: string | null
+          confirmed_at: string | null
           created_at: string | null
           customer_email: string | null
-          customer_name: string
+          customer_name: string | null
           fillout_link: string | null
           flag_count: number | null
           id: string
           markup_paths: string[] | null
           pg_quote_number: string | null
-          reviewer_email: string
+          reviewer_email: string | null
           status: string
           updated_at: string | null
           upload_path: string | null
@@ -532,15 +630,17 @@ export type Database = {
           account_id?: string | null
           airtable_record_id?: string | null
           artwork_paths?: string[] | null
+          confirmation_token?: string | null
+          confirmed_at?: string | null
           created_at?: string | null
           customer_email?: string | null
-          customer_name: string
+          customer_name?: string | null
           fillout_link?: string | null
           flag_count?: number | null
           id?: string
           markup_paths?: string[] | null
           pg_quote_number?: string | null
-          reviewer_email: string
+          reviewer_email?: string | null
           status?: string
           updated_at?: string | null
           upload_path?: string | null
@@ -549,15 +649,17 @@ export type Database = {
           account_id?: string | null
           airtable_record_id?: string | null
           artwork_paths?: string[] | null
+          confirmation_token?: string | null
+          confirmed_at?: string | null
           created_at?: string | null
           customer_email?: string | null
-          customer_name?: string
+          customer_name?: string | null
           fillout_link?: string | null
           flag_count?: number | null
           id?: string
           markup_paths?: string[] | null
           pg_quote_number?: string | null
-          reviewer_email?: string
+          reviewer_email?: string | null
           status?: string
           updated_at?: string | null
           upload_path?: string | null
@@ -898,6 +1000,24 @@ export type Database = {
     Functions: {
       archive_stale_projects: { Args: never; Returns: undefined }
       get_my_account_id: { Args: never; Returns: string }
+      search_signage: {
+        Args: {
+          result_limit?: number
+          search_lighting?: string[]
+          search_materials?: string[]
+          search_vibe?: string
+        }
+        Returns: {
+          id: string
+          image_url: string
+          lighting: string[]
+          materials: string[]
+          mounting: string[]
+          sign_profile: string
+          sign_types: string[]
+          vibe_description: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
