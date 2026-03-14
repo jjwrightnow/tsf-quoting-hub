@@ -47,24 +47,28 @@ const ChatThread = () => {
   const idempotencyKeyRef = useRef(crypto.randomUUID());
   const initRef = useRef(false);
 
-  // Detect reviewer role + load autocomplete on mount
+  // Detect reviewer role + load autocomplete on mount (only for authenticated users)
   useEffect(() => {
     if (initRef.current) return;
     initRef.current = true;
 
-    checkReviewerAccess()
-      .then((res) => {
-        if (res?.allowed) signStore.setUserRole('assistant');
-      })
-      .catch(() => {});
+    // Only call auth-gated functions if user is tier 2 (authenticated)
+    const tier = useAppStore.getState().userTier;
+    if (tier === 2) {
+      checkReviewerAccess()
+        .then((res) => {
+          if (res?.allowed) signStore.setUserRole('assistant');
+        })
+        .catch(() => {});
 
-    supabase
-      .from('autocomplete_options')
-      .select('category, option_value, display_label, search_terms')
-      .eq('active', true)
-      .then(({ data }) => {
-        if (data) signStore.setAutocompleteOptions(data);
-      });
+      supabase
+        .from('autocomplete_options')
+        .select('category, option_value, display_label, search_terms')
+        .eq('active', true)
+        .then(({ data }) => {
+          if (data) signStore.setAutocompleteOptions(data);
+        });
+    }
   }, []);
 
   // Determine if we're in legacy wizard mode
