@@ -101,7 +101,13 @@ const InputBar = () => {
 
   // Canned question chips for tier 0/1
   if (isCannedMode) {
-    if (cannedQuestions.length === 0) return null;
+    if (cannedQuestions.length === 0) {
+      return (
+        <div className="w-full flex justify-center px-4 pb-6 pt-2">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+        </div>
+      );
+    }
     return (
       <div className="w-full flex justify-center px-4 pb-6 pt-2">
         <div className="w-full max-w-[680px]">
