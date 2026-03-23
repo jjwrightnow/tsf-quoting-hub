@@ -223,7 +223,7 @@ const TECH_COLORS: Record<string, { bg: string; accent: string; label: string }>
   AF: { bg: '#1a1a2e', accent: '#3b82f6', label: 'Acrylic Face' },
   SA: { bg: '#1a1a2e', accent: '#06b6d4', label: 'Solid Acrylic' },
   FC: { bg: '#1a1a2e', accent: '#f59e0b', label: 'Flat Cut' },
-  CN: { bg: '#0f0f1a', accent: '#ec4899', label: 'Crystal Neon' },
+  
 };
 
 function TechPlaceholder({ technology }: { technology: string | null }) {
