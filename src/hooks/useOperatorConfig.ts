@@ -24,6 +24,7 @@ export function useOperatorConfig() {
             canned_questions: Array.isArray(data.canned_questions)
               ? (data.canned_questions as { q: string; a: string }[])
               : [],
+            context_instruction: data.context_instruction || null,
           });
         }
       });
