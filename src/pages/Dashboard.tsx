@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import ProjectShell from '@/components/shell/ProjectShell';
 import WinningLineConfigurator from '@/components/configurator/WinningLineConfigurator';
 import { useAppStore } from '@/stores/appStore';
