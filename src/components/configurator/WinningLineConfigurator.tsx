@@ -836,7 +836,7 @@ export default function WinningLineConfigurator({
             Pro
           </button>
           <button
-            onClick={() => setUiMode('client')}
+            onClick={() => { setUiMode('client'); localStorage.setItem('signmaker_ui_mode', 'client'); }}
             className={`rounded px-2.5 py-1 text-[10px] font-semibold transition-colors ${
               uiMode === 'client' ? 'bg-cfg-blue text-primary-foreground' : 'text-cfg-muted hover:text-foreground'
             }`}
