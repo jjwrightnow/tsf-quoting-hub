@@ -409,7 +409,7 @@ function SignList() {
 
   const editSign = (sign: PortalSign) => {
     store.setEditingSignId(sign.id);
-    // TODO: pre-load sign data into configurator
+    store.setEditingSign(sign);
   };
 
   return (

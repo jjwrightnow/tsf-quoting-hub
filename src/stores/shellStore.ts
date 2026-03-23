@@ -22,6 +22,7 @@ export interface PortalSign {
   profile_type: string | null;
   spec_data: Record<string, unknown> | null;
   height: string | null;
+  height_inches?: number | null;
   metal_type: string | null;
   finish: string | null;
   mounting: string | null;
@@ -29,6 +30,7 @@ export interface PortalSign {
   notes: string | null;
   sort_order: number | null;
   is_complete: boolean | null;
+  sets?: number | null;
 }
 
 interface ShellStore {
@@ -40,8 +42,11 @@ interface ShellStore {
   activeProject: PortalProject | null;
   activeSigns: PortalSign[];
   editingSignId: string | null;
+  editingSign: PortalSign | null;
   loading: boolean;
   identityError: string | null;
+  lastProfileSelected: number | null;
+  addSignFormOpen: boolean;
 
   setShellState: (state: ShellState) => void;
   setUserEmail: (email: string | null) => void;
@@ -51,8 +56,11 @@ interface ShellStore {
   setActiveProject: (project: PortalProject | null) => void;
   setActiveSigns: (signs: PortalSign[]) => void;
   setEditingSignId: (id: string | null) => void;
+  setEditingSign: (sign: PortalSign | null) => void;
   setLoading: (loading: boolean) => void;
   setIdentityError: (error: string | null) => void;
+  setLastProfileSelected: (ts: number | null) => void;
+  setAddSignFormOpen: (open: boolean) => void;
   signOut: () => void;
 }
 
@@ -65,19 +73,25 @@ export const useShellStore = create<ShellStore>((set) => ({
   activeProject: null,
   activeSigns: [],
   editingSignId: null,
+  editingSign: null,
   loading: false,
   identityError: null,
+  lastProfileSelected: null,
+  addSignFormOpen: false,
 
   setShellState: (shellState) => set({ shellState }),
   setUserEmail: (userEmail) => set({ userEmail }),
   setContactId: (contactId) => set({ contactId }),
   setAccountId: (accountId) => set({ accountId }),
   setProjects: (projects) => set({ projects }),
-  setActiveProject: (activeProject) => set({ activeProject }),
+  setActiveProject: (activeProject) => set({ activeProject, editingSign: null, editingSignId: null }),
   setActiveSigns: (activeSigns) => set({ activeSigns }),
   setEditingSignId: (editingSignId) => set({ editingSignId }),
+  setEditingSign: (editingSign) => set({ editingSign }),
   setLoading: (loading) => set({ loading }),
   setIdentityError: (identityError) => set({ identityError }),
+  setLastProfileSelected: (lastProfileSelected) => set({ lastProfileSelected }),
+  setAddSignFormOpen: (addSignFormOpen) => set({ addSignFormOpen }),
   signOut: () => {
     localStorage.removeItem('signmaker_user_email');
     set({
@@ -89,7 +103,10 @@ export const useShellStore = create<ShellStore>((set) => ({
       activeProject: null,
       activeSigns: [],
       editingSignId: null,
+      editingSign: null,
       identityError: null,
+      lastProfileSelected: null,
+      addSignFormOpen: false,
     });
   },
 }));
