@@ -510,16 +510,23 @@ function SignList() {
     store.setEditingSign(sign);
   };
 
+  const isLocked = store.activeProject?.status === 'ready' || store.activeProject?.status === 'submitted';
+
   return (
     <div className="rounded-lg border border-border bg-card p-4 animate-fade-in-up">
+      {isLocked && (
+        <p className="text-[10px] text-muted-foreground mb-3 italic">Locked — submitted for quote.</p>
+      )}
       <div className="flex items-center justify-between mb-3">
         <span className="text-xs font-semibold text-foreground uppercase tracking-wide">Signs</span>
-        <button
-          onClick={addSign}
-          className="text-xs text-primary hover:text-primary/80 font-medium transition-colors"
-        >
-          + Add Sign
-        </button>
+        {!isLocked && (
+          <button
+            onClick={addSign}
+            className="text-xs text-primary hover:text-primary/80 font-medium transition-colors"
+          >
+            + Add Sign
+          </button>
+        )}
       </div>
 
       {store.activeSigns.length === 0 ? (
@@ -547,24 +554,26 @@ function SignList() {
                   </span>
                 )}
               </div>
-              <div className="flex items-center gap-1">
-                <button onClick={() => editSign(sign)} className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors" title="Edit">
-                  <EditIcon />
-                </button>
-                <button onClick={() => duplicateSign(sign)} className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors" title="Duplicate">
-                  <CopyIcon />
-                </button>
-                {deleteConfirm === sign.id ? (
-                  <div className="flex items-center gap-1">
-                    <button onClick={() => deleteSign(sign.id)} className="text-[10px] text-destructive font-medium">Yes</button>
-                    <button onClick={() => setDeleteConfirm(null)} className="text-[10px] text-muted-foreground">No</button>
-                  </div>
-                ) : (
-                  <button onClick={() => setDeleteConfirm(sign.id)} className="p-1 rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors" title="Delete">
-                    <TrashIcon />
+              {!isLocked && (
+                <div className="flex items-center gap-1">
+                  <button onClick={() => editSign(sign)} className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors" title="Edit">
+                    <EditIcon />
                   </button>
-                )}
-              </div>
+                  <button onClick={() => duplicateSign(sign)} className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors" title="Duplicate">
+                    <CopyIcon />
+                  </button>
+                  {deleteConfirm === sign.id ? (
+                    <div className="flex items-center gap-1">
+                      <button onClick={() => deleteSign(sign.id)} className="text-[10px] text-destructive font-medium">Yes</button>
+                      <button onClick={() => setDeleteConfirm(null)} className="text-[10px] text-muted-foreground">No</button>
+                    </div>
+                  ) : (
+                    <button onClick={() => setDeleteConfirm(sign.id)} className="p-1 rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors" title="Delete">
+                      <TrashIcon />
+                    </button>
+                  )}
+                </div>
+              )}
             </li>
           ))}
         </ul>
