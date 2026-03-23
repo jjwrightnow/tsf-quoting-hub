@@ -14,7 +14,38 @@ import MainPanel from '@/components/layout/MainPanel';
 import InputBar from '@/components/layout/InputBar';
 import { useNavigate } from 'react-router-dom';
 
-const Dashboard = () => {
+/** Bridge component reads shell state and passes props to configurator */
+function ConfiguratorBridge() {
+  const shellState = useShellStore((s) => s.shellState);
+  const activeProject = useShellStore((s) => s.activeProject);
+
+  const projectProp = shellState === 'in_project' && activeProject
+    ? { id: activeProject.id, project_name: activeProject.project_name }
+    : null;
+
+  const handleSignSaved = () => {
+    // Reload signs in shell
+    const store = useShellStore.getState();
+    if (store.activeProject) {
+      supabase
+        .from('portal_signs')
+        .select('*')
+        .eq('project_id', store.activeProject.id)
+        .order('sort_order', { ascending: true })
+        .then(({ data }) => {
+          if (data) store.setActiveSigns(data as any);
+        });
+    }
+  };
+
+  return (
+    <WinningLineConfigurator
+      activeProject={projectProp}
+      onSignSaved={handleSignSaved}
+    />
+  );
+}
+
   const { session, signOut } = useAuth();
   const navigate = useNavigate();
   const userTier = useAppStore((s) => s.userTier);
