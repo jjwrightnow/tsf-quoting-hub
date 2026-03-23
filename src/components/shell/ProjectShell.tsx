@@ -443,6 +443,11 @@ function SignList() {
                 {sign.profile_code && (
                   <span className="text-[10px] font-mono text-primary">{sign.profile_code}</span>
                 )}
+                {(sign.height_inches || sign.height) && (
+                  <span className="text-[10px] text-muted-foreground ml-1">
+                    {sign.height_inches ? `${sign.height_inches}"` : sign.height}
+                  </span>
+                )}
               </div>
               <div className="flex items-center gap-1">
                 <button onClick={() => editSign(sign)} className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors" title="Edit">
