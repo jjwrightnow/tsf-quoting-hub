@@ -44,12 +44,12 @@ export function useWizardAutoSave() {
       };
 
       supabase
-        .from('signs')
+        .from('zzz_legacy_signs')
         .update({
           spec_data: specData as any,
           profile_type: state.profileName,
           updated_at: new Date().toISOString(),
-        } as any)
+        })
         .eq('id', activeSignId)
         .then(({ error }) => {
           if (error) console.error('[useWizardAutoSave] save failed:', error);
