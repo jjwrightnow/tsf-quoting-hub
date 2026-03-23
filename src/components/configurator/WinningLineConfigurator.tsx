@@ -246,7 +246,7 @@ function ProfileCard({
       <div className="absolute top-2 right-2">
         <LightingIcon code={profile.lighting_code} mode={mode} />
       </div>
-      <div className="flex items-center justify-center h-24 mb-2 rounded bg-secondary/40">
+      <div className="flex items-center justify-center h-24 mb-2 rounded bg-secondary/40 overflow-hidden">
         {profile.illustration_url ? (
           <img
             src={profile.illustration_url}
@@ -254,13 +254,11 @@ function ProfileCard({
             className="max-h-full max-w-full object-contain"
           />
         ) : (
-          <span className="text-3xl font-bold text-cfg-muted/30">A</span>
-        </div>
-      ) : (
-        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#1e1e35] to-[#151525] rounded">
-          <span className="text-[64px] font-bold text-cfg-blue/20 select-none leading-none">A</span>
-        </div>
-      )}
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#1e1e35] to-[#151525]">
+            <span className="text-[64px] font-bold text-cfg-blue/20 select-none leading-none">A</span>
+          </div>
+        )}
+      </div>
       <p className="text-xs font-bold text-foreground truncate">{profile.profile_name}</p>
       {mode === 'pro' && (
         <p className="text-[10px] font-mono text-cfg-blue">{profile.profile_code}</p>
