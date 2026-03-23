@@ -96,8 +96,10 @@ const Dashboard = () => {
         </header>
 
         {/* Chat / Content */}
-        <div className="flex-1 overflow-auto">
-          <MainPanel />
+        <div className="flex-1 overflow-hidden">
+          <ProjectShell>
+            <MainPanel />
+          </ProjectShell>
         </div>
 
         {/* Input bar — always visible */}
