@@ -42,6 +42,17 @@ interface LightingStyle {
   sort_order: number;
 }
 
+interface TechClass {
+  code: string;
+  display_name: string;
+  short_name: string;
+  materials: string;
+  price_tier: string;
+  hover_description: string;
+  thumbnail_url: string | null;
+  sort_order: number;
+}
+
 interface WinningLineConfiguratorProps {
   activeProject?: { id: string; project_name: string } | null;
   editingSign?: PortalSign | null;
