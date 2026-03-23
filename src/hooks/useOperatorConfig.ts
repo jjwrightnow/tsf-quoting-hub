@@ -10,7 +10,7 @@ export function useOperatorConfig() {
     if (operatorConfig) return;
     supabase
       .from('operator_config')
-      .select('brand_name, chatbot_name, logo_url, primary_color, support_email, canned_questions')
+      .select('brand_name, chatbot_name, logo_url, primary_color, support_email, canned_questions, context_instruction')
       .limit(1)
       .single()
       .then(({ data }) => {
