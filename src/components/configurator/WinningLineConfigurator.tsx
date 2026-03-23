@@ -973,7 +973,7 @@ export default function WinningLineConfigurator({
       {!isProfileSelected && (
         <div>
           {/* SECTION 1 — Lighting & Tech Filters */}
-          <div ref={zone0Ref} className="px-4 py-4 border-b border-border">
+          <div ref={zone0Ref} className="px-4 py-4 border-b border-border bg-[#0f0f1a]">
             <div className="flex items-center gap-2 mb-3">
               <span className="flex h-6 w-6 items-center justify-center rounded bg-[#1e1e35] text-[#3b82f6] text-xs font-bold shrink-0">1</span>
               <h2 className="text-sm font-semibold text-foreground">Choose a Lighting Style</h2>
@@ -1119,7 +1119,7 @@ export default function WinningLineConfigurator({
           </div>
 
           {/* SECTION 2 — Profile Grid */}
-          <div ref={zone1Ref} className="px-4 py-4 border-b border-border">
+          <div ref={zone1Ref} className="px-4 py-4 border-b border-border bg-[#13131f]">
             <div className="flex items-center gap-2 mb-3">
               <span className="flex h-6 w-6 items-center justify-center rounded bg-[#1e1e35] text-[#3b82f6] text-xs font-bold shrink-0">2</span>
               <h2 className="text-sm font-semibold text-foreground">Select a Profile</h2>
@@ -1157,7 +1157,7 @@ export default function WinningLineConfigurator({
           </div>
 
           {/* SECTION 3 — Review placeholder */}
-          <div ref={zone2Ref} className="px-4 py-4 opacity-40">
+          <div ref={zone2Ref} className="px-4 py-4 opacity-40 bg-[#0f0f1a]">
             <div className="flex items-center gap-2 mb-3">
               <span className="flex h-6 w-6 items-center justify-center rounded bg-[#1e1e35] text-[#3b82f6] text-xs font-bold shrink-0">3</span>
               <h2 className="text-sm font-semibold text-foreground">Review and Build</h2>
@@ -1194,7 +1194,7 @@ export default function WinningLineConfigurator({
           </div>
 
           {/* Profile detail header */}
-          <div className="px-4 py-4 border-b border-border">
+          <div className="px-4 py-4 border-b border-border bg-[#13131f]">
             <div className="flex flex-col md:flex-row gap-6">
               {/* Left: illustration */}
               <div className="w-full md:w-[200px] h-[200px] rounded-lg bg-secondary/40 overflow-hidden shrink-0">
@@ -1256,7 +1256,7 @@ export default function WinningLineConfigurator({
           </div>
 
           {/* Construction Stack */}
-          <div className="px-4 py-4 border-b border-border">
+          <div className="px-4 py-4 border-b border-border bg-[#0f0f1a]">
             <p className="text-sm font-semibold text-foreground mb-3 pb-2 border-b border-border">
               What's inside this letter
             </p>
@@ -1272,7 +1272,7 @@ export default function WinningLineConfigurator({
           </div>
 
           {/* CTA */}
-          <div className="px-4 py-4">
+          <div className="px-4 py-4 bg-[#13131f]">
             {!showAddForm && !showQuoteForm && (
               <div className="flex justify-end">
                 {activeProject ? (
