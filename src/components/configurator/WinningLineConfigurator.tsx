@@ -698,12 +698,14 @@ function ContextRibbon({
   techFilter,
   selectedProfile,
   lightingStyles,
+  techClasses,
 }: {
   filteredCount: number;
   lightingCodeFilters: Set<string>;
   techFilter: Set<string>;
   selectedProfile: Profile | null;
   lightingStyles: LightingStyle[];
+  techClasses: TechClass[];
 }) {
   const text = useMemo(() => {
     if (selectedProfile) {
@@ -715,7 +717,11 @@ function ContextRibbon({
     const parts: string[] = [];
 
     if (techFilter.size > 0) {
-      parts.push(Array.from(techFilter).join(' / '));
+      const techLabels = Array.from(techFilter).map(code => {
+        const tc = techClasses.find(t => t.code === code);
+        return tc?.short_name || code;
+      });
+      parts.push(techLabels.join(' / '));
     }
 
     if (lightingCodeFilters.size > 0) {
@@ -731,7 +737,7 @@ function ContextRibbon({
     }
 
     return `${parts.join(' ')} — ${filteredCount} profiles`;
-  }, [filteredCount, lightingCodeFilters, techFilter, selectedProfile, lightingStyles]);
+  }, [filteredCount, lightingCodeFilters, techFilter, selectedProfile, lightingStyles, techClasses]);
 
   return (
     <p className="text-[11px] italic text-cfg-muted px-1">{text}</p>
