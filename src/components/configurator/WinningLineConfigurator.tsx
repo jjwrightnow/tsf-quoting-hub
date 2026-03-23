@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useShellStore, type PortalSign } from '@/stores/shellStore';
 import { toast } from 'sonner';
 
 /* ─── Types ─── */
@@ -32,6 +33,7 @@ interface ProfileComponent {
 
 interface WinningLineConfiguratorProps {
   activeProject?: { id: string; project_name: string } | null;
+  editingSign?: PortalSign | null;
   onSignSaved?: () => void;
 }
 
@@ -143,10 +145,8 @@ function ScaleSilhouette({ heightInches }: { heightInches: number }) {
 
   return (
     <svg width={svgW} height={svgH} viewBox={`0 0 ${svgW} ${svgH}`}>
-      {/* Architectural human bar — narrow vertical rectangle, bottom-aligned */}
       <rect x="2" y={svgH - 2 - personH} width="4" height={personH}
         fill="#6b7280" opacity="0.8" rx="1" />
-      {/* Letter height bar — fixed width, scales vertically only, bottom-aligned */}
       <rect x="10" y={svgH - 2 - letterH} width="6" height={letterH}
         fill="#3b82f6" opacity="0.6" rx="1" />
     </svg>
@@ -240,17 +240,12 @@ function ProfileCard({
           : 'border-transparent hover:border-border'
       }`}
     >
-      {/* Price tier */}
       <span className={`absolute top-2 left-2 text-[10px] font-bold ${tier.color}`}>
         {tier.label}
       </span>
-
-      {/* Lighting icon / label */}
       <div className="absolute top-2 right-2">
         <LightingIcon code={profile.lighting_code} mode={mode} />
       </div>
-
-      {/* Image */}
       <div className="flex items-center justify-center h-24 mb-2 rounded bg-secondary/40">
         {profile.illustration_url ? (
           <img
@@ -262,14 +257,10 @@ function ProfileCard({
           <span className="text-3xl font-bold text-cfg-muted/30">A</span>
         )}
       </div>
-
-      {/* Text */}
       <p className="text-xs font-bold text-foreground truncate">{profile.profile_name}</p>
       {mode === 'pro' && (
         <p className="text-[10px] font-mono text-cfg-blue">{profile.profile_code}</p>
       )}
-
-      {/* Scale silhouette — bottom right */}
       <div className="absolute bottom-1 right-1">
         <ScaleSilhouette heightInches={letterHeight} />
       </div>
@@ -406,6 +397,7 @@ function AddSignForm({
   onHeightChange,
   onSaved,
   onCancel,
+  editingSign,
 }: {
   projectId: string;
   projectName: string;
@@ -416,12 +408,19 @@ function AddSignForm({
   onHeightChange: (h: number) => void;
   onSaved: () => void;
   onCancel: () => void;
+  editingSign?: PortalSign | null;
 }) {
-  const [signName, setSignName] = useState('');
-  const [height, setHeight] = useState(String(letterHeight));
-  const [quantity, setQuantity] = useState(1);
-  const [notes, setNotes] = useState('');
+  const [signName, setSignName] = useState(editingSign?.sign_name || '');
+  const [height, setHeight] = useState(editingSign?.height || String(letterHeight));
+  const [quantity, setQuantity] = useState(editingSign?.sets || 1);
+  const [notes, setNotes] = useState(editingSign?.notes || '');
   const [saving, setSaving] = useState(false);
+
+  // Track form open state in store
+  useEffect(() => {
+    useShellStore.getState().setAddSignFormOpen(true);
+    return () => { useShellStore.getState().setAddSignFormOpen(false); };
+  }, []);
 
   // Sync height back to parent letterHeight
   useEffect(() => {
@@ -447,31 +446,67 @@ function AddSignForm({
 
     const heightNum = parseFloat(height);
 
-    const { error } = await supabase.from('portal_signs').insert({
-      project_id: projectId,
-      sign_name: signName.trim(),
-      profile_code: profileCode,
-      profile_type: technology,
-      spec_data: specData,
-      height: height || null,
-      sets: quantity,
-      notes: notes || null,
-      sort_order: 0,
-      is_complete: true,
-    } as any);
+    if (editingSign) {
+      // UPDATE existing sign
+      const { error } = await supabase.from('portal_signs').update({
+        sign_name: signName.trim(),
+        profile_code: profileCode,
+        profile_type: technology,
+        spec_data: specData,
+        height: height || null,
+        height_inches: !isNaN(heightNum) ? heightNum : null,
+        sets: quantity,
+        notes: notes || null,
+        is_complete: true,
+      } as any).eq('id', editingSign.id);
 
-    if (!error) {
-      toast.success(`${signName.trim()} added to ${projectName}`);
-      onSaved();
+      if (!error) {
+        toast.success(`${signName.trim()} updated`);
+        useShellStore.getState().setEditingSign(null);
+        useShellStore.getState().setEditingSignId(null);
+        onSaved();
+      } else {
+        toast.error('Failed to update sign');
+      }
     } else {
-      toast.error('Failed to save sign');
+      // INSERT new sign
+      const { error } = await supabase.from('portal_signs').insert({
+        project_id: projectId,
+        sign_name: signName.trim(),
+        profile_code: profileCode,
+        profile_type: technology,
+        spec_data: specData,
+        height: height || null,
+        height_inches: !isNaN(heightNum) ? heightNum : null,
+        sets: quantity,
+        notes: notes || null,
+        sort_order: 0,
+        is_complete: true,
+      } as any);
+
+      if (!error) {
+        toast.success(`${signName.trim()} added to ${projectName}`);
+        onSaved();
+      } else {
+        toast.error('Failed to save sign');
+      }
     }
     setSaving(false);
   };
 
+  const handleCancel = () => {
+    if (editingSign) {
+      useShellStore.getState().setEditingSign(null);
+      useShellStore.getState().setEditingSignId(null);
+    }
+    onCancel();
+  };
+
   return (
     <div className="rounded-lg border border-border bg-card p-4 space-y-3 animate-fade-in-up">
-      <p className="text-sm font-semibold text-foreground">Add Sign to Project</p>
+      <p className="text-sm font-semibold text-foreground">
+        {editingSign ? 'Edit Sign' : 'Add Sign to Project'}
+      </p>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <div>
           <label className="text-[10px] uppercase tracking-wide text-cfg-muted">Sign name *</label>
@@ -517,9 +552,9 @@ function AddSignForm({
           disabled={saving || !signName.trim()}
           className="rounded-md bg-cfg-blue px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-cfg-blue/90 disabled:opacity-50 transition-colors"
         >
-          {saving ? 'Saving...' : 'Save Sign to Project'}
+          {saving ? 'Saving...' : editingSign ? 'Update Sign' : 'Save Sign to Project'}
         </button>
-        <button onClick={onCancel} className="text-xs text-cfg-muted hover:text-foreground transition-colors">
+        <button onClick={handleCancel} className="text-xs text-cfg-muted hover:text-foreground transition-colors">
           Cancel
         </button>
       </div>
@@ -644,12 +679,10 @@ function ContextRibbon({
 
     const parts: string[] = [];
 
-    // Tech
     if (techFilter.size > 0) {
       parts.push(Array.from(techFilter).join(' / '));
     }
 
-    // Lighting
     const lightingLabels: string[] = [];
     if (lightingFilters.has(0)) lightingLabels.push('face-lit');
     if (lightingFilters.has(1)) lightingLabels.push('side-front');
@@ -677,6 +710,7 @@ function ContextRibbon({
    ═══════════════════════════════════════════════ */
 export default function WinningLineConfigurator({
   activeProject = null,
+  editingSign = null,
   onSignSaved,
 }: WinningLineConfiguratorProps) {
   // Data
@@ -724,6 +758,14 @@ export default function WinningLineConfigurator({
       setLoadingProfiles(false);
     })();
   }, []);
+
+  // Edit mode: auto-select profile when editingSign changes
+  useEffect(() => {
+    if (!editingSign || profiles.length === 0) return;
+    const match = profiles.find(p => p.profile_code === editingSign.profile_code);
+    if (match) selectProfile(match).then(() => setShowAddForm(true));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editingSign, profiles]);
 
   // Filter logic
   const filteredProfiles = useMemo(() => {
@@ -803,6 +845,20 @@ export default function WinningLineConfigurator({
       setStep(2);
     }
     setLoadingComponents(false);
+
+    // Task 4: Silent context — update store + chat session metadata
+    useShellStore.getState().setLastProfileSelected(Date.now());
+    const sessionId = localStorage.getItem('chat_session_id');
+    if (sessionId) {
+      supabase.from('chat_sessions').update({
+        metadata: {
+          selected_profile: profile.profile_code,
+          profile_name: profile.profile_name,
+          lighting_label: lightingCodeToLabel(profile.lighting_code),
+          technology: profile.technology,
+        }
+      }).eq('id', sessionId).then(() => {});
+    }
   };
 
   // Scroll helper
@@ -856,7 +912,7 @@ export default function WinningLineConfigurator({
       {/* Stepper */}
       <Stepper step={step} />
 
-      {/* ZONE 1 — Compact Lighting Filter (Upgrade 2: max ~80px) */}
+      {/* ZONE 1 — Compact Lighting Filter */}
       <div ref={zone0Ref} className="space-y-1">
         <div className="flex flex-wrap items-center gap-1.5">
           <span className="text-[10px] text-cfg-muted mr-0.5">Light:</span>
@@ -900,7 +956,7 @@ export default function WinningLineConfigurator({
         </div>
       </div>
 
-      {/* Upgrade 3: AI Context Ribbon */}
+      {/* AI Context Ribbon */}
       <ContextRibbon
         filteredCount={filteredProfiles.length}
         lightingFilters={lightingFilters}
@@ -908,7 +964,7 @@ export default function WinningLineConfigurator({
         selectedProfile={selectedProfile}
       />
 
-      {/* Upgrade 4: Height control */}
+      {/* Height control */}
       <div className="flex items-center gap-2">
         <span className="text-[10px] text-cfg-muted">Letter height</span>
         <input
@@ -984,7 +1040,7 @@ export default function WinningLineConfigurator({
                   onClick={() => setShowAddForm(true)}
                   className="rounded-md bg-cfg-blue px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-cfg-blue/90 transition-colors"
                 >
-                  Add to Project
+                  {editingSign ? 'Edit Sign Details' : 'Add to Project'}
                 </button>
               ) : (
                 <button
@@ -1009,6 +1065,7 @@ export default function WinningLineConfigurator({
               onHeightChange={setLetterHeightInches}
               onSaved={handleSaved}
               onCancel={() => setShowAddForm(false)}
+              editingSign={editingSign}
             />
           )}
 
