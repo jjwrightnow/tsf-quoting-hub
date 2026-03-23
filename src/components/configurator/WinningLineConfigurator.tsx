@@ -293,8 +293,6 @@ function ProfileCard({
         )}
       </div>
       <p className="text-sm font-semibold text-foreground truncate">{profile.display_name || profile.profile_name}</p>
-      {mode === 'pro' && (
-        <p className="text-[9px] font-mono text-cfg-blue/30">{profile.profile_code}</p>
       )}
       <div className="absolute bottom-1 right-1">
         <ScaleSilhouette heightInches={letterHeight} />
