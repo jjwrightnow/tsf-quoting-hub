@@ -695,7 +695,9 @@ export default function WinningLineConfigurator({
   const [showQuoteForm, setShowQuoteForm] = useState(false);
 
   // Upgrade 1: UI mode
-  const [uiMode, setUiMode] = useState<UiMode>('pro');
+  const [uiMode, setUiMode] = useState<UiMode>(
+    () => (localStorage.getItem('signmaker_ui_mode') as UiMode) || 'pro'
+  );
 
   // Upgrade 4: Letter height
   const [letterHeightInches, setLetterHeightInches] = useState(12);
