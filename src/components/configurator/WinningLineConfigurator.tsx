@@ -791,6 +791,8 @@ export default function WinningLineConfigurator({
         component_name: pc.components?.component_name || null,
         material_category: pc.components?.material_category || null,
         sub_type: pc.components?.sub_type || null,
+        client_badge: pc.components?.client_badge || null,
+        client_description: pc.components?.client_description || null,
       }));
       setComponents(mapped);
       setStep(2);
