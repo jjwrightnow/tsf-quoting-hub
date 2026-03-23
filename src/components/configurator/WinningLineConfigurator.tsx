@@ -26,6 +26,8 @@ interface ProfileComponent {
   component_name: string | null;
   material_category: string | null;
   sub_type: string | null;
+  client_badge: string | null;
+  client_description: string | null;
 }
 
 interface WinningLineConfiguratorProps {
@@ -133,30 +135,20 @@ function LightingIcon({ code, mode }: { code: string; mode: UiMode }) {
 
 /* ─── Upgrade 4: Scale silhouette SVG ─── */
 function ScaleSilhouette({ heightInches }: { heightInches: number }) {
-  const refHeight = 72;
   const svgH = 36;
-  const svgW = 36;
+  const svgW = 20;
+  const refHeight = 72;
   const personH = svgH - 2;
-  const letterH = Math.max(1, (heightInches / refHeight) * personH);
+  const letterH = Math.max(2, (heightInches / refHeight) * personH);
 
   return (
-    <svg width={svgW} height={svgH} viewBox={`0 0 ${svgW} ${svgH}`} className="opacity-70">
-      {/* Stick figure */}
-      <circle cx="10" cy={svgH - personH + 2} r="2.5" fill="none" stroke="hsl(var(--cfg-muted))" strokeWidth="1" />
-      <line x1="10" y1={svgH - personH + 4.5} x2="10" y2={svgH - 8} stroke="hsl(var(--cfg-muted))" strokeWidth="1" />
-      <line x1="10" y1={svgH - 8} x2="6" y2={svgH - 1} stroke="hsl(var(--cfg-muted))" strokeWidth="1" />
-      <line x1="10" y1={svgH - 8} x2="14" y2={svgH - 1} stroke="hsl(var(--cfg-muted))" strokeWidth="1" />
-      <line x1="10" y1={svgH - personH + 10} x2="5" y2={svgH - personH + 16} stroke="hsl(var(--cfg-muted))" strokeWidth="1" />
-      <line x1="10" y1={svgH - personH + 10} x2="15" y2={svgH - personH + 16} stroke="hsl(var(--cfg-muted))" strokeWidth="1" />
-      {/* Letter rectangle */}
-      <rect
-        x="22"
-        y={svgH - 1 - letterH}
-        width="10"
-        height={letterH}
-        rx="1"
-        fill="hsl(var(--cfg-blue) / 0.6)"
-      />
+    <svg width={svgW} height={svgH} viewBox={`0 0 ${svgW} ${svgH}`}>
+      {/* Architectural human bar — narrow vertical rectangle, bottom-aligned */}
+      <rect x="2" y={svgH - 2 - personH} width="4" height={personH}
+        fill="#6b7280" opacity="0.8" rx="1" />
+      {/* Letter height bar — fixed width, scales vertically only, bottom-aligned */}
+      <rect x="10" y={svgH - 2 - letterH} width="6" height={letterH}
+        fill="#3b82f6" opacity="0.6" rx="1" />
     </svg>
   );
 }
@@ -361,6 +353,11 @@ function ConstructionStack({ components, mode }: { components: ProfileComponent[
                       <p className="text-xs font-semibold text-foreground">
                         {displayName(slot.component_name)}
                       </p>
+                      {mode === 'client' && slot.client_badge && (
+                        <span className="inline-block text-[9px] font-medium px-1.5 py-0.5 rounded-full bg-green-500/15 text-green-400" title={slot.client_description || ''}>
+                          {slot.client_badge}
+                        </span>
+                      )}
                       {mode === 'pro' && slot.material_category && (
                         <span className="text-[9px] text-cfg-muted">{slot.material_category}</span>
                       )}
@@ -664,7 +661,7 @@ function ContextRibbon({
     }
 
     if (parts.length === 0) {
-      return `Showing all ${filteredCount} profiles`;
+      return 'Select a lighting style above to begin';
     }
 
     return `${parts.join(' ')} — ${filteredCount} profiles`;
@@ -703,7 +700,9 @@ export default function WinningLineConfigurator({
   const [showQuoteForm, setShowQuoteForm] = useState(false);
 
   // Upgrade 1: UI mode
-  const [uiMode, setUiMode] = useState<UiMode>('pro');
+  const [uiMode, setUiMode] = useState<UiMode>(
+    () => (localStorage.getItem('signmaker_ui_mode') as UiMode) || 'pro'
+  );
 
   // Upgrade 4: Letter height
   const [letterHeightInches, setLetterHeightInches] = useState(12);
@@ -781,7 +780,7 @@ export default function WinningLineConfigurator({
 
     const { data } = await supabase
       .from('profile_components')
-      .select('id, profile_id, component_id, layer_position, position_order, is_default, notes, components(component_name, material_category, sub_type)')
+      .select('id, profile_id, component_id, layer_position, position_order, is_default, notes, components(component_name, material_category, sub_type, client_badge, client_description)')
       .eq('profile_id', profile.id)
       .order('position_order', { ascending: true });
 
@@ -797,6 +796,8 @@ export default function WinningLineConfigurator({
         component_name: pc.components?.component_name || null,
         material_category: pc.components?.material_category || null,
         sub_type: pc.components?.sub_type || null,
+        client_badge: pc.components?.client_badge || null,
+        client_description: pc.components?.client_description || null,
       }));
       setComponents(mapped);
       setStep(2);
@@ -834,7 +835,7 @@ export default function WinningLineConfigurator({
         {/* Upgrade 1: Pro / Client toggle */}
         <div className="flex rounded-md bg-secondary p-0.5 shrink-0">
           <button
-            onClick={() => setUiMode('pro')}
+            onClick={() => { setUiMode('pro'); localStorage.setItem('signmaker_ui_mode', 'pro'); }}
             className={`rounded px-2.5 py-1 text-[10px] font-semibold transition-colors ${
               uiMode === 'pro' ? 'bg-cfg-blue text-primary-foreground' : 'text-cfg-muted hover:text-foreground'
             }`}
@@ -842,7 +843,7 @@ export default function WinningLineConfigurator({
             Pro
           </button>
           <button
-            onClick={() => setUiMode('client')}
+            onClick={() => { setUiMode('client'); localStorage.setItem('signmaker_ui_mode', 'client'); }}
             className={`rounded px-2.5 py-1 text-[10px] font-semibold transition-colors ${
               uiMode === 'client' ? 'bg-cfg-blue text-primary-foreground' : 'text-cfg-muted hover:text-foreground'
             }`}

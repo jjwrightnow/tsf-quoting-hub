@@ -309,6 +309,8 @@ export type Database = {
           airtable_id: string | null
           can_be_back: boolean | null
           can_be_face: boolean | null
+          client_badge: string | null
+          client_description: string | null
           component_name: string
           created_at: string | null
           id: string
@@ -323,6 +325,8 @@ export type Database = {
           airtable_id?: string | null
           can_be_back?: boolean | null
           can_be_face?: boolean | null
+          client_badge?: string | null
+          client_description?: string | null
           component_name: string
           created_at?: string | null
           id?: string
@@ -337,6 +341,8 @@ export type Database = {
           airtable_id?: string | null
           can_be_back?: boolean | null
           can_be_face?: boolean | null
+          client_badge?: string | null
+          client_description?: string | null
           component_name?: string
           created_at?: string | null
           id?: string
