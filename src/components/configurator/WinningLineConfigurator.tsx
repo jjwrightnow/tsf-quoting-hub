@@ -1194,7 +1194,7 @@ export default function WinningLineConfigurator({
           </div>
 
           {/* Profile detail header */}
-          <div className="px-4 py-4 border-b border-border">
+          <div className="px-4 py-4 border-b border-border bg-[#13131f]">
             <div className="flex flex-col md:flex-row gap-6">
               {/* Left: illustration */}
               <div className="w-full md:w-[200px] h-[200px] rounded-lg bg-secondary/40 overflow-hidden shrink-0">
