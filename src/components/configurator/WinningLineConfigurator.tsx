@@ -785,7 +785,7 @@ export default function WinningLineConfigurator({
   // Fetch profiles + lighting styles
   useEffect(() => {
     (async () => {
-      const [profilesRes, lightingRes] = await Promise.all([
+      const [profilesRes, lightingRes, techRes] = await Promise.all([
         supabase
           .from('profiles')
           .select('*')
@@ -796,9 +796,15 @@ export default function WinningLineConfigurator({
           .select('lighting_code, display_name, sku_label, thumbnail_url, hover_description, sort_order')
           .eq('is_active', true)
           .order('sort_order'),
+        supabase
+          .from('technology_classes')
+          .select('code, display_name, short_name, materials, price_tier, hover_description, thumbnail_url, sort_order')
+          .eq('is_active', true)
+          .order('sort_order'),
       ]);
       if (profilesRes.data) setProfiles(profilesRes.data as unknown as Profile[]);
       if (lightingRes.data) setLightingStyles(lightingRes.data as LightingStyle[]);
+      if (techRes.data) setTechClasses(techRes.data as TechClass[]);
       setLoadingProfiles(false);
     })();
   }, []);
