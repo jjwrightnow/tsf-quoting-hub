@@ -775,7 +775,7 @@ export default function WinningLineConfigurator({
 
     const { data } = await supabase
       .from('profile_components')
-      .select('id, profile_id, component_id, layer_position, position_order, is_default, notes, components(component_name, material_category, sub_type)')
+      .select('id, profile_id, component_id, layer_position, position_order, is_default, notes, components(component_name, material_category, sub_type, client_badge, client_description)')
       .eq('profile_id', profile.id)
       .order('position_order', { ascending: true });
 
