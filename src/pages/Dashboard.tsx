@@ -97,10 +97,10 @@ const Dashboard = () => {
           )}
         </header>
 
-        {/* Chat / Content */}
+        {/* Right panel: ProjectShell wrapping configurator */}
         <div className="flex-1 overflow-hidden">
           <ProjectShell>
-            <MainPanel />
+            <ConfiguratorBridge />
           </ProjectShell>
         </div>
 
