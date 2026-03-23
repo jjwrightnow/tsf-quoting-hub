@@ -886,7 +886,7 @@ export default function WinningLineConfigurator({
       <div className="flex items-center gap-3">
         <div className="flex-1 min-w-0">
           <SummaryBar
-            profile={selectedProfile?.profile_name || null}
+            profile={selectedProfile?.display_name || selectedProfile?.profile_name || null}
             technology={selectedProfile?.technology || null}
             onScrollTo={scrollTo}
           />
