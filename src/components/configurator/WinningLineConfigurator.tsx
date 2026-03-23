@@ -280,9 +280,7 @@ function ProfileCard({
             className="max-h-full max-w-full object-contain"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#1e1e35] to-[#151525]">
-            <span className="text-[64px] font-bold text-cfg-blue/20 select-none leading-none">A</span>
-          </div>
+          <TechPlaceholder technology={profile.technology} />
         )}
       </div>
       <p className="text-sm font-semibold text-foreground truncate">{profile.display_name || profile.profile_name}</p>
