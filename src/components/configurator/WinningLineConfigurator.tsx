@@ -1098,6 +1098,7 @@ export default function WinningLineConfigurator({
                 techFilter={techFilter}
                 selectedProfile={null}
                 lightingStyles={lightingStyles}
+                techClasses={techClasses}
               />
             </div>
             <div className="flex items-center gap-2 mt-2">
