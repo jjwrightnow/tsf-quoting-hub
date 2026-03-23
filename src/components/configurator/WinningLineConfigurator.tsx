@@ -255,8 +255,12 @@ function ProfileCard({
           />
         ) : (
           <span className="text-3xl font-bold text-cfg-muted/30">A</span>
-        )}
-      </div>
+        </div>
+      ) : (
+        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#1e1e35] to-[#151525] rounded">
+          <span className="text-[64px] font-bold text-cfg-blue/20 select-none leading-none">A</span>
+        </div>
+      )}
       <p className="text-xs font-bold text-foreground truncate">{profile.profile_name}</p>
       {mode === 'pro' && (
         <p className="text-[10px] font-mono text-cfg-blue">{profile.profile_code}</p>
