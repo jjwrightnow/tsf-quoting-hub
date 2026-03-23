@@ -878,7 +878,7 @@ export default function WinningLineConfigurator({
   };
 
   return (
-    <div className="space-y-3 font-sans">
+    <div className="w-full space-y-3 font-sans">
       {/* Top row: Summary + Mode toggle */}
       <div className="flex items-center gap-3">
         <div className="flex-1 min-w-0">
