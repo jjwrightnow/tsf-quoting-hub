@@ -59,6 +59,12 @@
     --tsf-bubble-user: 315 38% 8%;
     --tsf-status-review: 43 100% 50%;
     --tsf-status-success: 157 100% 50%;
+
+    /* Configurator tokens */
+    --cfg-blue: 217 91% 60%;
+    --cfg-pink: 330 81% 60%;
+    --cfg-surface: 240 28% 16%;
+    --cfg-muted: 220 9% 46%;
   }
 }
 

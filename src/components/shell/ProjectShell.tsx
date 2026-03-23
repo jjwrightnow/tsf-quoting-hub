@@ -138,38 +138,38 @@ async function loadUserData(
 ) {
   store.setLoading(true);
 
-  // Get contact
-  const { data: contact } = await supabase
-    .from('contacts')
-    .select('id, account_id')
-    .eq('email', email)
-    .limit(1)
-    .maybeSingle();
+  // Get or create contact via RPC
+  const { data: contact, error } = await supabase
+    .rpc('get_or_create_contact', { p_email: email })
+    .single();
 
-  if (contact) {
-    store.setContactId((contact as any).id);
-    store.setAccountId((contact as any).account_id);
+  if (error || !contact) {
+    store.setLoading(false);
+    return;
+  }
 
-    // Get projects
-    const { data: projects } = await supabase
-      .from('portal_projects')
-      .select('*')
-      .eq('contact_id', (contact as any).id)
-      .neq('status', 'submitted')
-      .order('created_at', { ascending: false });
+  const { contact_id, account_id } = contact as { contact_id: string; account_id: string };
+  store.setContactId(contact_id);
+  store.setAccountId(account_id);
 
-    if (projects) {
-      // Get sign counts
-      const projectList: PortalProject[] = [];
-      for (const p of projects as any[]) {
-        const { count } = await supabase
-          .from('portal_signs')
-          .select('id', { count: 'exact', head: true })
-          .eq('project_id', p.id);
-        projectList.push({ ...p, sign_count: count || 0 });
-      }
-      store.setProjects(projectList);
+  // Get projects
+  const { data: projects } = await supabase
+    .from('portal_projects')
+    .select('*')
+    .eq('contact_id', contact_id)
+    .neq('status', 'submitted')
+    .order('created_at', { ascending: false });
+
+  if (projects) {
+    const projectList: PortalProject[] = [];
+    for (const p of projects as any[]) {
+      const { count } = await supabase
+        .from('portal_signs')
+        .select('id', { count: 'exact', head: true })
+        .eq('project_id', p.id);
+      projectList.push({ ...p, sign_count: count || 0 });
     }
+    store.setProjects(projectList);
   }
 
   store.setLoading(false);
