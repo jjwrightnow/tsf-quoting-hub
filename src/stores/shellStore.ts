@@ -101,6 +101,7 @@ export const useShellStore = create<ShellStore>((set) => ({
     set({
       shellState: 'explore',
       userEmail: null,
+      userRole: 'guest',
       contactId: null,
       accountId: null,
       projects: [],

@@ -75,6 +75,28 @@ function IdentityGate() {
       if (customer) {
         localStorage.setItem('signmaker_user_email', normalized);
         store.setUserEmail(normalized);
+
+        // Get effective role (handles temp_pro 48hr pass)
+        const { data: effectiveRole } = await supabase
+          .rpc('get_effective_user_role', { p_email: normalized });
+        const role = effectiveRole || 'guest';
+        store.setUserRole(role === 'temp_pro' ? 'pro' : role);
+
+        // If on temp pass, show a toast so they know it's time-limited
+        if (role === 'temp_pro') {
+          const { data: vc } = await supabase
+            .from('verified_customers')
+            .select('temp_pro_expires_at')
+            .eq('email', normalized)
+            .single();
+          if (vc?.temp_pro_expires_at) {
+            const hours = Math.ceil(
+              (new Date(vc.temp_pro_expires_at).getTime() - Date.now()) / 3600000
+            );
+            toast.info(`Pro access active for ${hours} more hours. Complete your application to keep it.`);
+          }
+        }
+
         await loadUserData(normalized, store);
         store.setShellState('verified');
       } else {
