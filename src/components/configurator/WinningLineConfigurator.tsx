@@ -1272,7 +1272,7 @@ export default function WinningLineConfigurator({
           </div>
 
           {/* CTA */}
-          <div className="px-4 py-4">
+          <div className="px-4 py-4 bg-[#13131f]">
             {!showAddForm && !showQuoteForm && (
               <div className="flex justify-end">
                 {activeProject ? (
