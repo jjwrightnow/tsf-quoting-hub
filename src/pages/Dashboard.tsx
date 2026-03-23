@@ -1,8 +1,10 @@
 import { useEffect } from 'react';
 import ProjectShell from '@/components/shell/ProjectShell';
+import WinningLineConfigurator from '@/components/configurator/WinningLineConfigurator';
 import { useAppStore } from '@/stores/appStore';
 import { useWizardStore } from '@/stores/wizardStore';
 import { useSignStore } from '@/stores/signStore';
+import { useShellStore } from '@/stores/shellStore';
 import { useAuth } from '@/hooks/useAuth';
 import { useOperatorConfig } from '@/hooks/useOperatorConfig';
 import { useQuotePolling } from '@/hooks/usePolling';
