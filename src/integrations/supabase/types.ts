@@ -752,6 +752,54 @@ export type Database = {
           },
         ]
       }
+      pro_applications: {
+        Row: {
+          auto_approved: boolean | null
+          company_name: string
+          created_at: string | null
+          email: string
+          estimated_volume: string | null
+          id: string
+          notes: string | null
+          referral_source: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          role: string | null
+          status: string
+          website: string | null
+        }
+        Insert: {
+          auto_approved?: boolean | null
+          company_name: string
+          created_at?: string | null
+          email: string
+          estimated_volume?: string | null
+          id?: string
+          notes?: string | null
+          referral_source?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          role?: string | null
+          status?: string
+          website?: string | null
+        }
+        Update: {
+          auto_approved?: boolean | null
+          company_name?: string
+          created_at?: string | null
+          email?: string
+          estimated_volume?: string | null
+          id?: string
+          notes?: string | null
+          referral_source?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          role?: string | null
+          status?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
       product_specs: {
         Row: {
           category: string | null
@@ -1558,6 +1606,7 @@ export type Database = {
           id: string
           is_verified: boolean
           ui_mode: string | null
+          user_role: string | null
         }
         Insert: {
           company_name?: string | null
@@ -1566,6 +1615,7 @@ export type Database = {
           id?: string
           is_verified?: boolean
           ui_mode?: string | null
+          user_role?: string | null
         }
         Update: {
           company_name?: string | null
@@ -1574,6 +1624,7 @@ export type Database = {
           id?: string
           is_verified?: boolean
           ui_mode?: string | null
+          user_role?: string | null
         }
         Relationships: []
       }
@@ -1732,6 +1783,7 @@ export type Database = {
           contact_id: string
         }[]
       }
+      is_business_email: { Args: { p_email: string }; Returns: boolean }
       search_signage: {
         Args: {
           result_limit?: number
@@ -1749,6 +1801,17 @@ export type Database = {
           sign_types: string[]
           vibe_description: string
         }[]
+      }
+      submit_pro_application: {
+        Args: {
+          p_company_name: string
+          p_email: string
+          p_estimated_volume?: string
+          p_referral_source?: string
+          p_role?: string
+          p_website?: string
+        }
+        Returns: Json
       }
     }
     Enums: {

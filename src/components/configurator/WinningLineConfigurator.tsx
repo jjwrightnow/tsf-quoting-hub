@@ -195,7 +195,7 @@ function SummaryBar({
 function Stepper({ step }: { step: number }) {
   const steps = ['Choose lighting', 'Pick style', 'Review and quote'];
   return (
-    <div className="flex items-center gap-4 text-[11px] font-medium">
+    <div className="flex items-center gap-4 w-full text-[11px] font-medium">
       {steps.map((label, i) => (
         <span
           key={i}
@@ -246,7 +246,7 @@ function ProfileCard({
       <div className="absolute top-2 right-2">
         <LightingIcon code={profile.lighting_code} mode={mode} />
       </div>
-      <div className="flex items-center justify-center h-24 mb-2 rounded bg-secondary/40">
+      <div className="flex items-center justify-center h-24 mb-2 rounded bg-secondary/40 overflow-hidden">
         {profile.illustration_url ? (
           <img
             src={profile.illustration_url}
@@ -254,7 +254,9 @@ function ProfileCard({
             className="max-h-full max-w-full object-contain"
           />
         ) : (
-          <span className="text-3xl font-bold text-cfg-muted/30">A</span>
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#1e1e35] to-[#151525]">
+            <span className="text-[64px] font-bold text-cfg-blue/20 select-none leading-none">A</span>
+          </div>
         )}
       </div>
       <p className="text-xs font-bold text-foreground truncate">{profile.profile_name}</p>
@@ -878,7 +880,7 @@ export default function WinningLineConfigurator({
   };
 
   return (
-    <div className="space-y-3 font-sans">
+    <div className="w-full space-y-3 font-sans">
       {/* Top row: Summary + Mode toggle */}
       <div className="flex items-center gap-3">
         <div className="flex-1 min-w-0">
