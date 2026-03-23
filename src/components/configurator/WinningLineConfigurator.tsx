@@ -8,6 +8,7 @@ interface Profile {
   id: string;
   profile_code: string;
   profile_name: string;
+  display_name: string | null;
   lighting_code: string;
   technology: string | null;
   illustration_url: string | null;
@@ -250,7 +251,7 @@ function ProfileCard({
         {profile.illustration_url ? (
           <img
             src={profile.illustration_url}
-            alt={profile.profile_name}
+            alt={profile.display_name || profile.profile_name}
             className="max-h-full max-w-full object-contain"
           />
         ) : (
@@ -259,9 +260,9 @@ function ProfileCard({
           </div>
         )}
       </div>
-      <p className="text-xs font-bold text-foreground truncate">{profile.profile_name}</p>
+      <p className="text-sm font-semibold text-foreground truncate">{profile.display_name || profile.profile_name}</p>
       {mode === 'pro' && (
-        <p className="text-[10px] font-mono text-cfg-blue">{profile.profile_code}</p>
+        <p className="text-[9px] font-mono text-cfg-blue/30">{profile.profile_code}</p>
       )}
       <div className="absolute bottom-1 right-1">
         <ScaleSilhouette heightInches={letterHeight} />
@@ -676,7 +677,7 @@ function ContextRibbon({
 }) {
   const text = useMemo(() => {
     if (selectedProfile) {
-      return `Selected: ${selectedProfile.profile_name} — ${lightingCodeToLabel(selectedProfile.lighting_code)}`;
+      return `Selected: ${selectedProfile.display_name || selectedProfile.profile_name} — ${lightingCodeToLabel(selectedProfile.lighting_code)}`;
     }
 
     const parts: string[] = [];
@@ -885,7 +886,7 @@ export default function WinningLineConfigurator({
       <div className="flex items-center gap-3">
         <div className="flex-1 min-w-0">
           <SummaryBar
-            profile={selectedProfile?.profile_name || null}
+            profile={selectedProfile?.display_name || selectedProfile?.profile_name || null}
             technology={selectedProfile?.technology || null}
             onScrollTo={scrollTo}
           />
@@ -1021,7 +1022,7 @@ export default function WinningLineConfigurator({
       {selectedProfile && (
         <div ref={zone2Ref} className="space-y-4">
           <p className="text-xs font-semibold text-foreground">
-            Construction — {selectedProfile.profile_name}
+            Construction — {selectedProfile.display_name || selectedProfile.profile_name}
           </p>
 
           {loadingComponents ? (

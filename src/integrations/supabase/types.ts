@@ -906,6 +906,7 @@ export type Database = {
         Row: {
           airtable_id: string | null
           created_at: string | null
+          display_name: string | null
           face_style: string | null
           id: string
           is_active: boolean | null
@@ -920,6 +921,7 @@ export type Database = {
         Insert: {
           airtable_id?: string | null
           created_at?: string | null
+          display_name?: string | null
           face_style?: string | null
           id?: string
           is_active?: boolean | null
@@ -934,6 +936,7 @@ export type Database = {
         Update: {
           airtable_id?: string | null
           created_at?: string | null
+          display_name?: string | null
           face_style?: string | null
           id?: string
           is_active?: boolean | null
@@ -1654,6 +1657,69 @@ export type Database = {
       }
     }
     Views: {
+      admin_application_queue: {
+        Row: {
+          auto_approved: boolean | null
+          company_name: string | null
+          created_at: string | null
+          domain: string | null
+          email: string | null
+          estimated_volume: string | null
+          id: string | null
+          is_business_domain: boolean | null
+          notes: string | null
+          priority_score: number | null
+          project_count: number | null
+          referral_source: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          role: string | null
+          status: string | null
+          volume_label: string | null
+          website: string | null
+        }
+        Insert: {
+          auto_approved?: boolean | null
+          company_name?: string | null
+          created_at?: string | null
+          domain?: never
+          email?: string | null
+          estimated_volume?: string | null
+          id?: string | null
+          is_business_domain?: never
+          notes?: string | null
+          priority_score?: never
+          project_count?: never
+          referral_source?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          role?: string | null
+          status?: string | null
+          volume_label?: never
+          website?: string | null
+        }
+        Update: {
+          auto_approved?: boolean | null
+          company_name?: string | null
+          created_at?: string | null
+          domain?: never
+          email?: string | null
+          estimated_volume?: string | null
+          id?: string | null
+          is_business_domain?: never
+          notes?: string | null
+          priority_score?: never
+          project_count?: never
+          referral_source?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          role?: string | null
+          status?: string | null
+          volume_label?: never
+          website?: string | null
+        }
+        Relationships: []
+      }
       portal_signs_display: {
         Row: {
           acrylic_face: string | null
@@ -1774,6 +1840,22 @@ export type Database = {
       }
     }
     Functions: {
+      admin_approve_application: {
+        Args: {
+          p_application_id: string
+          p_notes?: string
+          p_reviewer?: string
+        }
+        Returns: Json
+      }
+      admin_reject_application: {
+        Args: {
+          p_application_id: string
+          p_notes?: string
+          p_reviewer?: string
+        }
+        Returns: Json
+      }
       archive_stale_projects: { Args: never; Returns: undefined }
       get_my_account_id: { Args: never; Returns: string }
       get_or_create_contact: {
