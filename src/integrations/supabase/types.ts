@@ -1544,18 +1544,21 @@ export type Database = {
           created_at: string | null
           email: string
           id: string
+          is_verified: boolean
         }
         Insert: {
           company_name?: string | null
           created_at?: string | null
           email: string
           id?: string
+          is_verified?: boolean
         }
         Update: {
           company_name?: string | null
           created_at?: string | null
           email?: string
           id?: string
+          is_verified?: boolean
         }
         Relationships: []
       }
@@ -1603,6 +1606,13 @@ export type Database = {
     Functions: {
       archive_stale_projects: { Args: never; Returns: undefined }
       get_my_account_id: { Args: never; Returns: string }
+      get_or_create_contact: {
+        Args: { p_email: string }
+        Returns: {
+          account_id: string
+          contact_id: string
+        }[]
+      }
       search_signage: {
         Args: {
           result_limit?: number
