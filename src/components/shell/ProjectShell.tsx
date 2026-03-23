@@ -409,7 +409,7 @@ function SignList() {
 
   const editSign = (sign: PortalSign) => {
     store.setEditingSignId(sign.id);
-    // TODO: pre-load sign data into configurator
+    store.setEditingSign(sign);
   };
 
   return (
@@ -442,6 +442,11 @@ function SignList() {
                 <p className="text-xs font-medium text-foreground truncate">{sign.sign_name}</p>
                 {sign.profile_code && (
                   <span className="text-[10px] font-mono text-primary">{sign.profile_code}</span>
+                )}
+                {(sign.height_inches || sign.height) && (
+                  <span className="text-[10px] text-muted-foreground ml-1">
+                    {sign.height_inches ? `${sign.height_inches}"` : sign.height}
+                  </span>
                 )}
               </div>
               <div className="flex items-center gap-1">
