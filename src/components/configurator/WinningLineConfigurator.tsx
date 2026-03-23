@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useShellStore, type PortalSign } from '@/stores/shellStore';
 import { toast } from 'sonner';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 /* ─── Types ─── */
 interface Profile {
@@ -32,6 +33,15 @@ interface ProfileComponent {
   client_description: string | null;
 }
 
+interface LightingStyle {
+  lighting_code: string;
+  display_name: string;
+  sku_label: string;
+  thumbnail_url: string | null;
+  hover_description: string | null;
+  sort_order: number;
+}
+
 interface WinningLineConfiguratorProps {
   activeProject?: { id: string; project_name: string } | null;
   editingSign?: PortalSign | null;
@@ -41,15 +51,6 @@ interface WinningLineConfiguratorProps {
 type UiMode = 'pro' | 'client';
 
 /* ─── Constants ─── */
-const LIGHTING_BUTTONS = [
-  { label: 'None', position: -1 },
-  { label: 'Face', position: 0 },
-  { label: 'Side (front)', position: 1 },
-  { label: 'Side', position: -2 },
-  { label: 'Side (back)', position: 2 },
-  { label: 'Halo', position: 3 },
-] as const;
-
 const TECH_BUTTONS = ['Premium', 'Standard', 'Acrylic', 'Solid Acrylic', 'Flat Cut'] as const;
 
 const PRICE_TIER: Record<string, { label: string; color: string }> = {
@@ -70,7 +71,20 @@ const MATERIAL_BORDER: Record<string, string> = {
   'wire/electrical': 'border-l-red-400',
 };
 
-/* ─── Upgrade 1: Client mode mappings ─── */
+const TECH_THUMBNAILS: Record<string, { label: string; sublabel: string; count: number; hover: string; color: string; bg: string; fullName: string }> = {
+  PF: { label: 'Premium', sublabel: 'Fabricated', count: 44, color: '#c0c0c0', bg: '#1a1a2e', fullName: 'Premium',
+    hover: 'Hand-welded stainless steel or aluminum. Highest grade in our range.' },
+  SF: { label: 'Standard', sublabel: 'Fabricated', count: 3, color: '#9ca3af', bg: '#1a1a2e', fullName: 'Standard',
+    hover: 'Welded aluminum construction. Reliable commercial-grade option.' },
+  AF: { label: 'Acrylic', sublabel: 'Fabricated', count: 7, color: '#06b6d4', bg: '#0e2a2e', fullName: 'Acrylic',
+    hover: 'Metal body with acrylic face panel. Wide range of face colors.' },
+  SA: { label: 'Solid', sublabel: 'Acrylic', count: 19, color: '#3b82f6', bg: '#0f1a2e', fullName: 'Solid Acrylic',
+    hover: 'Entire letter routed from a solid acrylic block. Best for heights up to 18 inches.' },
+  FC: { label: 'Flat Cut', sublabel: 'Single Layer', count: 6, color: '#f59e0b', bg: '#1e1a0e', fullName: 'Flat Cut',
+    hover: 'Single flat layer of cut material. No depth or return. Most affordable option.' },
+};
+
+/* ─── Client mode mappings ─── */
 const LIGHTING_CODE_LABELS: Record<string, string> = {
   '0000': 'No Lighting',
   '1000': 'Front Glow',
@@ -136,7 +150,7 @@ function LightingIcon({ code, mode }: { code: string; mode: UiMode }) {
   );
 }
 
-/* ─── Upgrade 4: Scale silhouette SVG ─── */
+/* ─── Scale silhouette SVG ─── */
 function ScaleSilhouette({ heightInches }: { heightInches: number }) {
   const svgH = 36;
   const svgW = 20;
@@ -223,7 +237,6 @@ const TECH_COLORS: Record<string, { bg: string; accent: string; label: string }>
   AF: { bg: '#1a1a2e', accent: '#3b82f6', label: 'Acrylic Face' },
   SA: { bg: '#1a1a2e', accent: '#06b6d4', label: 'Solid Acrylic' },
   FC: { bg: '#1a1a2e', accent: '#f59e0b', label: 'Flat Cut' },
-  
 };
 
 function TechPlaceholder({ technology }: { technology: string | null }) {
@@ -442,13 +455,11 @@ function AddSignForm({
   const [notes, setNotes] = useState(editingSign?.notes || '');
   const [saving, setSaving] = useState(false);
 
-  // Track form open state in store
   useEffect(() => {
     useShellStore.getState().setAddSignFormOpen(true);
     return () => { useShellStore.getState().setAddSignFormOpen(false); };
   }, []);
 
-  // Sync height back to parent letterHeight
   useEffect(() => {
     const parsed = parseFloat(height);
     if (!isNaN(parsed) && parsed > 0) onHeightChange(parsed);
@@ -473,7 +484,6 @@ function AddSignForm({
     const heightNum = parseFloat(height);
 
     if (editingSign) {
-      // UPDATE existing sign
       const { error } = await supabase.from('portal_signs').update({
         sign_name: signName.trim(),
         profile_code: profileCode,
@@ -495,7 +505,6 @@ function AddSignForm({
         toast.error('Failed to update sign');
       }
     } else {
-      // INSERT new sign
       const { error } = await supabase.from('portal_signs').insert({
         project_id: projectId,
         sign_name: signName.trim(),
@@ -686,21 +695,25 @@ function ExploreQuoteForm({
   );
 }
 
-/* ─── Upgrade 3: AI Context Ribbon ─── */
+/* ─── AI Context Ribbon ─── */
 function ContextRibbon({
   filteredCount,
-  lightingFilters,
+  lightingCodeFilters,
   techFilter,
   selectedProfile,
+  lightingStyles,
 }: {
   filteredCount: number;
-  lightingFilters: Set<number>;
+  lightingCodeFilters: Set<string>;
   techFilter: Set<string>;
   selectedProfile: Profile | null;
+  lightingStyles: LightingStyle[];
 }) {
   const text = useMemo(() => {
     if (selectedProfile) {
-      return `Selected: ${selectedProfile.display_name || selectedProfile.profile_name} — ${lightingCodeToLabel(selectedProfile.lighting_code)}`;
+      const matchingStyle = lightingStyles.find(s => s.lighting_code === selectedProfile.lighting_code);
+      const lightingLabel = matchingStyle?.display_name || lightingCodeToLabel(selectedProfile.lighting_code);
+      return `Selected: ${selectedProfile.display_name || selectedProfile.profile_name} — ${lightingLabel}`;
     }
 
     const parts: string[] = [];
@@ -709,14 +722,12 @@ function ContextRibbon({
       parts.push(Array.from(techFilter).join(' / '));
     }
 
-    const lightingLabels: string[] = [];
-    if (lightingFilters.has(0)) lightingLabels.push('face-lit');
-    if (lightingFilters.has(1)) lightingLabels.push('side-front');
-    if (lightingFilters.has(-2)) lightingLabels.push('side-lit');
-    if (lightingFilters.has(2)) lightingLabels.push('side-back');
-    if (lightingFilters.has(3)) lightingLabels.push('halo');
-    if (lightingLabels.length > 0) {
-      parts.push(lightingLabels.join(' and ') + ' options');
+    if (lightingCodeFilters.size > 0) {
+      const lightingLabels = Array.from(lightingCodeFilters).map(code => {
+        const style = lightingStyles.find(s => s.lighting_code === code);
+        return style?.display_name || code;
+      });
+      parts.push(lightingLabels.join(' + '));
     }
 
     if (parts.length === 0) {
@@ -724,7 +735,7 @@ function ContextRibbon({
     }
 
     return `${parts.join(' ')} — ${filteredCount} profiles`;
-  }, [filteredCount, lightingFilters, techFilter, selectedProfile]);
+  }, [filteredCount, lightingCodeFilters, techFilter, selectedProfile, lightingStyles]);
 
   return (
     <p className="text-[11px] italic text-cfg-muted px-1">{text}</p>
@@ -742,9 +753,10 @@ export default function WinningLineConfigurator({
   // Data
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loadingProfiles, setLoadingProfiles] = useState(true);
+  const [lightingStyles, setLightingStyles] = useState<LightingStyle[]>([]);
 
-  // Filters
-  const [lightingFilters, setLightingFilters] = useState<Set<number>>(new Set());
+  // Filters — lighting codes as strings now
+  const [lightingCodeFilters, setLightingCodeFilters] = useState<Set<string>>(new Set());
   const [techFilter, setTechFilter] = useState<Set<string>>(new Set());
 
   // Selection
@@ -759,28 +771,37 @@ export default function WinningLineConfigurator({
   const [showAddForm, setShowAddForm] = useState(false);
   const [showQuoteForm, setShowQuoteForm] = useState(false);
 
-  // Upgrade 1: UI mode
+  // UI mode
   const [uiMode, setUiMode] = useState<UiMode>(
     () => (localStorage.getItem('signmaker_ui_mode') as UiMode) || 'pro'
   );
 
-  // Upgrade 4: Letter height
+  // Letter height
   const [letterHeightInches, setLetterHeightInches] = useState(12);
 
   // Refs for scrolling
   const zone0Ref = useRef<HTMLDivElement>(null);
   const zone1Ref = useRef<HTMLDivElement>(null);
   const zone2Ref = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  // Fetch profiles
+  // Fetch profiles + lighting styles
   useEffect(() => {
     (async () => {
-      const { data } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('is_active', true)
-        .order('profile_code', { ascending: true });
-      if (data) setProfiles(data as unknown as Profile[]);
+      const [profilesRes, lightingRes] = await Promise.all([
+        supabase
+          .from('profiles')
+          .select('*')
+          .eq('is_active', true)
+          .order('profile_code', { ascending: true }),
+        supabase
+          .from('lighting_styles')
+          .select('lighting_code, display_name, sku_label, thumbnail_url, hover_description, sort_order')
+          .eq('is_active', true)
+          .order('sort_order'),
+      ]);
+      if (profilesRes.data) setProfiles(profilesRes.data as unknown as Profile[]);
+      if (lightingRes.data) setLightingStyles(lightingRes.data as LightingStyle[]);
       setLoadingProfiles(false);
     })();
   }, []);
@@ -793,20 +814,12 @@ export default function WinningLineConfigurator({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editingSign, profiles]);
 
-  // Filter logic
+  // Filter logic — direct lighting_code matching
   const filteredProfiles = useMemo(() => {
     let result = profiles;
 
-    if (lightingFilters.size > 0 && !lightingFilters.has(-1)) {
-      result = result.filter((p) => {
-        const code = p.lighting_code.padEnd(4, '0');
-        return Array.from(lightingFilters).every((pos) => {
-          if (pos === -2) {
-            return code[1] === '1' || code[2] === '1';
-          }
-          return code[pos] === '1';
-        });
-      });
+    if (lightingCodeFilters.size > 0) {
+      result = result.filter(p => lightingCodeFilters.has(p.lighting_code));
     }
 
     if (techFilter.size > 0) {
@@ -814,20 +827,19 @@ export default function WinningLineConfigurator({
     }
 
     return result;
-  }, [profiles, lightingFilters, techFilter]);
+  }, [profiles, lightingCodeFilters, techFilter]);
 
-  // Toggle lighting
-  const toggleLighting = (position: number) => {
-    setLightingFilters((prev) => {
+  // Toggle lighting code
+  const toggleLightingCode = (code: string) => {
+    setLightingCodeFilters((prev) => {
       const next = new Set(prev);
-      if (position === -1) {
-        return new Set();
-      }
-      next.delete(-1);
-      next.has(position) ? next.delete(position) : next.add(position);
+      next.has(code) ? next.delete(code) : next.add(code);
       return next;
     });
   };
+
+  // Helper: check if a lighting code is active
+  const isLightingCodeActive = (code: string) => lightingCodeFilters.has(code);
 
   // Toggle tech
   const toggleTech = (tech: string) => {
@@ -872,7 +884,7 @@ export default function WinningLineConfigurator({
     }
     setLoadingComponents(false);
 
-    // Task 4: Silent context — update store + chat session metadata
+    // Silent context — update store + chat session metadata
     useShellStore.getState().setLastProfileSelected(Date.now());
     const sessionId = localStorage.getItem('chat_session_id');
     if (sessionId) {
@@ -912,8 +924,6 @@ export default function WinningLineConfigurator({
     setShowQuoteForm(false);
     containerRef.current?.scrollTo({ top: 0, behavior: 'instant' });
   };
-
-  const containerRef = useRef<HTMLDivElement>(null);
 
   const isProfileSelected = !!selectedProfile;
 
@@ -959,54 +969,93 @@ export default function WinningLineConfigurator({
               <span className="flex h-6 w-6 items-center justify-center rounded bg-[#1e1e35] text-[#3b82f6] text-xs font-bold shrink-0">1</span>
               <h2 className="text-sm font-semibold text-foreground">Choose a lighting style</h2>
             </div>
-            <div className="space-y-1.5">
-              <div className="flex flex-wrap items-center gap-1.5">
-                <span className="text-[10px] text-cfg-muted mr-0.5">Light:</span>
-                {LIGHTING_BUTTONS.map((btn) => {
-                  const active = btn.position === -1
-                    ? lightingFilters.size === 0
-                    : lightingFilters.has(btn.position);
+
+            {/* Lighting Style label */}
+            <p className="text-xs font-semibold text-[#6b7280] uppercase tracking-wider mb-2">Lighting Style</p>
+
+            {/* Lighting Style thumbnail grid */}
+            <TooltipProvider>
+              <div className="grid grid-cols-4 md:grid-cols-8 gap-2 mb-4">
+                {lightingStyles.map((style) => {
+                  const active = isLightingCodeActive(style.lighting_code);
                   return (
-                    <button
-                      key={btn.label}
-                      onClick={() => toggleLighting(btn.position)}
-                      className={`rounded-full px-2.5 py-1 text-[10px] font-medium transition-colors ${
-                        active
-                          ? 'bg-cfg-blue text-primary-foreground'
-                          : 'bg-secondary text-cfg-muted hover:text-foreground'
-                      }`}
-                    >
-                      {btn.label}
-                    </button>
+                    <Tooltip key={style.lighting_code}>
+                      <TooltipTrigger asChild>
+                        <button
+                          onClick={() => toggleLightingCode(style.lighting_code)}
+                          className={`flex flex-col items-center rounded-lg border overflow-hidden transition-all cursor-pointer
+                            ${active
+                              ? 'border-[#3b82f6] ring-1 ring-[#3b82f6] bg-[#3b82f6]/10'
+                              : 'border-[#2a2a40] bg-[#1a1a2e] hover:border-[#3b82f6]/50'
+                            }`}
+                        >
+                          {/* Thumbnail image */}
+                          <div className="w-full aspect-square bg-[#151525] overflow-hidden">
+                            {style.thumbnail_url ? (
+                              <img src={style.thumbnail_url} alt={style.display_name}
+                                className="w-full h-full object-cover" />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center">
+                                <span className={`text-2xl font-bold ${active ? 'text-[#3b82f6]' : 'text-[#374151]'}`}>A</span>
+                              </div>
+                            )}
+                          </div>
+                          {/* Label */}
+                          <div className="px-1 py-1 w-full text-center">
+                            <div className={`text-[8px] font-medium leading-tight truncate ${active ? 'text-[#3b82f6]' : 'text-[#9ca3af]'}`}>
+                              {style.display_name}
+                            </div>
+                            <div className="text-[7px] text-[#4b5563] leading-tight">{style.sku_label}</div>
+                          </div>
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom" className="max-w-[180px] text-xs text-center">
+                        <p className="font-medium">{style.display_name}</p>
+                        <p className="text-muted-foreground mt-0.5">{style.hover_description}</p>
+                      </TooltipContent>
+                    </Tooltip>
                   );
                 })}
               </div>
-              <div className="flex flex-wrap items-center gap-1.5">
-                <span className="text-[10px] text-cfg-muted mr-0.5">Tech:</span>
-                {TECH_BUTTONS.map((tech) => {
-                  const active = techFilter.has(tech);
+            </TooltipProvider>
+
+            {/* Construction (Technology) label */}
+            <p className="text-xs font-semibold text-[#6b7280] uppercase tracking-wider mb-2">Construction</p>
+
+            {/* Technology thumbnail cards */}
+            <TooltipProvider>
+              <div className="flex gap-2 flex-wrap mb-3">
+                {Object.entries(TECH_THUMBNAILS).map(([code, t]) => {
+                  const active = techFilter.has(t.fullName);
                   return (
-                    <button
-                      key={tech}
-                      onClick={() => toggleTech(tech)}
-                      className={`rounded-full px-2.5 py-1 text-[10px] font-medium transition-colors ${
-                        active
-                          ? 'bg-cfg-blue text-primary-foreground'
-                          : 'bg-secondary text-cfg-muted hover:text-foreground'
-                      }`}
-                    >
-                      {tech}
-                    </button>
+                    <Tooltip key={code}>
+                      <TooltipTrigger asChild>
+                        <button
+                          onClick={() => toggleTech(t.fullName)}
+                          className={`relative flex flex-col items-center justify-center rounded-lg border p-2 w-20 h-24 transition-all
+                            ${active ? 'border-[#3b82f6] ring-1 ring-[#3b82f6]' : 'border-[#2a2a40] hover:border-[#3b82f6]/50'}`}
+                          style={{ background: active ? `${t.color}18` : t.bg }}
+                        >
+                          <span className="absolute top-1 right-1.5 text-[8px] text-[#4b5563]">{t.count}</span>
+                          <span style={{ color: active ? t.color : `${t.color}90` }} className="text-3xl font-bold leading-none mb-1">A</span>
+                          <span style={{ color: active ? t.color : '#9ca3af' }} className="text-[9px] font-semibold leading-tight">{t.label}</span>
+                          <span className="text-[8px] text-[#4b5563] leading-tight">{t.sublabel}</span>
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom" className="max-w-[180px] text-xs">{t.hover}</TooltipContent>
+                    </Tooltip>
                   );
                 })}
               </div>
-            </div>
+            </TooltipProvider>
+
             <div className="mt-2">
               <ContextRibbon
                 filteredCount={filteredProfiles.length}
-                lightingFilters={lightingFilters}
+                lightingCodeFilters={lightingCodeFilters}
                 techFilter={techFilter}
                 selectedProfile={null}
+                lightingStyles={lightingStyles}
               />
             </div>
             <div className="flex items-center gap-2 mt-2">
@@ -1042,7 +1091,7 @@ export default function WinningLineConfigurator({
               <div className="text-center py-8">
                 <p className="text-sm text-cfg-muted">No profiles match</p>
                 <button
-                  onClick={() => { setLightingFilters(new Set()); setTechFilter(new Set()); }}
+                  onClick={() => { setLightingCodeFilters(new Set()); setTechFilter(new Set()); }}
                   className="text-xs text-cfg-blue hover:underline mt-1"
                 >
                   Clear filters
@@ -1135,7 +1184,10 @@ export default function WinningLineConfigurator({
                   })()}
                 </div>
                 <p className="text-xs text-cfg-muted">
-                  {lightingCodeToLabel(selectedProfile.lighting_code)}
+                  {(() => {
+                    const matchingStyle = lightingStyles.find(s => s.lighting_code === selectedProfile.lighting_code);
+                    return matchingStyle?.display_name || lightingCodeToLabel(selectedProfile.lighting_code);
+                  })()}
                 </p>
                 {uiMode === 'pro' && (
                   <p className="text-[9px] font-mono text-cfg-blue/30">{selectedProfile.profile_code}</p>
