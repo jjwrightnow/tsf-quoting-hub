@@ -1230,9 +1230,6 @@ export default function WinningLineConfigurator({
                     return matchingStyle?.display_name || lightingCodeToLabel(selectedProfile.lighting_code);
                   })()}
                 </p>
-                {uiMode === 'pro' && (
-                  <p className="text-[9px] font-mono text-cfg-blue/30">{selectedProfile.profile_code}</p>
-                )}
                 <div className="flex items-center gap-2 mt-1">
                   <span className="text-[10px] text-cfg-muted">Letter height</span>
                   <input
