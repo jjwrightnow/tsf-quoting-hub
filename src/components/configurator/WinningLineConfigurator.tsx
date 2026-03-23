@@ -204,7 +204,7 @@ function SummaryBar({
 
 /* ─── Stepper ─── */
 function Stepper({ step }: { step: number }) {
-  const steps = ['Choose lighting', 'Pick style', 'Review and quote'];
+  const steps = ['Choose lighting', 'Pick style', 'Review and build'];
   return (
     <div className="flex items-center gap-4 w-full text-[11px] font-medium">
       {steps.map((label, i) => (
