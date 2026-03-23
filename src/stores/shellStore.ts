@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-export type ShellState = 'explore' | 'verified' | 'in_project';
+export type ShellState = 'explore' | 'verified' | 'in_project' | 'submitted';
 
 export interface PortalProject {
   id: string;
