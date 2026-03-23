@@ -139,6 +139,20 @@ const Dashboard = () => {
     }
   }, [session, userTier, setUserTier]);
 
+  // Initialize chat session on mount so chat_session_id exists before first profile click
+  useEffect(() => {
+    const initSession = async () => {
+      const email = useShellStore.getState().userEmail;
+      const { data, error } = await supabase.rpc('init_chat_session', {
+        p_email: email || null,
+      });
+      if (data && !error) {
+        localStorage.setItem('chat_session_id', data);
+      }
+    };
+    initSession();
+  }, []);
+
   // Only poll quotes for tier 2
   useQuotePolling(userTier === 2 && !!session);
   useWizardAutoSave();

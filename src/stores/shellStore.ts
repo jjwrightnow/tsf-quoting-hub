@@ -36,6 +36,7 @@ export interface PortalSign {
 interface ShellStore {
   shellState: ShellState;
   userEmail: string | null;
+  userRole: string;
   contactId: string | null;
   accountId: string | null;
   projects: PortalProject[];
@@ -50,6 +51,7 @@ interface ShellStore {
 
   setShellState: (state: ShellState) => void;
   setUserEmail: (email: string | null) => void;
+  setUserRole: (role: string) => void;
   setContactId: (id: string | null) => void;
   setAccountId: (id: string | null) => void;
   setProjects: (projects: PortalProject[]) => void;
@@ -67,6 +69,7 @@ interface ShellStore {
 export const useShellStore = create<ShellStore>((set) => ({
   shellState: 'explore',
   userEmail: null,
+  userRole: 'guest',
   contactId: null,
   accountId: null,
   projects: [],
@@ -81,6 +84,7 @@ export const useShellStore = create<ShellStore>((set) => ({
 
   setShellState: (shellState) => set({ shellState }),
   setUserEmail: (userEmail) => set({ userEmail }),
+  setUserRole: (userRole) => set({ userRole }),
   setContactId: (contactId) => set({ contactId }),
   setAccountId: (accountId) => set({ accountId }),
   setProjects: (projects) => set({ projects }),
@@ -97,6 +101,7 @@ export const useShellStore = create<ShellStore>((set) => ({
     set({
       shellState: 'explore',
       userEmail: null,
+      userRole: 'guest',
       contactId: null,
       accountId: null,
       projects: [],
