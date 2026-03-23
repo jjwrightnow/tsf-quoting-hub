@@ -132,7 +132,7 @@ const ChatThread = () => {
     msgs.push({
       id: 'welcome',
       role: 'assistant',
-      content: `Welcome! I'm ${chatbotName}, here to help with your sign project.`,
+      content: `Welcome! I'm ${chatbotName}, here to help with your sign project.\n\n_I can answer questions about our products, materials, and profiles. For safety, I don't provide electrical, wiring, or installation advice — please consult a licensed professional for those needs._`,
       component: welcomeComponent,
     });
 

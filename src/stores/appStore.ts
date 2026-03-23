@@ -30,6 +30,7 @@ export interface OperatorConfig {
   primary_color: string | null;
   support_email: string | null;
   canned_questions: { q: string; a: string }[];
+  context_instruction: string | null;
 }
 
 interface AppState {
