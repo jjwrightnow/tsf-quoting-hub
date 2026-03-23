@@ -62,8 +62,6 @@ interface WinningLineConfiguratorProps {
 type UiMode = 'pro' | 'client';
 
 /* ─── Constants ─── */
-const TECH_BUTTONS = ['Premium', 'Standard', 'Acrylic', 'Solid Acrylic', 'Flat Cut'] as const;
-
 const PRICE_TIER: Record<string, { label: string; color: string }> = {
   Premium: { label: '$$$', color: 'text-cfg-pink' },
   Acrylic: { label: '$$', color: 'text-cfg-blue' },
@@ -80,19 +78,6 @@ const MATERIAL_BORDER: Record<string, string> = {
   PVC: 'border-l-teal-400',
   vinyl: 'border-l-purple-400',
   'wire/electrical': 'border-l-red-400',
-};
-
-const TECH_THUMBNAILS: Record<string, { label: string; sublabel: string; count: number; hover: string; color: string; bg: string; fullName: string }> = {
-  PF: { label: 'Premium', sublabel: 'Fabricated', count: 44, color: '#c0c0c0', bg: '#1a1a2e', fullName: 'Premium',
-    hover: 'Hand-welded stainless steel or aluminum. Highest grade in our range.' },
-  SF: { label: 'Standard', sublabel: 'Fabricated', count: 3, color: '#9ca3af', bg: '#1a1a2e', fullName: 'Standard',
-    hover: 'Welded aluminum construction. Reliable commercial-grade option.' },
-  AF: { label: 'Acrylic', sublabel: 'Fabricated', count: 7, color: '#06b6d4', bg: '#0e2a2e', fullName: 'Acrylic',
-    hover: 'Metal body with acrylic face panel. Wide range of face colors.' },
-  SA: { label: 'Solid', sublabel: 'Acrylic', count: 19, color: '#3b82f6', bg: '#0f1a2e', fullName: 'Solid Acrylic',
-    hover: 'Entire letter routed from a solid acrylic block. Best for heights up to 18 inches.' },
-  FC: { label: 'Flat Cut', sublabel: 'Single Layer', count: 6, color: '#f59e0b', bg: '#1e1a0e', fullName: 'Flat Cut',
-    hover: 'Single flat layer of cut material. No depth or return. Most affordable option.' },
 };
 
 /* ─── Client mode mappings ─── */
