@@ -36,6 +36,7 @@ export interface PortalSign {
 interface ShellStore {
   shellState: ShellState;
   userEmail: string | null;
+  userRole: string;
   contactId: string | null;
   accountId: string | null;
   projects: PortalProject[];
@@ -50,6 +51,7 @@ interface ShellStore {
 
   setShellState: (state: ShellState) => void;
   setUserEmail: (email: string | null) => void;
+  setUserRole: (role: string) => void;
   setContactId: (id: string | null) => void;
   setAccountId: (id: string | null) => void;
   setProjects: (projects: PortalProject[]) => void;
