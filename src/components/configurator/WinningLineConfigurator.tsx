@@ -8,6 +8,7 @@ interface Profile {
   id: string;
   profile_code: string;
   profile_name: string;
+  display_name: string | null;
   lighting_code: string;
   technology: string | null;
   illustration_url: string | null;
