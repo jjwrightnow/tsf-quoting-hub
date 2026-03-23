@@ -46,6 +46,7 @@ function ConfiguratorBridge() {
   );
 }
 
+const Dashboard = () => {
   const { session, signOut } = useAuth();
   const navigate = useNavigate();
   const userTier = useAppStore((s) => s.userTier);
