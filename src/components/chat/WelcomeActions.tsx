@@ -25,6 +25,7 @@ const WelcomeActions = () => {
     const id = result?.id;
     if (!id) throw new Error('Failed to create session');
     setSessionId(id);
+    localStorage.setItem('chat_session_id', id);
     return id;
   };
 

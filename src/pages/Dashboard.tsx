@@ -1,9 +1,6 @@
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import ProjectShell from '@/components/shell/ProjectShell';
-import WinningLineConfigurator from '@/components/configurator/WinningLineConfigurator';
 import { useAppStore } from '@/stores/appStore';
-import { useWizardStore } from '@/stores/wizardStore';
 import { useSignStore } from '@/stores/signStore';
 import { useShellStore } from '@/stores/shellStore';
 import { useAuth } from '@/hooks/useAuth';
@@ -11,21 +8,24 @@ import { useOperatorConfig } from '@/hooks/useOperatorConfig';
 import { useQuotePolling } from '@/hooks/usePolling';
 import { useWizardAutoSave } from '@/hooks/useWizardAutoSave';
 import AppSidebar from '@/components/layout/AppSidebar';
-import MainPanel from '@/components/layout/MainPanel';
 import InputBar from '@/components/layout/InputBar';
+import ProjectShell from '@/components/shell/ProjectShell';
+import WinningLineConfigurator from '@/components/configurator/WinningLineConfigurator';
+import ChatThread from '@/components/chat/ChatThread';
+import ChatErrorBoundary from '@/components/chat/ChatErrorBoundary';
 import { useNavigate } from 'react-router-dom';
 
-/** Bridge component reads shell state and passes props to configurator */
+/** Bridge reads shell state and passes props to configurator */
 function ConfiguratorBridge() {
   const shellState = useShellStore((s) => s.shellState);
   const activeProject = useShellStore((s) => s.activeProject);
+  const editingSign = useShellStore((s) => s.editingSign);
 
   const projectProp = shellState === 'in_project' && activeProject
     ? { id: activeProject.id, project_name: activeProject.project_name }
     : null;
 
   const handleSignSaved = () => {
-    // Reload signs in shell
     const store = useShellStore.getState();
     if (store.activeProject) {
       supabase
@@ -42,8 +42,82 @@ function ConfiguratorBridge() {
   return (
     <WinningLineConfigurator
       activeProject={projectProp}
+      editingSign={shellState === 'in_project' ? editingSign : null}
       onSignSaved={handleSignSaved}
     />
+  );
+}
+
+/** Floating chat overlay */
+function FloatingChat() {
+  const [chatOpen, setChatOpen] = useState(
+    () => localStorage.getItem('signmaker_chat_open') === 'true'
+  );
+  const [pulse, setPulse] = useState(false);
+  const lastProfileSelected = useShellStore((s) => s.lastProfileSelected);
+  const addSignFormOpen = useShellStore((s) => s.addSignFormOpen);
+
+  // Pulse when profile is selected
+  useEffect(() => {
+    if (lastProfileSelected) {
+      setPulse(true);
+      const t = setTimeout(() => setPulse(false), 600);
+      return () => clearTimeout(t);
+    }
+  }, [lastProfileSelected]);
+
+  const toggle = () => {
+    const next = !chatOpen;
+    setChatOpen(next);
+    localStorage.setItem('signmaker_chat_open', String(next));
+  };
+
+  return (
+    <>
+      {/* Chat overlay panel */}
+      {chatOpen && (
+        <div
+          className={`fixed z-[55] bg-card border border-border rounded-t-2xl shadow-2xl flex flex-col
+            bottom-20 w-[420px] h-[560px]
+            max-md:inset-x-0 max-md:bottom-0 max-md:w-full max-md:h-[min(65vh,calc(100vh-env(safe-area-inset-bottom)-120px))] max-md:rounded-t-2xl
+            ${addSignFormOpen ? 'right-[460px]' : 'right-6'}
+            md:right-6 transition-all duration-200
+          `}
+          style={addSignFormOpen ? { right: 460 } : { right: 24 }}
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between px-4 py-3 border-b border-border shrink-0">
+            <span className="text-sm font-semibold text-foreground">LetterMan</span>
+            <button
+              onClick={toggle}
+              className="text-muted-foreground hover:text-foreground transition-colors text-xs"
+            >
+              ✕
+            </button>
+          </div>
+          {/* Chat body */}
+          <div className="flex-1 min-h-0 flex flex-col">
+            <ChatErrorBoundary>
+              <ChatThread />
+            </ChatErrorBoundary>
+          </div>
+          {/* Input */}
+          <div className="shrink-0">
+            <InputBar />
+          </div>
+        </div>
+      )}
+
+      {/* Floating toggle button */}
+      <button
+        onClick={toggle}
+        className={`fixed bottom-6 right-6 z-50 rounded-full bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground shadow-lg hover:bg-primary/90 transition-all duration-200 ${
+          pulse ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''
+        }`}
+      >
+        {chatOpen ? 'Close' : 'Ask LetterMan'}
+      </button>
+    </>
   );
 }
 
@@ -52,12 +126,8 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const userTier = useAppStore((s) => s.userTier);
   const setUserTier = useAppStore((s) => s.setUserTier);
-  const wizardActive = useAppStore((s) => s.wizardActive);
-  const activeQuoteId = useAppStore((s) => s.activeQuoteId);
-  const activeSignId = useAppStore((s) => s.activeSignId);
   const sidebarOpen = useAppStore((s) => s.sidebarOpen);
   const setSidebarOpen = useAppStore((s) => s.setSidebarOpen);
-  const chatPhase = useSignStore((s) => s.chatPhase);
   const operatorConfig = useOperatorConfig();
 
   // Set tier based on auth session
@@ -73,9 +143,6 @@ const Dashboard = () => {
   useQuotePolling(userTier === 2 && !!session);
   useWizardAutoSave();
 
-  // Determine if InputBar should show free-form or canned
-  const showFullInputBar = userTier === 2 && (wizardActive || activeQuoteId || activeSignId || chatPhase !== 'welcome');
-
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background">
       {/* Sidebar — tier 2 only */}
@@ -87,7 +154,7 @@ const Dashboard = () => {
         />
       )}
 
-      {/* Main area */}
+      {/* Main area — full width, configurator only */}
       <div className="relative flex flex-1 flex-col min-w-0">
         {/* Header */}
         <header className="flex h-12 items-center justify-between border-b border-border bg-card px-4">
@@ -130,18 +197,16 @@ const Dashboard = () => {
           )}
         </header>
 
-        {/* Right panel: ProjectShell wrapping configurator */}
+        {/* Right panel: ProjectShell wrapping configurator — full width */}
         <div className="flex-1 overflow-hidden">
           <ProjectShell>
             <ConfiguratorBridge />
           </ProjectShell>
         </div>
-
-        {/* Input bar — always visible */}
-        <div className="shrink-0">
-          <InputBar />
-        </div>
       </div>
+
+      {/* Floating chat overlay */}
+      <FloatingChat />
 
       {/* Mobile overlay */}
       {userTier === 2 && sidebarOpen && (

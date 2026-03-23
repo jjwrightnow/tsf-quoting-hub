@@ -563,6 +563,7 @@ export type Database = {
           brand_name: string | null
           canned_questions: Json | null
           chatbot_name: string | null
+          context_instruction: string | null
           id: string
           logo_url: string | null
           primary_color: string | null
@@ -573,6 +574,7 @@ export type Database = {
           brand_name?: string | null
           canned_questions?: Json | null
           chatbot_name?: string | null
+          context_instruction?: string | null
           id?: string
           logo_url?: string | null
           primary_color?: string | null
@@ -583,6 +585,7 @@ export type Database = {
           brand_name?: string | null
           canned_questions?: Json | null
           chatbot_name?: string | null
+          context_instruction?: string | null
           id?: string
           logo_url?: string | null
           primary_color?: string | null
@@ -1600,6 +1603,110 @@ export type Database = {
       }
     }
     Views: {
+      portal_signs_display: {
+        Row: {
+          acrylic_face: string | null
+          airtable_sign_id: string | null
+          artwork_urls: string[] | null
+          back_type: string | null
+          created_at: string | null
+          depth: string | null
+          display_height: string | null
+          finish: string | null
+          height: string | null
+          height_inches: number | null
+          id: string | null
+          is_complete: boolean | null
+          lead_wires: string | null
+          led_color: string | null
+          metal_type: string | null
+          mounting: string | null
+          notes: string | null
+          profile_code: string | null
+          profile_type: string | null
+          project_id: string | null
+          sets: number | null
+          sign_name: string | null
+          sign_text: string | null
+          sort_order: number | null
+          spec_data: Json | null
+          ul_label: string | null
+          updated_at: string | null
+          user_email: string | null
+          wire_exit: string | null
+        }
+        Insert: {
+          acrylic_face?: string | null
+          airtable_sign_id?: string | null
+          artwork_urls?: string[] | null
+          back_type?: string | null
+          created_at?: string | null
+          depth?: string | null
+          display_height?: never
+          finish?: string | null
+          height?: string | null
+          height_inches?: number | null
+          id?: string | null
+          is_complete?: boolean | null
+          lead_wires?: string | null
+          led_color?: string | null
+          metal_type?: string | null
+          mounting?: string | null
+          notes?: string | null
+          profile_code?: string | null
+          profile_type?: string | null
+          project_id?: string | null
+          sets?: number | null
+          sign_name?: string | null
+          sign_text?: string | null
+          sort_order?: number | null
+          spec_data?: Json | null
+          ul_label?: string | null
+          updated_at?: string | null
+          user_email?: string | null
+          wire_exit?: string | null
+        }
+        Update: {
+          acrylic_face?: string | null
+          airtable_sign_id?: string | null
+          artwork_urls?: string[] | null
+          back_type?: string | null
+          created_at?: string | null
+          depth?: string | null
+          display_height?: never
+          finish?: string | null
+          height?: string | null
+          height_inches?: number | null
+          id?: string | null
+          is_complete?: boolean | null
+          lead_wires?: string | null
+          led_color?: string | null
+          metal_type?: string | null
+          mounting?: string | null
+          notes?: string | null
+          profile_code?: string | null
+          profile_type?: string | null
+          project_id?: string | null
+          sets?: number | null
+          sign_name?: string | null
+          sign_text?: string | null
+          sort_order?: number | null
+          spec_data?: Json | null
+          ul_label?: string | null
+          updated_at?: string | null
+          user_email?: string | null
+          wire_exit?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "portal_signs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "portal_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_summary: {
         Row: {
           complete_sign_count: number | null
