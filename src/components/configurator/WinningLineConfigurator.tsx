@@ -828,7 +828,7 @@ export default function WinningLineConfigurator({
         {/* Upgrade 1: Pro / Client toggle */}
         <div className="flex rounded-md bg-secondary p-0.5 shrink-0">
           <button
-            onClick={() => setUiMode('pro')}
+            onClick={() => { setUiMode('pro'); localStorage.setItem('signmaker_ui_mode', 'pro'); }}
             className={`rounded px-2.5 py-1 text-[10px] font-semibold transition-colors ${
               uiMode === 'pro' ? 'bg-cfg-blue text-primary-foreground' : 'text-cfg-muted hover:text-foreground'
             }`}
