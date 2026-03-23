@@ -204,7 +204,7 @@ function SummaryBar({
 
 /* ─── Stepper ─── */
 function Stepper({ step }: { step: number }) {
-  const steps = ['Choose lighting', 'Pick style', 'Review and quote'];
+  const steps = ['Choose lighting', 'Pick style', 'Review and build'];
   return (
     <div className="flex items-center gap-4 w-full text-[11px] font-medium">
       {steps.map((label, i) => (
@@ -976,7 +976,7 @@ export default function WinningLineConfigurator({
           <div ref={zone0Ref} className="px-4 py-4 border-b border-border">
             <div className="flex items-center gap-2 mb-3">
               <span className="flex h-6 w-6 items-center justify-center rounded bg-[#1e1e35] text-[#3b82f6] text-xs font-bold shrink-0">1</span>
-              <h2 className="text-sm font-semibold text-foreground">Choose a lighting style</h2>
+              <h2 className="text-sm font-semibold text-foreground">Choose a Lighting Style</h2>
             </div>
 
             {/* Lighting Style label */}
@@ -1122,7 +1122,7 @@ export default function WinningLineConfigurator({
           <div ref={zone1Ref} className="px-4 py-4 border-b border-border">
             <div className="flex items-center gap-2 mb-3">
               <span className="flex h-6 w-6 items-center justify-center rounded bg-[#1e1e35] text-[#3b82f6] text-xs font-bold shrink-0">2</span>
-              <h2 className="text-sm font-semibold text-foreground">Select a profile</h2>
+              <h2 className="text-sm font-semibold text-foreground">Select a Profile</h2>
             </div>
             {loadingProfiles ? (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -1160,9 +1160,9 @@ export default function WinningLineConfigurator({
           <div ref={zone2Ref} className="px-4 py-4 opacity-40">
             <div className="flex items-center gap-2 mb-3">
               <span className="flex h-6 w-6 items-center justify-center rounded bg-[#1e1e35] text-[#3b82f6] text-xs font-bold shrink-0">3</span>
-              <h2 className="text-sm font-semibold text-foreground">Review and quote</h2>
+              <h2 className="text-sm font-semibold text-foreground">Review and Build</h2>
             </div>
-            <p className="text-sm text-cfg-muted">Select a profile above to see the construction details.</p>
+            <p className="text-sm text-cfg-muted">Select a profile above to see how it's built.</p>
           </div>
         </div>
       )}
