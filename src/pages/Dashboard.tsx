@@ -1,8 +1,11 @@
 import { useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import ProjectShell from '@/components/shell/ProjectShell';
+import WinningLineConfigurator from '@/components/configurator/WinningLineConfigurator';
 import { useAppStore } from '@/stores/appStore';
 import { useWizardStore } from '@/stores/wizardStore';
 import { useSignStore } from '@/stores/signStore';
+import { useShellStore } from '@/stores/shellStore';
 import { useAuth } from '@/hooks/useAuth';
 import { useOperatorConfig } from '@/hooks/useOperatorConfig';
 import { useQuotePolling } from '@/hooks/usePolling';
@@ -11,6 +14,38 @@ import AppSidebar from '@/components/layout/AppSidebar';
 import MainPanel from '@/components/layout/MainPanel';
 import InputBar from '@/components/layout/InputBar';
 import { useNavigate } from 'react-router-dom';
+
+/** Bridge component reads shell state and passes props to configurator */
+function ConfiguratorBridge() {
+  const shellState = useShellStore((s) => s.shellState);
+  const activeProject = useShellStore((s) => s.activeProject);
+
+  const projectProp = shellState === 'in_project' && activeProject
+    ? { id: activeProject.id, project_name: activeProject.project_name }
+    : null;
+
+  const handleSignSaved = () => {
+    // Reload signs in shell
+    const store = useShellStore.getState();
+    if (store.activeProject) {
+      supabase
+        .from('portal_signs')
+        .select('*')
+        .eq('project_id', store.activeProject.id)
+        .order('sort_order', { ascending: true })
+        .then(({ data }) => {
+          if (data) store.setActiveSigns(data as any);
+        });
+    }
+  };
+
+  return (
+    <WinningLineConfigurator
+      activeProject={projectProp}
+      onSignSaved={handleSignSaved}
+    />
+  );
+}
 
 const Dashboard = () => {
   const { session, signOut } = useAuth();
@@ -95,10 +130,10 @@ const Dashboard = () => {
           )}
         </header>
 
-        {/* Chat / Content */}
+        {/* Right panel: ProjectShell wrapping configurator */}
         <div className="flex-1 overflow-hidden">
           <ProjectShell>
-            <MainPanel />
+            <ConfiguratorBridge />
           </ProjectShell>
         </div>
 

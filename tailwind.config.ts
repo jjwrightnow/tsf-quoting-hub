@@ -70,6 +70,12 @@ export default {
           "status-review": "hsl(var(--tsf-status-review))",
           "status-success": "hsl(var(--tsf-status-success))",
         },
+        cfg: {
+          blue: "hsl(var(--cfg-blue))",
+          pink: "hsl(var(--cfg-pink))",
+          surface: "hsl(var(--cfg-surface))",
+          muted: "hsl(var(--cfg-muted))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
