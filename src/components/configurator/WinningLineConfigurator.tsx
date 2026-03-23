@@ -978,7 +978,24 @@ export default function WinningLineConfigurator({
 
             {/* Lighting Style thumbnail grid */}
             <TooltipProvider>
-              <div className="grid grid-cols-4 md:grid-cols-8 gap-2 mb-4">
+              <div className="grid grid-cols-4 md:grid-cols-8 gap-1.5 mb-4">
+                {/* Show All reset button */}
+                <button
+                  onClick={() => setLightingCodeFilters(new Set())}
+                  className={`flex flex-col items-center rounded-lg border overflow-hidden transition-all cursor-pointer
+                    ${lightingCodeFilters.size === 0
+                      ? 'border-[#3b82f6] ring-1 ring-[#3b82f6] bg-[#3b82f6]/10'
+                      : 'border-[#2a2a40] bg-[#1a1a2e] hover:border-[#3b82f6]/40'
+                    }`}
+                >
+                  <div className="w-full aspect-square bg-[#151525] overflow-hidden flex items-center justify-center">
+                    <span className={`text-xl font-bold ${lightingCodeFilters.size === 0 ? 'text-[#3b82f6]' : 'text-[#374151]'}`}>✦</span>
+                  </div>
+                  <div className="px-1 py-1 w-full text-center">
+                    <div className={`text-[8px] font-medium leading-tight ${lightingCodeFilters.size === 0 ? 'text-[#3b82f6]' : 'text-[#9ca3af]'}`}>All</div>
+                    <div className="text-[7px] text-[#4b5563]">&nbsp;</div>
+                  </div>
+                </button>
                 {lightingStyles.map((style) => {
                   const active = isLightingCodeActive(style.lighting_code);
                   return (
@@ -989,32 +1006,30 @@ export default function WinningLineConfigurator({
                           className={`flex flex-col items-center rounded-lg border overflow-hidden transition-all cursor-pointer
                             ${active
                               ? 'border-[#3b82f6] ring-1 ring-[#3b82f6] bg-[#3b82f6]/10'
-                              : 'border-[#2a2a40] bg-[#1a1a2e] hover:border-[#3b82f6]/50'
+                              : 'border-[#2a2a40] bg-[#1a1a2e] hover:border-[#3b82f6]/40'
                             }`}
                         >
-                          {/* Thumbnail image */}
                           <div className="w-full aspect-square bg-[#151525] overflow-hidden">
                             {style.thumbnail_url ? (
                               <img src={style.thumbnail_url} alt={style.display_name}
                                 className="w-full h-full object-cover" />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center">
-                                <span className={`text-2xl font-bold ${active ? 'text-[#3b82f6]' : 'text-[#374151]'}`}>A</span>
+                                <span className={`text-xl font-bold ${active ? 'text-[#3b82f6]' : 'text-[#374151]'}`}>A</span>
                               </div>
                             )}
                           </div>
-                          {/* Label */}
                           <div className="px-1 py-1 w-full text-center">
                             <div className={`text-[8px] font-medium leading-tight truncate ${active ? 'text-[#3b82f6]' : 'text-[#9ca3af]'}`}>
                               {style.display_name}
                             </div>
-                            <div className="text-[7px] text-[#4b5563] leading-tight">{style.sku_label}</div>
+                            <div className="text-[7px] text-[#4b5563]">{style.sku_label}</div>
                           </div>
                         </button>
                       </TooltipTrigger>
-                      <TooltipContent side="bottom" className="max-w-[180px] text-xs text-center">
-                        <p className="font-medium">{style.display_name}</p>
-                        <p className="text-muted-foreground mt-0.5">{style.hover_description}</p>
+                      <TooltipContent side="bottom" className="max-w-[200px] text-xs text-center">
+                        <p className="font-semibold mb-0.5">{style.display_name}</p>
+                        <p className="text-muted-foreground">{style.hover_description}</p>
                       </TooltipContent>
                     </Tooltip>
                   );
@@ -1022,35 +1037,53 @@ export default function WinningLineConfigurator({
               </div>
             </TooltipProvider>
 
-            {/* Construction (Technology) label */}
-            <p className="text-xs font-semibold text-[#6b7280] uppercase tracking-wider mb-2">Construction</p>
+            {/* Construction (Technology) section */}
+            <div className="border-t border-border pt-3">
+              <p className="text-xs font-semibold text-[#6b7280] uppercase tracking-wider mb-2">Construction</p>
 
-            {/* Technology thumbnail cards */}
-            <TooltipProvider>
-              <div className="flex gap-2 flex-wrap mb-3">
-                {Object.entries(TECH_THUMBNAILS).map(([code, t]) => {
-                  const active = techFilter.has(t.fullName);
-                  return (
-                    <Tooltip key={code}>
-                      <TooltipTrigger asChild>
-                        <button
-                          onClick={() => toggleTech(t.fullName)}
-                          className={`relative flex flex-col items-center justify-center rounded-lg border p-2 w-20 h-24 transition-all
-                            ${active ? 'border-[#3b82f6] ring-1 ring-[#3b82f6]' : 'border-[#2a2a40] hover:border-[#3b82f6]/50'}`}
-                          style={{ background: active ? `${t.color}18` : t.bg }}
-                        >
-                          <span className="absolute top-1 right-1.5 text-[8px] text-[#4b5563]">{t.count}</span>
-                          <span style={{ color: active ? t.color : `${t.color}90` }} className="text-3xl font-bold leading-none mb-1">A</span>
-                          <span style={{ color: active ? t.color : '#9ca3af' }} className="text-[9px] font-semibold leading-tight">{t.label}</span>
-                          <span className="text-[8px] text-[#4b5563] leading-tight">{t.sublabel}</span>
-                        </button>
-                      </TooltipTrigger>
-                      <TooltipContent side="bottom" className="max-w-[180px] text-xs">{t.hover}</TooltipContent>
-                    </Tooltip>
-                  );
-                })}
-              </div>
-            </TooltipProvider>
+              <TooltipProvider>
+                <div className="flex flex-wrap gap-1.5 mb-3">
+                  {techClasses.map((tech) => {
+                    const active = techFilter.has(tech.code);
+                    return (
+                      <Tooltip key={tech.code}>
+                        <TooltipTrigger asChild>
+                          <button
+                            onClick={() => toggleTech(tech.code)}
+                            className={`relative flex flex-col items-center justify-end rounded-lg border overflow-hidden transition-all w-[72px]
+                              ${active ? 'border-[#3b82f6] ring-1 ring-[#3b82f6]' : 'border-[#2a2a40] bg-[#1a1a2e] hover:border-[#3b82f6]/40'}`}
+                          >
+                            <div className="w-full aspect-square bg-[#151525] overflow-hidden">
+                              {tech.thumbnail_url ? (
+                                <img src={tech.thumbnail_url} alt={tech.short_name} className="w-full h-full object-cover" />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center">
+                                  <span className={`text-2xl font-bold ${active ? 'text-[#3b82f6]' : 'text-[#374151]'}`}>A</span>
+                                </div>
+                              )}
+                            </div>
+                            <div className="w-full px-1 py-1 text-center">
+                              <div className={`text-[8px] font-semibold leading-tight truncate ${active ? 'text-[#3b82f6]' : 'text-[#9ca3af]'}`}>
+                                {tech.short_name}
+                              </div>
+                              <div className={`text-[8px] font-medium ${active ? 'text-[#3b82f6]/70' : 'text-[#4b5563]'}`}>
+                                {tech.price_tier}
+                              </div>
+                            </div>
+                            {active && <div className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-[#3b82f6]" />}
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom" className="max-w-[220px] text-xs">
+                          <p className="font-semibold mb-0.5">{tech.display_name} — {tech.price_tier}</p>
+                          <p className="text-muted-foreground text-[10px]">{tech.materials}</p>
+                          <p className="text-muted-foreground mt-1">{tech.hover_description}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    );
+                  })}
+                </div>
+              </TooltipProvider>
+            </div>
 
             <div className="mt-2">
               <ContextRibbon
