@@ -486,6 +486,39 @@ export type Database = {
         }
         Relationships: []
       }
+      lighting_styles: {
+        Row: {
+          display_name: string
+          hover_description: string | null
+          id: string
+          is_active: boolean | null
+          lighting_code: string
+          sku_label: string
+          sort_order: number
+          thumbnail_url: string | null
+        }
+        Insert: {
+          display_name: string
+          hover_description?: string | null
+          id?: string
+          is_active?: boolean | null
+          lighting_code: string
+          sku_label: string
+          sort_order?: number
+          thumbnail_url?: string | null
+        }
+        Update: {
+          display_name?: string
+          hover_description?: string | null
+          id?: string
+          is_active?: boolean | null
+          lighting_code?: string
+          sku_label?: string
+          sort_order?: number
+          thumbnail_url?: string | null
+        }
+        Relationships: []
+      }
       material_finish_compatibility: {
         Row: {
           finish_2b: boolean | null
@@ -1565,6 +1598,90 @@ export type Database = {
           last_polled_at?: string
           last_successful_at?: string | null
           poll_count?: number
+        }
+        Relationships: []
+      }
+      technology_classes: {
+        Row: {
+          code: string
+          display_name: string
+          hover_description: string
+          id: string
+          is_active: boolean | null
+          materials: string
+          price_tier: string
+          short_name: string
+          sort_order: number
+          thumbnail_url: string | null
+        }
+        Insert: {
+          code: string
+          display_name: string
+          hover_description: string
+          id?: string
+          is_active?: boolean | null
+          materials: string
+          price_tier: string
+          short_name: string
+          sort_order?: number
+          thumbnail_url?: string | null
+        }
+        Update: {
+          code?: string
+          display_name?: string
+          hover_description?: string
+          id?: string
+          is_active?: boolean | null
+          materials?: string
+          price_tier?: string
+          short_name?: string
+          sort_order?: number
+          thumbnail_url?: string | null
+        }
+        Relationships: []
+      }
+      ui_tooltips: {
+        Row: {
+          best_for: string | null
+          category: string
+          created_at: string | null
+          id: string
+          key: string
+          label: string
+          long_description: string | null
+          not_ideal_for: string | null
+          price_indicator: string | null
+          short_description: string
+          sort_order: number | null
+          svg_illustration: string | null
+        }
+        Insert: {
+          best_for?: string | null
+          category: string
+          created_at?: string | null
+          id?: string
+          key: string
+          label: string
+          long_description?: string | null
+          not_ideal_for?: string | null
+          price_indicator?: string | null
+          short_description: string
+          sort_order?: number | null
+          svg_illustration?: string | null
+        }
+        Update: {
+          best_for?: string | null
+          category?: string
+          created_at?: string | null
+          id?: string
+          key?: string
+          label?: string
+          long_description?: string | null
+          not_ideal_for?: string | null
+          price_indicator?: string | null
+          short_description?: string
+          sort_order?: number | null
+          svg_illustration?: string | null
         }
         Relationships: []
       }
