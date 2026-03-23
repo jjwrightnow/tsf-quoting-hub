@@ -656,7 +656,7 @@ function ContextRibbon({
     }
 
     if (parts.length === 0) {
-      return `Showing all ${filteredCount} profiles`;
+      return 'Select a lighting style above to begin';
     }
 
     return `${parts.join(' ')} — ${filteredCount} profiles`;
