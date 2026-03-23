@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import ProjectShell from '@/components/shell/ProjectShell';
 import { useAppStore } from '@/stores/appStore';
 import { useWizardStore } from '@/stores/wizardStore';
 import { useSignStore } from '@/stores/signStore';
@@ -95,8 +96,10 @@ const Dashboard = () => {
         </header>
 
         {/* Chat / Content */}
-        <div className="flex-1 overflow-auto">
-          <MainPanel />
+        <div className="flex-1 overflow-hidden">
+          <ProjectShell>
+            <MainPanel />
+          </ProjectShell>
         </div>
 
         {/* Input bar — always visible */}
