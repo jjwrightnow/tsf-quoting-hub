@@ -135,30 +135,20 @@ function LightingIcon({ code, mode }: { code: string; mode: UiMode }) {
 
 /* ─── Upgrade 4: Scale silhouette SVG ─── */
 function ScaleSilhouette({ heightInches }: { heightInches: number }) {
-  const refHeight = 72;
   const svgH = 36;
-  const svgW = 36;
+  const svgW = 20;
+  const refHeight = 72;
   const personH = svgH - 2;
-  const letterH = Math.max(1, (heightInches / refHeight) * personH);
+  const letterH = Math.max(2, (heightInches / refHeight) * personH);
 
   return (
-    <svg width={svgW} height={svgH} viewBox={`0 0 ${svgW} ${svgH}`} className="opacity-70">
-      {/* Stick figure */}
-      <circle cx="10" cy={svgH - personH + 2} r="2.5" fill="none" stroke="hsl(var(--cfg-muted))" strokeWidth="1" />
-      <line x1="10" y1={svgH - personH + 4.5} x2="10" y2={svgH - 8} stroke="hsl(var(--cfg-muted))" strokeWidth="1" />
-      <line x1="10" y1={svgH - 8} x2="6" y2={svgH - 1} stroke="hsl(var(--cfg-muted))" strokeWidth="1" />
-      <line x1="10" y1={svgH - 8} x2="14" y2={svgH - 1} stroke="hsl(var(--cfg-muted))" strokeWidth="1" />
-      <line x1="10" y1={svgH - personH + 10} x2="5" y2={svgH - personH + 16} stroke="hsl(var(--cfg-muted))" strokeWidth="1" />
-      <line x1="10" y1={svgH - personH + 10} x2="15" y2={svgH - personH + 16} stroke="hsl(var(--cfg-muted))" strokeWidth="1" />
-      {/* Letter rectangle */}
-      <rect
-        x="22"
-        y={svgH - 1 - letterH}
-        width="10"
-        height={letterH}
-        rx="1"
-        fill="hsl(var(--cfg-blue) / 0.6)"
-      />
+    <svg width={svgW} height={svgH} viewBox={`0 0 ${svgW} ${svgH}`}>
+      {/* Architectural human bar — narrow vertical rectangle, bottom-aligned */}
+      <rect x="2" y={svgH - 2 - personH} width="4" height={personH}
+        fill="#6b7280" opacity="0.8" rx="1" />
+      {/* Letter height bar — fixed width, scales vertically only, bottom-aligned */}
+      <rect x="10" y={svgH - 2 - letterH} width="6" height={letterH}
+        fill="#3b82f6" opacity="0.6" rx="1" />
     </svg>
   );
 }
