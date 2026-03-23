@@ -195,7 +195,7 @@ function SummaryBar({
 function Stepper({ step }: { step: number }) {
   const steps = ['Choose lighting', 'Pick style', 'Review and quote'];
   return (
-    <div className="flex items-center gap-4 text-[11px] font-medium">
+    <div className="flex items-center gap-4 w-full text-[11px] font-medium">
       {steps.map((label, i) => (
         <span
           key={i}
