@@ -1160,9 +1160,9 @@ export default function WinningLineConfigurator({
           <div ref={zone2Ref} className="px-4 py-4 opacity-40">
             <div className="flex items-center gap-2 mb-3">
               <span className="flex h-6 w-6 items-center justify-center rounded bg-[#1e1e35] text-[#3b82f6] text-xs font-bold shrink-0">3</span>
-              <h2 className="text-sm font-semibold text-foreground">Review and quote</h2>
+              <h2 className="text-sm font-semibold text-foreground">Review and Build</h2>
             </div>
-            <p className="text-sm text-cfg-muted">Select a profile above to see the construction details.</p>
+            <p className="text-sm text-cfg-muted">Select a profile above to see how it's built.</p>
           </div>
         </div>
       )}
