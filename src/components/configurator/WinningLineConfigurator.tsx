@@ -216,6 +216,31 @@ function Stepper({ step }: { step: number }) {
   );
 }
 
+/* ─── Tech Placeholder ─── */
+const TECH_COLORS: Record<string, { bg: string; accent: string; label: string }> = {
+  PF: { bg: '#1a1a2e', accent: '#c0c0c0', label: 'Premium Metal' },
+  SF: { bg: '#1a1a2e', accent: '#9ca3af', label: 'Standard Metal' },
+  AF: { bg: '#1a1a2e', accent: '#3b82f6', label: 'Acrylic Face' },
+  SA: { bg: '#1a1a2e', accent: '#06b6d4', label: 'Solid Acrylic' },
+  FC: { bg: '#1a1a2e', accent: '#f59e0b', label: 'Flat Cut' },
+  CN: { bg: '#0f0f1a', accent: '#ec4899', label: 'Crystal Neon' },
+};
+
+function TechPlaceholder({ technology }: { technology: string | null }) {
+  const t = TECH_COLORS[technology || ''] || { bg: '#1a1a2e', accent: '#6b7280', label: technology || '—' };
+  return (
+    <div style={{ background: t.bg }} className="w-full h-full flex flex-col items-center justify-center gap-2">
+      <span style={{ color: t.accent, textShadow: `0 0 20px ${t.accent}40` }}
+        className="text-[56px] font-bold leading-none select-none">
+        A
+      </span>
+      <span style={{ color: t.accent }} className="text-[9px] font-medium uppercase tracking-widest opacity-60">
+        {t.label}
+      </span>
+    </div>
+  );
+}
+
 /* ─── Profile Card ─── */
 function ProfileCard({
   profile,
@@ -255,9 +280,7 @@ function ProfileCard({
             className="max-h-full max-w-full object-contain"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#1e1e35] to-[#151525]">
-            <span className="text-[64px] font-bold text-cfg-blue/20 select-none leading-none">A</span>
-          </div>
+          <TechPlaceholder technology={profile.technology} />
         )}
       </div>
       <p className="text-sm font-semibold text-foreground truncate">{profile.display_name || profile.profile_name}</p>

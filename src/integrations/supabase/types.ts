@@ -604,6 +604,8 @@ export type Database = {
           notes: string | null
           project_name: string
           quote_ref: string | null
+          share_pricing_visible: boolean | null
+          share_slug: string | null
           status: string
           submitted_at: string | null
           updated_at: string
@@ -617,6 +619,8 @@ export type Database = {
           notes?: string | null
           project_name: string
           quote_ref?: string | null
+          share_pricing_visible?: boolean | null
+          share_slug?: string | null
           status?: string
           submitted_at?: string | null
           updated_at?: string
@@ -630,6 +634,8 @@ export type Database = {
           notes?: string | null
           project_name?: string
           quote_ref?: string | null
+          share_pricing_visible?: boolean | null
+          share_slug?: string | null
           status?: string
           submitted_at?: string | null
           updated_at?: string
@@ -900,6 +906,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "profile_components_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_display"
+            referencedColumns: ["id"]
+          },
         ]
       }
       profiles: {
@@ -909,6 +922,7 @@ export type Database = {
           display_name: string | null
           face_style: string | null
           id: string
+          illustration_url: string | null
           is_active: boolean | null
           lighting_code: string
           notes: string | null
@@ -924,6 +938,7 @@ export type Database = {
           display_name?: string | null
           face_style?: string | null
           id?: string
+          illustration_url?: string | null
           is_active?: boolean | null
           lighting_code: string
           notes?: string | null
@@ -939,6 +954,7 @@ export type Database = {
           display_name?: string | null
           face_style?: string | null
           id?: string
+          illustration_url?: string | null
           is_active?: boolean | null
           lighting_code?: string
           notes?: string | null
@@ -949,6 +965,47 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      project_comments: {
+        Row: {
+          action: string | null
+          client_email: string
+          client_name: string | null
+          comment: string | null
+          created_at: string | null
+          id: string
+          project_id: string
+          share_slug: string | null
+        }
+        Insert: {
+          action?: string | null
+          client_email: string
+          client_name?: string | null
+          comment?: string | null
+          created_at?: string | null
+          id?: string
+          project_id: string
+          share_slug?: string | null
+        }
+        Update: {
+          action?: string | null
+          client_email?: string
+          client_name?: string | null
+          comment?: string | null
+          created_at?: string | null
+          id?: string
+          project_id?: string
+          share_slug?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_comments_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "portal_projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       project_library: {
         Row: {
@@ -992,48 +1049,6 @@ export type Database = {
           sign_types?: string[] | null
           source_base?: string | null
           vibe_description?: string | null
-        }
-        Relationships: []
-      }
-      projects: {
-        Row: {
-          created_at: string | null
-          id: string
-          image_url: string | null
-          location_type: string | null
-          name: string
-          notes: string | null
-          quote_number: string | null
-          status: string
-          updated_at: string | null
-          user_email: string
-          wall_type: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string
-          image_url?: string | null
-          location_type?: string | null
-          name: string
-          notes?: string | null
-          quote_number?: string | null
-          status?: string
-          updated_at?: string | null
-          user_email: string
-          wall_type?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          image_url?: string | null
-          location_type?: string | null
-          name?: string
-          notes?: string | null
-          quote_number?: string | null
-          status?: string
-          updated_at?: string | null
-          user_email?: string
-          wall_type?: string | null
         }
         Relationships: []
       }
@@ -1376,54 +1391,6 @@ export type Database = {
         }
         Relationships: []
       }
-      signs: {
-        Row: {
-          created_at: string | null
-          id: string
-          profile_type: string | null
-          project_id: string
-          sort_order: number | null
-          spec_data: Json | null
-          title: string
-          updated_at: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string
-          profile_type?: string | null
-          project_id: string
-          sort_order?: number | null
-          spec_data?: Json | null
-          title?: string
-          updated_at?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          profile_type?: string | null
-          project_id?: string
-          sort_order?: number | null
-          spec_data?: Json | null
-          title?: string
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "signs_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "project_summary"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "signs_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "projects"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       spec_options: {
         Row: {
           field_name: string
@@ -1608,6 +1575,7 @@ export type Database = {
           email: string
           id: string
           is_verified: boolean
+          temp_pro_expires_at: string | null
           ui_mode: string | null
           user_role: string | null
         }
@@ -1617,6 +1585,7 @@ export type Database = {
           email: string
           id?: string
           is_verified?: boolean
+          temp_pro_expires_at?: string | null
           ui_mode?: string | null
           user_role?: string | null
         }
@@ -1626,6 +1595,7 @@ export type Database = {
           email?: string
           id?: string
           is_verified?: boolean
+          temp_pro_expires_at?: string | null
           ui_mode?: string | null
           user_role?: string | null
         }
@@ -1654,6 +1624,96 @@ export type Database = {
           id?: string
         }
         Relationships: []
+      }
+      zzz_legacy_projects: {
+        Row: {
+          created_at: string | null
+          id: string
+          image_url: string | null
+          location_type: string | null
+          name: string
+          notes: string | null
+          quote_number: string | null
+          status: string
+          updated_at: string | null
+          user_email: string
+          wall_type: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          image_url?: string | null
+          location_type?: string | null
+          name: string
+          notes?: string | null
+          quote_number?: string | null
+          status?: string
+          updated_at?: string | null
+          user_email: string
+          wall_type?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          image_url?: string | null
+          location_type?: string | null
+          name?: string
+          notes?: string | null
+          quote_number?: string | null
+          status?: string
+          updated_at?: string | null
+          user_email?: string
+          wall_type?: string | null
+        }
+        Relationships: []
+      }
+      zzz_legacy_signs: {
+        Row: {
+          created_at: string | null
+          id: string
+          profile_type: string | null
+          project_id: string
+          sort_order: number | null
+          spec_data: Json | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          profile_type?: string | null
+          project_id: string
+          sort_order?: number | null
+          spec_data?: Json | null
+          title?: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          profile_type?: string | null
+          project_id?: string
+          sort_order?: number | null
+          spec_data?: Json | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "signs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "project_summary"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "signs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "zzz_legacy_projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
@@ -1824,6 +1884,60 @@ export type Database = {
           },
         ]
       }
+      profiles_display: {
+        Row: {
+          airtable_id: string | null
+          created_at: string | null
+          display_name: string | null
+          face_style: string | null
+          id: string | null
+          illustration_url: string | null
+          is_active: boolean | null
+          lighting_code: string | null
+          name: string | null
+          notes: string | null
+          profile_code: string | null
+          profile_name: string | null
+          return_type: string | null
+          technology: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          airtable_id?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          face_style?: string | null
+          id?: string | null
+          illustration_url?: string | null
+          is_active?: boolean | null
+          lighting_code?: string | null
+          name?: string | null
+          notes?: string | null
+          profile_code?: string | null
+          profile_name?: string | null
+          return_type?: string | null
+          technology?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          airtable_id?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          face_style?: string | null
+          id?: string | null
+          illustration_url?: string | null
+          is_active?: boolean | null
+          lighting_code?: string | null
+          name?: string | null
+          notes?: string | null
+          profile_code?: string | null
+          profile_name?: string | null
+          return_type?: string | null
+          technology?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       project_summary: {
         Row: {
           complete_sign_count: number | null
@@ -1857,6 +1971,7 @@ export type Database = {
         Returns: Json
       }
       archive_stale_projects: { Args: never; Returns: undefined }
+      get_effective_user_role: { Args: { p_email: string }; Returns: string }
       get_my_account_id: { Args: never; Returns: string }
       get_or_create_contact: {
         Args: { p_email: string }
@@ -1864,6 +1979,10 @@ export type Database = {
           account_id: string
           contact_id: string
         }[]
+      }
+      init_chat_session: {
+        Args: { p_company_name?: string; p_email?: string }
+        Returns: string
       }
       is_business_email: { Args: { p_email: string }; Returns: boolean }
       search_signage: {
