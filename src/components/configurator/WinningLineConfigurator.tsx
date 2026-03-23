@@ -1022,7 +1022,7 @@ export default function WinningLineConfigurator({
       {selectedProfile && (
         <div ref={zone2Ref} className="space-y-4">
           <p className="text-xs font-semibold text-foreground">
-            Construction — {selectedProfile.profile_name}
+            Construction — {selectedProfile.display_name || selectedProfile.profile_name}
           </p>
 
           {loadingComponents ? (
