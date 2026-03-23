@@ -903,10 +903,24 @@ export default function WinningLineConfigurator({
     onSignSaved?.();
   };
 
+  // Back to browse
+  const handleBackToBrowse = () => {
+    setSelectedProfile(null);
+    setComponents([]);
+    setStep(0);
+    setShowAddForm(false);
+    setShowQuoteForm(false);
+    containerRef.current?.scrollTo({ top: 0, behavior: 'instant' });
+  };
+
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const isProfileSelected = !!selectedProfile;
+
   return (
-    <div className="w-full space-y-3 font-sans">
-      {/* Top row: Summary + Mode toggle */}
-      <div className="flex items-center gap-3">
+    <div ref={containerRef} className="w-full font-sans">
+      {/* ── Persistent top bar: Summary + Mode toggle ── */}
+      <div className="flex items-center gap-3 px-4 py-3 border-b border-border">
         <div className="flex-1 min-w-0">
           <SummaryBar
             profile={selectedProfile?.display_name || selectedProfile?.profile_name || null}
@@ -914,7 +928,6 @@ export default function WinningLineConfigurator({
             onScrollTo={scrollTo}
           />
         </div>
-        {/* Upgrade 1: Pro / Client toggle */}
         <div className="flex rounded-md bg-secondary p-0.5 shrink-0">
           <button
             onClick={() => { setUiMode('pro'); localStorage.setItem('signmaker_ui_mode', 'pro'); }}
@@ -935,175 +948,280 @@ export default function WinningLineConfigurator({
         </div>
       </div>
 
-      {/* Stepper */}
-      <Stepper step={step} />
-
-      {/* ZONE 1 — Compact Lighting Filter */}
-      <div ref={zone0Ref} className="space-y-1">
-        <div className="flex flex-wrap items-center gap-1.5">
-          <span className="text-[10px] text-cfg-muted mr-0.5">Light:</span>
-          {LIGHTING_BUTTONS.map((btn) => {
-            const active = btn.position === -1
-              ? lightingFilters.size === 0
-              : lightingFilters.has(btn.position);
-            return (
-              <button
-                key={btn.label}
-                onClick={() => toggleLighting(btn.position)}
-                className={`rounded-full px-2.5 py-1 text-[10px] font-medium transition-colors ${
-                  active
-                    ? 'bg-cfg-blue text-primary-foreground'
-                    : 'bg-secondary text-cfg-muted hover:text-foreground'
-                }`}
-              >
-                {btn.label}
-              </button>
-            );
-          })}
-        </div>
-        <div className="flex flex-wrap items-center gap-1.5">
-          <span className="text-[10px] text-cfg-muted mr-0.5">Tech:</span>
-          {TECH_BUTTONS.map((tech) => {
-            const active = techFilter.has(tech);
-            return (
-              <button
-                key={tech}
-                onClick={() => toggleTech(tech)}
-                className={`rounded-full px-2.5 py-1 text-[10px] font-medium transition-colors ${
-                  active
-                    ? 'bg-cfg-blue text-primary-foreground'
-                    : 'bg-secondary text-cfg-muted hover:text-foreground'
-                }`}
-              >
-                {tech}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* AI Context Ribbon */}
-      <ContextRibbon
-        filteredCount={filteredProfiles.length}
-        lightingFilters={lightingFilters}
-        techFilter={techFilter}
-        selectedProfile={selectedProfile}
-      />
-
-      {/* Height control */}
-      <div className="flex items-center gap-2">
-        <span className="text-[10px] text-cfg-muted">Letter height</span>
-        <input
-          type="number"
-          min={1}
-          max={200}
-          value={letterHeightInches}
-          onChange={(e) => {
-            const v = parseFloat(e.target.value);
-            if (!isNaN(v) && v > 0) setLetterHeightInches(v);
-          }}
-          className="w-14 rounded border border-input bg-background px-2 py-0.5 text-xs text-foreground text-center focus:outline-none focus:ring-1 focus:ring-ring"
-        />
-        <span className="text-[10px] text-cfg-muted">in</span>
-      </div>
-
-      {/* ZONE 2 — Profile Grid */}
-      <div ref={zone1Ref}>
-        {loadingProfiles ? (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-40 rounded-lg shimmer-skeleton" />
-            ))}
-          </div>
-        ) : filteredProfiles.length === 0 ? (
-          <div className="text-center py-8">
-            <p className="text-sm text-cfg-muted">No profiles match</p>
-            <button
-              onClick={() => { setLightingFilters(new Set()); setTechFilter(new Set()); }}
-              className="text-xs text-cfg-blue hover:underline mt-1"
-            >
-              Clear filters
-            </button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {filteredProfiles.map((p) => (
-              <ProfileCard
-                key={p.id}
-                profile={p}
-                selected={selectedProfile?.id === p.id}
-                onClick={() => selectProfile(p)}
-                mode={uiMode}
-                letterHeight={letterHeightInches}
-              />
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* ZONE 3 — Construction Stack */}
-      {selectedProfile && (
-        <div ref={zone2Ref} className="space-y-4">
-          <p className="text-xs font-semibold text-foreground">
-            Construction — {selectedProfile.display_name || selectedProfile.profile_name}
-          </p>
-
-          {loadingComponents ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="h-32 rounded-lg shimmer-skeleton" />
-              ))}
+      {/* ════════════════════════════════════════════
+          VIEW A — Browse Mode (no profile selected)
+          ════════════════════════════════════════════ */}
+      {!isProfileSelected && (
+        <div>
+          {/* SECTION 1 — Lighting & Tech Filters */}
+          <div ref={zone0Ref} className="px-4 py-4 border-b border-border">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="flex h-6 w-6 items-center justify-center rounded bg-[#1e1e35] text-[#3b82f6] text-xs font-bold shrink-0">1</span>
+              <h2 className="text-sm font-semibold text-foreground">Choose a lighting style</h2>
             </div>
-          ) : (
-            <ConstructionStack components={components} mode={uiMode} />
-          )}
+            <div className="space-y-1.5">
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="text-[10px] text-cfg-muted mr-0.5">Light:</span>
+                {LIGHTING_BUTTONS.map((btn) => {
+                  const active = btn.position === -1
+                    ? lightingFilters.size === 0
+                    : lightingFilters.has(btn.position);
+                  return (
+                    <button
+                      key={btn.label}
+                      onClick={() => toggleLighting(btn.position)}
+                      className={`rounded-full px-2.5 py-1 text-[10px] font-medium transition-colors ${
+                        active
+                          ? 'bg-cfg-blue text-primary-foreground'
+                          : 'bg-secondary text-cfg-muted hover:text-foreground'
+                      }`}
+                    >
+                      {btn.label}
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="text-[10px] text-cfg-muted mr-0.5">Tech:</span>
+                {TECH_BUTTONS.map((tech) => {
+                  const active = techFilter.has(tech);
+                  return (
+                    <button
+                      key={tech}
+                      onClick={() => toggleTech(tech)}
+                      className={`rounded-full px-2.5 py-1 text-[10px] font-medium transition-colors ${
+                        active
+                          ? 'bg-cfg-blue text-primary-foreground'
+                          : 'bg-secondary text-cfg-muted hover:text-foreground'
+                      }`}
+                    >
+                      {tech}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            <div className="mt-2">
+              <ContextRibbon
+                filteredCount={filteredProfiles.length}
+                lightingFilters={lightingFilters}
+                techFilter={techFilter}
+                selectedProfile={null}
+              />
+            </div>
+            <div className="flex items-center gap-2 mt-2">
+              <span className="text-[10px] text-cfg-muted">Letter height</span>
+              <input
+                type="number"
+                min={1}
+                max={200}
+                value={letterHeightInches}
+                onChange={(e) => {
+                  const v = parseFloat(e.target.value);
+                  if (!isNaN(v) && v > 0) setLetterHeightInches(v);
+                }}
+                className="w-14 rounded border border-input bg-background px-2 py-0.5 text-xs text-foreground text-center focus:outline-none focus:ring-1 focus:ring-ring"
+              />
+              <span className="text-[10px] text-cfg-muted">in</span>
+            </div>
+          </div>
 
-          {/* CTA Row */}
-          {!showAddForm && !showQuoteForm && (
-            <div className="flex justify-end">
-              {activeProject ? (
+          {/* SECTION 2 — Profile Grid */}
+          <div ref={zone1Ref} className="px-4 py-4 border-b border-border">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="flex h-6 w-6 items-center justify-center rounded bg-[#1e1e35] text-[#3b82f6] text-xs font-bold shrink-0">2</span>
+              <h2 className="text-sm font-semibold text-foreground">Select a profile</h2>
+            </div>
+            {loadingProfiles ? (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="h-40 rounded-lg shimmer-skeleton" />
+                ))}
+              </div>
+            ) : filteredProfiles.length === 0 ? (
+              <div className="text-center py-8">
+                <p className="text-sm text-cfg-muted">No profiles match</p>
                 <button
-                  onClick={() => setShowAddForm(true)}
-                  className="rounded-md bg-cfg-blue px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-cfg-blue/90 transition-colors"
+                  onClick={() => { setLightingFilters(new Set()); setTechFilter(new Set()); }}
+                  className="text-xs text-cfg-blue hover:underline mt-1"
                 >
-                  {editingSign ? 'Edit Sign Details' : 'Add to Project'}
+                  Clear filters
                 </button>
-              ) : (
-                <button
-                  onClick={() => setShowQuoteForm(true)}
-                  className="rounded-md bg-secondary px-4 py-2 text-sm font-medium text-cfg-muted hover:text-foreground transition-colors"
-                >
-                  Request Quote
-                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {filteredProfiles.map((p) => (
+                  <ProfileCard
+                    key={p.id}
+                    profile={p}
+                    selected={false}
+                    onClick={() => selectProfile(p)}
+                    mode={uiMode}
+                    letterHeight={letterHeightInches}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* SECTION 3 — Review placeholder */}
+          <div ref={zone2Ref} className="px-4 py-4 opacity-40">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="flex h-6 w-6 items-center justify-center rounded bg-[#1e1e35] text-[#3b82f6] text-xs font-bold shrink-0">3</span>
+              <h2 className="text-sm font-semibold text-foreground">Review and quote</h2>
+            </div>
+            <p className="text-sm text-cfg-muted">Select a profile above to see the construction details.</p>
+          </div>
+        </div>
+      )}
+
+      {/* ════════════════════════════════════════════
+          VIEW B — Profile Selected Mode
+          ════════════════════════════════════════════ */}
+      {isProfileSelected && (
+        <div>
+          {/* Back bar */}
+          <div className="flex items-center justify-between bg-card border-b border-border px-4 py-2">
+            <button
+              onClick={handleBackToBrowse}
+              className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <span className="text-base">←</span>
+              <span>Back to all profiles</span>
+            </button>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-semibold text-foreground">
+                {selectedProfile.display_name || selectedProfile.profile_name}
+              </span>
+              {selectedProfile.technology && (
+                <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-medium text-cfg-muted">
+                  {selectedProfile.technology}
+                </span>
               )}
             </div>
-          )}
+          </div>
 
-          {/* Add Sign Form */}
-          {showAddForm && activeProject && (
-            <AddSignForm
-              projectId={activeProject.id}
-              projectName={activeProject.project_name}
-              profileCode={selectedProfile.profile_code}
-              technology={selectedProfile.technology}
-              slotData={components.filter((c) => c.is_default !== false)}
-              letterHeight={letterHeightInches}
-              onHeightChange={setLetterHeightInches}
-              onSaved={handleSaved}
-              onCancel={() => setShowAddForm(false)}
-              editingSign={editingSign}
-            />
-          )}
+          {/* Profile detail header */}
+          <div className="px-4 py-4 border-b border-border">
+            <div className="flex flex-col md:flex-row gap-6">
+              {/* Left: illustration */}
+              <div className="w-full md:w-[200px] h-[200px] rounded-lg bg-secondary/40 overflow-hidden shrink-0">
+                {selectedProfile.illustration_url ? (
+                  <img
+                    src={selectedProfile.illustration_url}
+                    alt={selectedProfile.display_name || selectedProfile.profile_name}
+                    className="w-full h-full object-contain"
+                  />
+                ) : (
+                  <TechPlaceholder technology={selectedProfile.technology} />
+                )}
+              </div>
+              {/* Right: metadata */}
+              <div className="flex flex-col justify-center gap-2 min-w-0">
+                <h2 className="text-lg font-semibold text-foreground">
+                  {selectedProfile.display_name || selectedProfile.profile_name}
+                </h2>
+                <div className="flex items-center gap-2 flex-wrap">
+                  {selectedProfile.technology && (
+                    <span className="rounded-full bg-secondary px-2.5 py-0.5 text-[10px] font-medium text-cfg-muted">
+                      {selectedProfile.technology}
+                    </span>
+                  )}
+                  {(() => {
+                    const tier = PRICE_TIER[selectedProfile.technology || 'Standard'] || PRICE_TIER.Standard;
+                    return (
+                      <span className={`text-xs font-bold ${tier.color}`}>{tier.label}</span>
+                    );
+                  })()}
+                </div>
+                <p className="text-xs text-cfg-muted">
+                  {lightingCodeToLabel(selectedProfile.lighting_code)}
+                </p>
+                {uiMode === 'pro' && (
+                  <p className="text-[9px] font-mono text-cfg-blue/30">{selectedProfile.profile_code}</p>
+                )}
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-[10px] text-cfg-muted">Letter height</span>
+                  <input
+                    type="number"
+                    min={1}
+                    max={200}
+                    value={letterHeightInches}
+                    onChange={(e) => {
+                      const v = parseFloat(e.target.value);
+                      if (!isNaN(v) && v > 0) setLetterHeightInches(v);
+                    }}
+                    className="w-14 rounded border border-input bg-background px-2 py-0.5 text-xs text-foreground text-center focus:outline-none focus:ring-1 focus:ring-ring"
+                  />
+                  <span className="text-[10px] text-cfg-muted">in</span>
+                  <ScaleSilhouette heightInches={letterHeightInches} />
+                </div>
+              </div>
+            </div>
+          </div>
 
-          {/* Explore Quote Form */}
-          {showQuoteForm && !activeProject && (
-            <ExploreQuoteForm
-              profileCode={selectedProfile.profile_code}
-              technology={selectedProfile.technology}
-              slotData={components.filter((c) => c.is_default !== false)}
-              onClose={() => setShowQuoteForm(false)}
-            />
-          )}
+          {/* Construction Stack */}
+          <div className="px-4 py-4 border-b border-border">
+            <p className="text-sm font-semibold text-foreground mb-3 pb-2 border-b border-border">
+              What's inside this letter
+            </p>
+            {loadingComponents ? (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="h-32 rounded-lg shimmer-skeleton" />
+                ))}
+              </div>
+            ) : (
+              <ConstructionStack components={components} mode={uiMode} />
+            )}
+          </div>
+
+          {/* CTA */}
+          <div className="px-4 py-4">
+            {!showAddForm && !showQuoteForm && (
+              <div className="flex justify-end">
+                {activeProject ? (
+                  <button
+                    onClick={() => setShowAddForm(true)}
+                    className="rounded-md bg-cfg-blue px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-cfg-blue/90 transition-colors"
+                  >
+                    {editingSign ? 'Edit Sign Details' : 'Add to Project'}
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => setShowQuoteForm(true)}
+                    className="rounded-md bg-secondary px-4 py-2 text-sm font-medium text-cfg-muted hover:text-foreground transition-colors"
+                  >
+                    Request Quote
+                  </button>
+                )}
+              </div>
+            )}
+
+            {showAddForm && activeProject && (
+              <AddSignForm
+                projectId={activeProject.id}
+                projectName={activeProject.project_name}
+                profileCode={selectedProfile.profile_code}
+                technology={selectedProfile.technology}
+                slotData={components.filter((c) => c.is_default !== false)}
+                letterHeight={letterHeightInches}
+                onHeightChange={setLetterHeightInches}
+                onSaved={handleSaved}
+                onCancel={() => setShowAddForm(false)}
+                editingSign={editingSign}
+              />
+            )}
+
+            {showQuoteForm && !activeProject && (
+              <ExploreQuoteForm
+                profileCode={selectedProfile.profile_code}
+                technology={selectedProfile.technology}
+                slotData={components.filter((c) => c.is_default !== false)}
+                onClose={() => setShowQuoteForm(false)}
+              />
+            )}
+          </div>
         </div>
       )}
     </div>
