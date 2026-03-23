@@ -354,9 +354,9 @@ function ProjectDashboard() {
 function ProjectContextBar() {
   const store = useShellStore();
   const project = store.activeProject;
+  const [submitOpen, setSubmitOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   if (!project) return null;
-
-  const hasComplete = store.activeSigns.some((s) => s.is_complete);
 
   const goBack = () => {
     store.setActiveProject(null);
@@ -365,22 +365,86 @@ function ProjectContextBar() {
     store.setShellState('verified');
   };
 
+  const handleSubmit = async () => {
+    if (store.activeSigns.length === 0) {
+      toast.error('Add at least one sign before submitting.');
+      setSubmitOpen(false);
+      return;
+    }
+    setSubmitting(true);
+    try {
+      // Step 1 — fetch project + signs
+      const { data: pdfData } = await supabase
+        .rpc('get_project_for_pdf', { p_project_id: project.id });
+
+      // Step 2 — update status (triggers factory notification automatically)
+      const { error } = await supabase
+        .from('portal_projects')
+        .update({ status: 'ready', submitted_at: new Date().toISOString() } as any)
+        .eq('id', project.id);
+
+      if (!error && pdfData) {
+        store.setActiveProject({ ...project, status: 'ready' });
+        generateAndDownloadPDF((pdfData as any).project, (pdfData as any).signs);
+        store.setShellState('submitted');
+      } else if (error) {
+        toast.error('Failed to submit. Please try again.');
+      }
+    } catch {
+      toast.error('Failed to submit. Please try again.');
+    } finally {
+      setSubmitting(false);
+      setSubmitOpen(false);
+    }
+  };
+
+  const isLocked = project.status === 'ready' || project.status === 'submitted';
+
   return (
-    <div className="flex items-center justify-between rounded-lg border border-border bg-card px-4 py-2.5">
-      <div className="flex items-center gap-2 min-w-0">
-        <button onClick={goBack} className="text-muted-foreground hover:text-foreground transition-colors">
-          <ArrowLeft />
-        </button>
-        <span className="text-sm font-semibold text-foreground truncate">{project.project_name}</span>
-        <StatusBadge status={project.status} />
+    <>
+      <div className="flex items-center justify-between rounded-lg border border-border bg-card px-4 py-2.5">
+        <div className="flex items-center gap-2 min-w-0">
+          <button onClick={goBack} className="text-muted-foreground hover:text-foreground transition-colors">
+            <ArrowLeft />
+          </button>
+          <span className="text-sm font-semibold text-foreground truncate">{project.project_name}</span>
+          <StatusBadge status={project.status} />
+        </div>
+        {isLocked ? (
+          <span className="rounded-full bg-muted px-3 py-1 text-[10px] font-medium text-muted-foreground">Submitted</span>
+        ) : (
+          <button
+            onClick={() => {
+              if (store.activeSigns.length === 0) {
+                toast.error('Add at least one sign before submitting.');
+                return;
+              }
+              setSubmitOpen(true);
+            }}
+            className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+          >
+            Submit for Quote
+          </button>
+        )}
       </div>
-      <button
-        disabled={!hasComplete}
-        className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-30 transition-colors"
-      >
-        Submit Project for Quote
-      </button>
-    </div>
+
+      <AlertDialog open={submitOpen} onOpenChange={setSubmitOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Submit to Factory?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will lock the project and send a work order to our production team. You will receive a PDF spec sheet to download.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={submitting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleSubmit} disabled={submitting}>
+              {submitting ? 'Submitting…' : 'Submit'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
 
