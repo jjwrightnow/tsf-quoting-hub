@@ -69,6 +69,7 @@ interface ShellStore {
 export const useShellStore = create<ShellStore>((set) => ({
   shellState: 'explore',
   userEmail: null,
+  userRole: 'guest',
   contactId: null,
   accountId: null,
   projects: [],
@@ -83,6 +84,7 @@ export const useShellStore = create<ShellStore>((set) => ({
 
   setShellState: (shellState) => set({ shellState }),
   setUserEmail: (userEmail) => set({ userEmail }),
+  setUserRole: (userRole) => set({ userRole }),
   setContactId: (contactId) => set({ contactId }),
   setAccountId: (accountId) => set({ accountId }),
   setProjects: (projects) => set({ projects }),
