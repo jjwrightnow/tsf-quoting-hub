@@ -652,6 +652,7 @@ export type Database = {
           depth: string | null
           finish: string | null
           height: string | null
+          height_inches: number | null
           id: string
           is_complete: boolean | null
           lead_wires: string | null
@@ -681,6 +682,7 @@ export type Database = {
           depth?: string | null
           finish?: string | null
           height?: string | null
+          height_inches?: number | null
           id?: string
           is_complete?: boolean | null
           lead_wires?: string | null
@@ -710,6 +712,7 @@ export type Database = {
           depth?: string | null
           finish?: string | null
           height?: string | null
+          height_inches?: number | null
           id?: string
           is_complete?: boolean | null
           lead_wires?: string | null
@@ -1545,6 +1548,7 @@ export type Database = {
           email: string
           id: string
           is_verified: boolean
+          ui_mode: string | null
         }
         Insert: {
           company_name?: string | null
@@ -1552,6 +1556,7 @@ export type Database = {
           email: string
           id?: string
           is_verified?: boolean
+          ui_mode?: string | null
         }
         Update: {
           company_name?: string | null
@@ -1559,6 +1564,7 @@ export type Database = {
           email?: string
           id?: string
           is_verified?: boolean
+          ui_mode?: string | null
         }
         Relationships: []
       }
