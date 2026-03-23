@@ -2,6 +2,17 @@ import { useEffect, useState, useCallback } from 'react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useShellStore, type PortalProject, type PortalSign } from '@/stores/shellStore';
+import { generateAndDownloadPDF } from '@/utils/generateWorkOrder';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 /* ─── Icons ─── */
 const ArrowLeft = () => (
