@@ -1980,6 +1980,7 @@ export type Database = {
           contact_id: string
         }[]
       }
+      get_project_for_pdf: { Args: { p_project_id: string }; Returns: Json }
       init_chat_session: {
         Args: { p_company_name?: string; p_email?: string }
         Returns: string

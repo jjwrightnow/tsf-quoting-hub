@@ -2,6 +2,17 @@ import { useEffect, useState, useCallback } from 'react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useShellStore, type PortalProject, type PortalSign } from '@/stores/shellStore';
+import { generateAndDownloadPDF } from '@/utils/generateWorkOrder';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 /* ─── Icons ─── */
 const ArrowLeft = () => (
@@ -343,9 +354,9 @@ function ProjectDashboard() {
 function ProjectContextBar() {
   const store = useShellStore();
   const project = store.activeProject;
+  const [submitOpen, setSubmitOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   if (!project) return null;
-
-  const hasComplete = store.activeSigns.some((s) => s.is_complete);
 
   const goBack = () => {
     store.setActiveProject(null);
@@ -354,22 +365,86 @@ function ProjectContextBar() {
     store.setShellState('verified');
   };
 
+  const handleSubmit = async () => {
+    if (store.activeSigns.length === 0) {
+      toast.error('Add at least one sign before submitting.');
+      setSubmitOpen(false);
+      return;
+    }
+    setSubmitting(true);
+    try {
+      // Step 1 — fetch project + signs
+      const { data: pdfData } = await supabase
+        .rpc('get_project_for_pdf', { p_project_id: project.id });
+
+      // Step 2 — update status (triggers factory notification automatically)
+      const { error } = await supabase
+        .from('portal_projects')
+        .update({ status: 'ready', submitted_at: new Date().toISOString() } as any)
+        .eq('id', project.id);
+
+      if (!error && pdfData) {
+        store.setActiveProject({ ...project, status: 'ready' });
+        generateAndDownloadPDF((pdfData as any).project, (pdfData as any).signs);
+        store.setShellState('submitted');
+      } else if (error) {
+        toast.error('Failed to submit. Please try again.');
+      }
+    } catch {
+      toast.error('Failed to submit. Please try again.');
+    } finally {
+      setSubmitting(false);
+      setSubmitOpen(false);
+    }
+  };
+
+  const isLocked = project.status === 'ready' || project.status === 'submitted';
+
   return (
-    <div className="flex items-center justify-between rounded-lg border border-border bg-card px-4 py-2.5">
-      <div className="flex items-center gap-2 min-w-0">
-        <button onClick={goBack} className="text-muted-foreground hover:text-foreground transition-colors">
-          <ArrowLeft />
-        </button>
-        <span className="text-sm font-semibold text-foreground truncate">{project.project_name}</span>
-        <StatusBadge status={project.status} />
+    <>
+      <div className="flex items-center justify-between rounded-lg border border-border bg-card px-4 py-2.5">
+        <div className="flex items-center gap-2 min-w-0">
+          <button onClick={goBack} className="text-muted-foreground hover:text-foreground transition-colors">
+            <ArrowLeft />
+          </button>
+          <span className="text-sm font-semibold text-foreground truncate">{project.project_name}</span>
+          <StatusBadge status={project.status} />
+        </div>
+        {isLocked ? (
+          <span className="rounded-full bg-muted px-3 py-1 text-[10px] font-medium text-muted-foreground">Submitted</span>
+        ) : (
+          <button
+            onClick={() => {
+              if (store.activeSigns.length === 0) {
+                toast.error('Add at least one sign before submitting.');
+                return;
+              }
+              setSubmitOpen(true);
+            }}
+            className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+          >
+            Submit for Quote
+          </button>
+        )}
       </div>
-      <button
-        disabled={!hasComplete}
-        className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-30 transition-colors"
-      >
-        Submit Project for Quote
-      </button>
-    </div>
+
+      <AlertDialog open={submitOpen} onOpenChange={setSubmitOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Submit to Factory?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will lock the project and send a work order to our production team. You will receive a PDF spec sheet to download.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={submitting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleSubmit} disabled={submitting}>
+              {submitting ? 'Submitting…' : 'Submit'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
 
@@ -435,16 +510,23 @@ function SignList() {
     store.setEditingSign(sign);
   };
 
+  const isLocked = store.activeProject?.status === 'ready' || store.activeProject?.status === 'submitted';
+
   return (
     <div className="rounded-lg border border-border bg-card p-4 animate-fade-in-up">
+      {isLocked && (
+        <p className="text-[10px] text-muted-foreground mb-3 italic">Locked — submitted for quote.</p>
+      )}
       <div className="flex items-center justify-between mb-3">
         <span className="text-xs font-semibold text-foreground uppercase tracking-wide">Signs</span>
-        <button
-          onClick={addSign}
-          className="text-xs text-primary hover:text-primary/80 font-medium transition-colors"
-        >
-          + Add Sign
-        </button>
+        {!isLocked && (
+          <button
+            onClick={addSign}
+            className="text-xs text-primary hover:text-primary/80 font-medium transition-colors"
+          >
+            + Add Sign
+          </button>
+        )}
       </div>
 
       {store.activeSigns.length === 0 ? (
@@ -472,24 +554,26 @@ function SignList() {
                   </span>
                 )}
               </div>
-              <div className="flex items-center gap-1">
-                <button onClick={() => editSign(sign)} className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors" title="Edit">
-                  <EditIcon />
-                </button>
-                <button onClick={() => duplicateSign(sign)} className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors" title="Duplicate">
-                  <CopyIcon />
-                </button>
-                {deleteConfirm === sign.id ? (
-                  <div className="flex items-center gap-1">
-                    <button onClick={() => deleteSign(sign.id)} className="text-[10px] text-destructive font-medium">Yes</button>
-                    <button onClick={() => setDeleteConfirm(null)} className="text-[10px] text-muted-foreground">No</button>
-                  </div>
-                ) : (
-                  <button onClick={() => setDeleteConfirm(sign.id)} className="p-1 rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors" title="Delete">
-                    <TrashIcon />
+              {!isLocked && (
+                <div className="flex items-center gap-1">
+                  <button onClick={() => editSign(sign)} className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors" title="Edit">
+                    <EditIcon />
                   </button>
-                )}
-              </div>
+                  <button onClick={() => duplicateSign(sign)} className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors" title="Duplicate">
+                    <CopyIcon />
+                  </button>
+                  {deleteConfirm === sign.id ? (
+                    <div className="flex items-center gap-1">
+                      <button onClick={() => deleteSign(sign.id)} className="text-[10px] text-destructive font-medium">Yes</button>
+                      <button onClick={() => setDeleteConfirm(null)} className="text-[10px] text-muted-foreground">No</button>
+                    </div>
+                  ) : (
+                    <button onClick={() => setDeleteConfirm(sign.id)} className="p-1 rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors" title="Delete">
+                      <TrashIcon />
+                    </button>
+                  )}
+                </div>
+              )}
             </li>
           ))}
         </ul>
@@ -568,15 +652,69 @@ export default function ProjectShell({ children }: ProjectShellProps) {
         <ProjectContextBar />
       )}
 
-      {/* Configurator / main content */}
-      <div className="flex-1 min-h-0">
-        {children}
+      {/* Submitted success screen replaces content */}
+      {store.shellState === 'submitted' ? (
+        <SubmissionSuccess />
+      ) : (
+        <>
+          {/* Configurator / main content */}
+          <div className="flex-1 min-h-0">
+            {children}
+          </div>
+
+          {/* Sign list — only in IN_PROJECT state */}
+          {store.shellState === 'in_project' && (
+            <SignList />
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
+/* ─── Submission Success Screen ─── */
+function SubmissionSuccess() {
+  const store = useShellStore();
+  const project = store.activeProject;
+
+  const downloadPdf = async () => {
+    if (!project) return;
+    const { data } = await supabase
+      .rpc('get_project_for_pdf', { p_project_id: project.id });
+    if (data) generateAndDownloadPDF((data as any).project, (data as any).signs);
+  };
+
+  return (
+    <div className="flex flex-col items-center justify-center py-16 px-6 animate-fade-in-up">
+      <div className="flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-6">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--primary))" strokeWidth="2">
+          <circle cx="12" cy="12" r="10" />
+          <polyline points="9 12 11.5 14.5 16 9.5" />
+        </svg>
       </div>
 
-      {/* Sign list — only in IN_PROJECT state */}
-      {store.shellState === 'in_project' && (
-        <SignList />
-      )}
+      <h2 className="text-xl font-semibold text-foreground mb-2">Work Order Submitted</h2>
+      <p className="text-sm text-muted-foreground text-center max-w-md mb-8">
+        {project?.quote_ref
+          ? `Project ${project.quote_ref} has`
+          : 'Your project has'}{' '}
+        been sent to the factory floor. Download your spec sheet below for your records.
+      </p>
+
+      <div className="flex flex-col gap-3 w-full max-w-xs">
+        <button
+          onClick={downloadPdf}
+          className="w-full rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+        >
+          Download PDF Spec Sheet
+        </button>
+        <button
+          onClick={() => store.setShellState('verified')}
+          className="w-full rounded-md border border-border px-4 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+        >
+          Return to Dashboard
+        </button>
+      </div>
     </div>
   );
 }
