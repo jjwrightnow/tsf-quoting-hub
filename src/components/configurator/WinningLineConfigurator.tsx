@@ -33,6 +33,8 @@ interface WinningLineConfiguratorProps {
   onSignSaved?: () => void;
 }
 
+type UiMode = 'pro' | 'client';
+
 /* ─── Constants ─── */
 const LIGHTING_BUTTONS = [
   { label: 'None', position: -1 },
@@ -63,10 +65,56 @@ const MATERIAL_BORDER: Record<string, string> = {
   'wire/electrical': 'border-l-red-400',
 };
 
+/* ─── Upgrade 1: Client mode mappings ─── */
+const LIGHTING_CODE_LABELS: Record<string, string> = {
+  '0000': 'No Lighting',
+  '1000': 'Front Glow',
+  '0001': 'Halo',
+  '1001': 'Front + Halo',
+  '0010': 'Side Glow',
+  '0110': 'Edge Glow',
+  '1111': 'Full Illumination',
+};
+
+function lightingCodeToLabel(code: string): string {
+  const padded = code.padEnd(4, '0');
+  return LIGHTING_CODE_LABELS[padded] || 'Custom Lighting';
+}
+
+const CLIENT_LAYER_LABELS: Record<string, string> = {
+  'face type': 'Front Face',
+  'return body': 'Letter Sides',
+  'back insert': 'Back Panel',
+  'LED': 'Internal Lighting',
+  'wiring': 'Power Connection',
+  'mounting': 'Wall Attachment',
+  'face cover': 'Face Plate',
+};
+
+function clientComponentName(name: string | null): string {
+  if (!name) return 'Unknown';
+  const lower = name.toLowerCase();
+  if (lower.includes('acrylic')) return 'Acrylic';
+  if (lower.includes('metal')) return 'Metal';
+  if (name === 'Stud mount (rivnut + strap)') return 'Wall Studs';
+  if (name === 'wire exit (back)') return 'Power Exit';
+  if (name === 'LEDs') return 'LED Modules';
+  return name;
+}
+
 /* ─── Lighting code icon ─── */
-function LightingIcon({ code }: { code: string }) {
+function LightingIcon({ code, mode }: { code: string; mode: UiMode }) {
   const positions = code.padEnd(4, '0').split('');
   const colors = ['hsl(var(--cfg-blue))', '#eab308', '#eab308', '#eab308'];
+
+  if (mode === 'client') {
+    return (
+      <span className="text-[9px] text-cfg-muted leading-none">
+        {lightingCodeToLabel(code)}
+      </span>
+    );
+  }
+
   return (
     <div className="grid grid-cols-2 gap-[2px] w-5 h-5">
       {positions.map((bit, i) => (
@@ -80,6 +128,36 @@ function LightingIcon({ code }: { code: string }) {
         />
       ))}
     </div>
+  );
+}
+
+/* ─── Upgrade 4: Scale silhouette SVG ─── */
+function ScaleSilhouette({ heightInches }: { heightInches: number }) {
+  const refHeight = 72;
+  const svgH = 36;
+  const svgW = 36;
+  const personH = svgH - 2;
+  const letterH = Math.max(1, (heightInches / refHeight) * personH);
+
+  return (
+    <svg width={svgW} height={svgH} viewBox={`0 0 ${svgW} ${svgH}`} className="opacity-70">
+      {/* Stick figure */}
+      <circle cx="10" cy={svgH - personH + 2} r="2.5" fill="none" stroke="hsl(var(--cfg-muted))" strokeWidth="1" />
+      <line x1="10" y1={svgH - personH + 4.5} x2="10" y2={svgH - 8} stroke="hsl(var(--cfg-muted))" strokeWidth="1" />
+      <line x1="10" y1={svgH - 8} x2="6" y2={svgH - 1} stroke="hsl(var(--cfg-muted))" strokeWidth="1" />
+      <line x1="10" y1={svgH - 8} x2="14" y2={svgH - 1} stroke="hsl(var(--cfg-muted))" strokeWidth="1" />
+      <line x1="10" y1={svgH - personH + 10} x2="5" y2={svgH - personH + 16} stroke="hsl(var(--cfg-muted))" strokeWidth="1" />
+      <line x1="10" y1={svgH - personH + 10} x2="15" y2={svgH - personH + 16} stroke="hsl(var(--cfg-muted))" strokeWidth="1" />
+      {/* Letter rectangle */}
+      <rect
+        x="22"
+        y={svgH - 1 - letterH}
+        width="10"
+        height={letterH}
+        rx="1"
+        fill="hsl(var(--cfg-blue) / 0.6)"
+      />
+    </svg>
   );
 }
 
@@ -150,10 +228,14 @@ function ProfileCard({
   profile,
   selected,
   onClick,
+  mode,
+  letterHeight,
 }: {
   profile: Profile;
   selected: boolean;
   onClick: () => void;
+  mode: UiMode;
+  letterHeight: number;
 }) {
   const tier = PRICE_TIER[profile.technology || 'Standard'] || PRICE_TIER.Standard;
 
@@ -171,9 +253,9 @@ function ProfileCard({
         {tier.label}
       </span>
 
-      {/* Lighting icon */}
+      {/* Lighting icon / label */}
       <div className="absolute top-2 right-2">
-        <LightingIcon code={profile.lighting_code} />
+        <LightingIcon code={profile.lighting_code} mode={mode} />
       </div>
 
       {/* Image */}
@@ -191,13 +273,20 @@ function ProfileCard({
 
       {/* Text */}
       <p className="text-xs font-bold text-foreground truncate">{profile.profile_name}</p>
-      <p className="text-[10px] font-mono text-cfg-blue">{profile.profile_code}</p>
+      {mode === 'pro' && (
+        <p className="text-[10px] font-mono text-cfg-blue">{profile.profile_code}</p>
+      )}
+
+      {/* Scale silhouette — bottom right */}
+      <div className="absolute bottom-1 right-1">
+        <ScaleSilhouette heightInches={letterHeight} />
+      </div>
     </button>
   );
 }
 
 /* ─── Construction Stack ─── */
-function ConstructionStack({ components }: { components: ProfileComponent[] }) {
+function ConstructionStack({ components, mode }: { components: ProfileComponent[]; mode: UiMode }) {
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
   const groups = useMemo(() => {
@@ -228,7 +317,6 @@ function ConstructionStack({ components }: { components: ProfileComponent[] }) {
     });
   };
 
-  // Group items by layer_position
   const groupSlots = (items: ProfileComponent[]) => {
     const map = new Map<string, ProfileComponent[]>();
     for (const item of items) {
@@ -238,6 +326,12 @@ function ConstructionStack({ components }: { components: ProfileComponent[] }) {
     }
     return Array.from(map.entries());
   };
+
+  const displayPosition = (pos: string) =>
+    mode === 'client' ? (CLIENT_LAYER_LABELS[pos] || pos) : pos;
+
+  const displayName = (name: string | null) =>
+    mode === 'client' ? clientComponentName(name) : (name || 'Unknown');
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-3 animate-fade-in-up">
@@ -262,12 +356,12 @@ function ConstructionStack({ components }: { components: ProfileComponent[] }) {
                       className={`rounded border-l-2 ${borderColor} bg-background/40 px-2.5 py-1.5`}
                     >
                       <p className="text-[9px] uppercase tracking-wide text-cfg-muted">
-                        {position}
+                        {displayPosition(position)}
                       </p>
                       <p className="text-xs font-semibold text-foreground">
-                        {slot.component_name || 'Unknown'}
+                        {displayName(slot.component_name)}
                       </p>
-                      {slot.material_category && (
+                      {mode === 'pro' && slot.material_category && (
                         <span className="text-[9px] text-cfg-muted">{slot.material_category}</span>
                       )}
                     </div>
@@ -288,8 +382,8 @@ function ConstructionStack({ components }: { components: ProfileComponent[] }) {
                           MATERIAL_BORDER[alt.material_category || ''] || 'border-l-cfg-muted'
                         } bg-background/20 px-2.5 py-1.5 mt-1`}
                       >
-                        <p className="text-xs text-foreground/80">{alt.component_name || 'Unknown'}</p>
-                        {alt.material_category && (
+                        <p className="text-xs text-foreground/80">{displayName(alt.component_name)}</p>
+                        {mode === 'pro' && alt.material_category && (
                           <span className="text-[9px] text-cfg-muted">{alt.material_category}</span>
                         )}
                       </div>
@@ -311,6 +405,8 @@ function AddSignForm({
   profileCode,
   technology,
   slotData,
+  letterHeight,
+  onHeightChange,
   onSaved,
   onCancel,
 }: {
@@ -319,20 +415,27 @@ function AddSignForm({
   profileCode: string;
   technology: string | null;
   slotData: ProfileComponent[];
+  letterHeight: number;
+  onHeightChange: (h: number) => void;
   onSaved: () => void;
   onCancel: () => void;
 }) {
   const [signName, setSignName] = useState('');
-  const [height, setHeight] = useState('');
+  const [height, setHeight] = useState(String(letterHeight));
   const [quantity, setQuantity] = useState(1);
   const [notes, setNotes] = useState('');
   const [saving, setSaving] = useState(false);
+
+  // Sync height back to parent letterHeight
+  useEffect(() => {
+    const parsed = parseFloat(height);
+    if (!isNaN(parsed) && parsed > 0) onHeightChange(parsed);
+  }, [height, onHeightChange]);
 
   const handleSave = async () => {
     if (!signName.trim()) return;
     setSaving(true);
 
-    // Group slot data
     const specData: Record<string, unknown[]> = { face_assembly: [], body: [], systems: [] };
     for (const c of slotData) {
       const entry = { component_name: c.component_name, material_category: c.material_category, layer_position: c.layer_position };
@@ -344,6 +447,8 @@ function AddSignForm({
         specData.systems.push(entry);
       }
     }
+
+    const heightNum = parseFloat(height);
 
     const { error } = await supabase.from('portal_signs').insert({
       project_id: projectId,
@@ -523,6 +628,53 @@ function ExploreQuoteForm({
   );
 }
 
+/* ─── Upgrade 3: AI Context Ribbon ─── */
+function ContextRibbon({
+  filteredCount,
+  lightingFilters,
+  techFilter,
+  selectedProfile,
+}: {
+  filteredCount: number;
+  lightingFilters: Set<number>;
+  techFilter: Set<string>;
+  selectedProfile: Profile | null;
+}) {
+  const text = useMemo(() => {
+    if (selectedProfile) {
+      return `Selected: ${selectedProfile.profile_name} — ${lightingCodeToLabel(selectedProfile.lighting_code)}`;
+    }
+
+    const parts: string[] = [];
+
+    // Tech
+    if (techFilter.size > 0) {
+      parts.push(Array.from(techFilter).join(' / '));
+    }
+
+    // Lighting
+    const lightingLabels: string[] = [];
+    if (lightingFilters.has(0)) lightingLabels.push('face-lit');
+    if (lightingFilters.has(1)) lightingLabels.push('side-front');
+    if (lightingFilters.has(-2)) lightingLabels.push('side-lit');
+    if (lightingFilters.has(2)) lightingLabels.push('side-back');
+    if (lightingFilters.has(3)) lightingLabels.push('halo');
+    if (lightingLabels.length > 0) {
+      parts.push(lightingLabels.join(' and ') + ' options');
+    }
+
+    if (parts.length === 0) {
+      return `Showing all ${filteredCount} profiles`;
+    }
+
+    return `${parts.join(' ')} — ${filteredCount} profiles`;
+  }, [filteredCount, lightingFilters, techFilter, selectedProfile]);
+
+  return (
+    <p className="text-[11px] italic text-cfg-muted px-1">{text}</p>
+  );
+}
+
 /* ═══════════════════════════════════════════════
    MAIN COMPONENT
    ═══════════════════════════════════════════════ */
@@ -550,6 +702,12 @@ export default function WinningLineConfigurator({
   const [showAddForm, setShowAddForm] = useState(false);
   const [showQuoteForm, setShowQuoteForm] = useState(false);
 
+  // Upgrade 1: UI mode
+  const [uiMode, setUiMode] = useState<UiMode>('pro');
+
+  // Upgrade 4: Letter height
+  const [letterHeightInches, setLetterHeightInches] = useState(12);
+
   // Refs for scrolling
   const zone0Ref = useRef<HTMLDivElement>(null);
   const zone1Ref = useRef<HTMLDivElement>(null);
@@ -572,13 +730,11 @@ export default function WinningLineConfigurator({
   const filteredProfiles = useMemo(() => {
     let result = profiles;
 
-    // Lighting filter
     if (lightingFilters.size > 0 && !lightingFilters.has(-1)) {
       result = result.filter((p) => {
         const code = p.lighting_code.padEnd(4, '0');
         return Array.from(lightingFilters).every((pos) => {
           if (pos === -2) {
-            // "Side" = either front or back
             return code[1] === '1' || code[2] === '1';
           }
           return code[pos] === '1';
@@ -586,7 +742,6 @@ export default function WinningLineConfigurator({
       });
     }
 
-    // Tech filter
     if (techFilter.size > 0) {
       result = result.filter((p) => techFilter.has(p.technology || ''));
     }
@@ -599,7 +754,6 @@ export default function WinningLineConfigurator({
     setLightingFilters((prev) => {
       const next = new Set(prev);
       if (position === -1) {
-        // "None" clears everything
         return new Set();
       }
       next.delete(-1);
@@ -625,7 +779,6 @@ export default function WinningLineConfigurator({
     setShowQuoteForm(false);
     setLoadingComponents(true);
 
-    // Fetch components with join
     const { data } = await supabase
       .from('profile_components')
       .select('id, profile_id, component_id, layer_position, position_order, is_default, notes, components(component_name, material_category, sub_type)')
@@ -668,23 +821,44 @@ export default function WinningLineConfigurator({
   };
 
   return (
-    <div className="space-y-4 font-sans">
-      {/* Summary Bar */}
-      <SummaryBar
-        profile={selectedProfile?.profile_name || null}
-        technology={selectedProfile?.technology || null}
-        onScrollTo={scrollTo}
-      />
+    <div className="space-y-3 font-sans">
+      {/* Top row: Summary + Mode toggle */}
+      <div className="flex items-center gap-3">
+        <div className="flex-1 min-w-0">
+          <SummaryBar
+            profile={selectedProfile?.profile_name || null}
+            technology={selectedProfile?.technology || null}
+            onScrollTo={scrollTo}
+          />
+        </div>
+        {/* Upgrade 1: Pro / Client toggle */}
+        <div className="flex rounded-md bg-secondary p-0.5 shrink-0">
+          <button
+            onClick={() => setUiMode('pro')}
+            className={`rounded px-2.5 py-1 text-[10px] font-semibold transition-colors ${
+              uiMode === 'pro' ? 'bg-cfg-blue text-primary-foreground' : 'text-cfg-muted hover:text-foreground'
+            }`}
+          >
+            Pro
+          </button>
+          <button
+            onClick={() => setUiMode('client')}
+            className={`rounded px-2.5 py-1 text-[10px] font-semibold transition-colors ${
+              uiMode === 'client' ? 'bg-cfg-blue text-primary-foreground' : 'text-cfg-muted hover:text-foreground'
+            }`}
+          >
+            Client
+          </button>
+        </div>
+      </div>
 
       {/* Stepper */}
       <Stepper step={step} />
 
-      {/* ZONE 1 — Lighting Filter */}
-      <div ref={zone0Ref} className="space-y-3">
-        <p className="text-xs font-semibold text-foreground">Where does the light come out?</p>
-
-        {/* Lighting pills */}
-        <div className="flex flex-wrap gap-2">
+      {/* ZONE 1 — Compact Lighting Filter (Upgrade 2: max ~80px) */}
+      <div ref={zone0Ref} className="space-y-1">
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="text-[10px] text-cfg-muted mr-0.5">Light:</span>
           {LIGHTING_BUTTONS.map((btn) => {
             const active = btn.position === -1
               ? lightingFilters.size === 0
@@ -693,7 +867,7 @@ export default function WinningLineConfigurator({
               <button
                 key={btn.label}
                 onClick={() => toggleLighting(btn.position)}
-                className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+                className={`rounded-full px-2.5 py-1 text-[10px] font-medium transition-colors ${
                   active
                     ? 'bg-cfg-blue text-primary-foreground'
                     : 'bg-secondary text-cfg-muted hover:text-foreground'
@@ -704,17 +878,15 @@ export default function WinningLineConfigurator({
             );
           })}
         </div>
-
-        {/* Technology pills */}
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-[10px] uppercase tracking-wide text-cfg-muted mr-1">Technology:</span>
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="text-[10px] text-cfg-muted mr-0.5">Tech:</span>
           {TECH_BUTTONS.map((tech) => {
             const active = techFilter.has(tech);
             return (
               <button
                 key={tech}
                 onClick={() => toggleTech(tech)}
-                className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+                className={`rounded-full px-2.5 py-1 text-[10px] font-medium transition-colors ${
                   active
                     ? 'bg-cfg-blue text-primary-foreground'
                     : 'bg-secondary text-cfg-muted hover:text-foreground'
@@ -725,6 +897,31 @@ export default function WinningLineConfigurator({
             );
           })}
         </div>
+      </div>
+
+      {/* Upgrade 3: AI Context Ribbon */}
+      <ContextRibbon
+        filteredCount={filteredProfiles.length}
+        lightingFilters={lightingFilters}
+        techFilter={techFilter}
+        selectedProfile={selectedProfile}
+      />
+
+      {/* Upgrade 4: Height control */}
+      <div className="flex items-center gap-2">
+        <span className="text-[10px] text-cfg-muted">Letter height</span>
+        <input
+          type="number"
+          min={1}
+          max={200}
+          value={letterHeightInches}
+          onChange={(e) => {
+            const v = parseFloat(e.target.value);
+            if (!isNaN(v) && v > 0) setLetterHeightInches(v);
+          }}
+          className="w-14 rounded border border-input bg-background px-2 py-0.5 text-xs text-foreground text-center focus:outline-none focus:ring-1 focus:ring-ring"
+        />
+        <span className="text-[10px] text-cfg-muted">in</span>
       </div>
 
       {/* ZONE 2 — Profile Grid */}
@@ -753,6 +950,8 @@ export default function WinningLineConfigurator({
                 profile={p}
                 selected={selectedProfile?.id === p.id}
                 onClick={() => selectProfile(p)}
+                mode={uiMode}
+                letterHeight={letterHeightInches}
               />
             ))}
           </div>
@@ -773,7 +972,7 @@ export default function WinningLineConfigurator({
               ))}
             </div>
           ) : (
-            <ConstructionStack components={components} />
+            <ConstructionStack components={components} mode={uiMode} />
           )}
 
           {/* CTA Row */}
@@ -805,6 +1004,8 @@ export default function WinningLineConfigurator({
               profileCode={selectedProfile.profile_code}
               technology={selectedProfile.technology}
               slotData={components.filter((c) => c.is_default !== false)}
+              letterHeight={letterHeightInches}
+              onHeightChange={setLetterHeightInches}
               onSaved={handleSaved}
               onCancel={() => setShowAddForm(false)}
             />
