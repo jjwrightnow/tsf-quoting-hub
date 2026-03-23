@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import ProjectShell from '@/components/shell/ProjectShell';
 import { useAppStore } from '@/stores/appStore';
 import { useWizardStore } from '@/stores/wizardStore';
 import { useSignStore } from '@/stores/signStore';
