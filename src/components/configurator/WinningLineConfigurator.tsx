@@ -1122,7 +1122,7 @@ export default function WinningLineConfigurator({
           <div ref={zone1Ref} className="px-4 py-4 border-b border-border">
             <div className="flex items-center gap-2 mb-3">
               <span className="flex h-6 w-6 items-center justify-center rounded bg-[#1e1e35] text-[#3b82f6] text-xs font-bold shrink-0">2</span>
-              <h2 className="text-sm font-semibold text-foreground">Select a profile</h2>
+              <h2 className="text-sm font-semibold text-foreground">Select a Profile</h2>
             </div>
             {loadingProfiles ? (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
