@@ -652,15 +652,69 @@ export default function ProjectShell({ children }: ProjectShellProps) {
         <ProjectContextBar />
       )}
 
-      {/* Configurator / main content */}
-      <div className="flex-1 min-h-0">
-        {children}
+      {/* Submitted success screen replaces content */}
+      {store.shellState === 'submitted' ? (
+        <SubmissionSuccess />
+      ) : (
+        <>
+          {/* Configurator / main content */}
+          <div className="flex-1 min-h-0">
+            {children}
+          </div>
+
+          {/* Sign list — only in IN_PROJECT state */}
+          {store.shellState === 'in_project' && (
+            <SignList />
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
+/* ─── Submission Success Screen ─── */
+function SubmissionSuccess() {
+  const store = useShellStore();
+  const project = store.activeProject;
+
+  const downloadPdf = async () => {
+    if (!project) return;
+    const { data } = await supabase
+      .rpc('get_project_for_pdf', { p_project_id: project.id });
+    if (data) generateAndDownloadPDF((data as any).project, (data as any).signs);
+  };
+
+  return (
+    <div className="flex flex-col items-center justify-center py-16 px-6 animate-fade-in-up">
+      <div className="flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-6">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--primary))" strokeWidth="2">
+          <circle cx="12" cy="12" r="10" />
+          <polyline points="9 12 11.5 14.5 16 9.5" />
+        </svg>
       </div>
 
-      {/* Sign list — only in IN_PROJECT state */}
-      {store.shellState === 'in_project' && (
-        <SignList />
-      )}
+      <h2 className="text-xl font-semibold text-foreground mb-2">Work Order Submitted</h2>
+      <p className="text-sm text-muted-foreground text-center max-w-md mb-8">
+        {project?.quote_ref
+          ? `Project ${project.quote_ref} has`
+          : 'Your project has'}{' '}
+        been sent to the factory floor. Download your spec sheet below for your records.
+      </p>
+
+      <div className="flex flex-col gap-3 w-full max-w-xs">
+        <button
+          onClick={downloadPdf}
+          className="w-full rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+        >
+          Download PDF Spec Sheet
+        </button>
+        <button
+          onClick={() => store.setShellState('verified')}
+          className="w-full rounded-md border border-border px-4 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+        >
+          Return to Dashboard
+        </button>
+      </div>
     </div>
   );
 }
