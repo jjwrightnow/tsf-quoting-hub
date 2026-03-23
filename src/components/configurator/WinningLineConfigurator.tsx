@@ -750,6 +750,7 @@ export default function WinningLineConfigurator({
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loadingProfiles, setLoadingProfiles] = useState(true);
   const [lightingStyles, setLightingStyles] = useState<LightingStyle[]>([]);
+  const [techClasses, setTechClasses] = useState<TechClass[]>([]);
 
   // Filters — lighting codes as strings now
   const [lightingCodeFilters, setLightingCodeFilters] = useState<Set<string>>(new Set());
