@@ -251,7 +251,7 @@ function ProfileCard({
         {profile.illustration_url ? (
           <img
             src={profile.illustration_url}
-            alt={profile.profile_name}
+            alt={profile.display_name || profile.profile_name}
             className="max-h-full max-w-full object-contain"
           />
         ) : (
