@@ -26,6 +26,8 @@ interface ProfileComponent {
   component_name: string | null;
   material_category: string | null;
   sub_type: string | null;
+  client_badge: string | null;
+  client_description: string | null;
 }
 
 interface WinningLineConfiguratorProps {
