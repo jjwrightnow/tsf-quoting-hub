@@ -69,7 +69,7 @@ export function generateAndDownloadPDF(project: any, signs: any[]) {
     doc.setFontSize(7);
     doc.setTextColor(150);
     doc.text(
-      'Manufactured by The Signage Factory, Bangkok. This document is the official technical spec for production.',
+      'Includes full-size mounting template and pre-configured power supply. Final installation by a licensed sign contractor or electrician required.',
       14,
       doc.internal.pageSize.height - 8
     );
