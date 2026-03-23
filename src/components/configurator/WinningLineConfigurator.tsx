@@ -677,7 +677,7 @@ function ContextRibbon({
 }) {
   const text = useMemo(() => {
     if (selectedProfile) {
-      return `Selected: ${selectedProfile.profile_name} — ${lightingCodeToLabel(selectedProfile.lighting_code)}`;
+      return `Selected: ${selectedProfile.display_name || selectedProfile.profile_name} — ${lightingCodeToLabel(selectedProfile.lighting_code)}`;
     }
 
     const parts: string[] = [];
