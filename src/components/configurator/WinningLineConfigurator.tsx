@@ -353,6 +353,11 @@ function ConstructionStack({ components, mode }: { components: ProfileComponent[
                       <p className="text-xs font-semibold text-foreground">
                         {displayName(slot.component_name)}
                       </p>
+                      {mode === 'client' && slot.client_badge && (
+                        <span className="inline-block text-[9px] font-medium px-1.5 py-0.5 rounded-full bg-green-500/15 text-green-400" title={slot.client_description || ''}>
+                          {slot.client_badge}
+                        </span>
+                      )}
                       {mode === 'pro' && slot.material_category && (
                         <span className="text-[9px] text-cfg-muted">{slot.material_category}</span>
                       )}
