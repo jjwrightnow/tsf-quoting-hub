@@ -973,7 +973,7 @@ export default function WinningLineConfigurator({
       {!isProfileSelected && (
         <div>
           {/* SECTION 1 — Lighting & Tech Filters */}
-          <div ref={zone0Ref} className="px-4 py-4 border-b border-border">
+          <div ref={zone0Ref} className="px-4 py-4 border-b border-border bg-[#0f0f1a]">
             <div className="flex items-center gap-2 mb-3">
               <span className="flex h-6 w-6 items-center justify-center rounded bg-[#1e1e35] text-[#3b82f6] text-xs font-bold shrink-0">1</span>
               <h2 className="text-sm font-semibold text-foreground">Choose a Lighting Style</h2>
