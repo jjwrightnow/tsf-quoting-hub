@@ -21,6 +21,10 @@ export type Database = {
           email: string
           full_name: string
           id: string
+          message: string | null
+          phone: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
           status: string | null
         }
         Insert: {
@@ -29,6 +33,10 @@ export type Database = {
           email: string
           full_name: string
           id?: string
+          message?: string | null
+          phone?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           status?: string | null
         }
         Update: {
@@ -37,6 +45,10 @@ export type Database = {
           email?: string
           full_name?: string
           id?: string
+          message?: string | null
+          phone?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           status?: string | null
         }
         Relationships: []
@@ -209,6 +221,134 @@ export type Database = {
         }
         Relationships: []
       }
+      chat_messages: {
+        Row: {
+          bubble_id: string | null
+          content: string
+          created_at: string
+          id: string
+          message_type: string
+          role: string
+          session_id: string
+        }
+        Insert: {
+          bubble_id?: string | null
+          content: string
+          created_at?: string
+          id?: string
+          message_type?: string
+          role: string
+          session_id: string
+        }
+        Update: {
+          bubble_id?: string | null
+          content?: string
+          created_at?: string
+          id?: string
+          message_type?: string
+          role?: string
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_messages_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "chat_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chat_sessions: {
+        Row: {
+          company_name: string | null
+          domain: string | null
+          email: string | null
+          id: string
+          is_verified: boolean
+          jj_notified: boolean
+          last_message_at: string | null
+          metadata: Json | null
+          resolved_at: string | null
+          resolved_by: string | null
+          started_at: string
+          status: string
+        }
+        Insert: {
+          company_name?: string | null
+          domain?: string | null
+          email?: string | null
+          id?: string
+          is_verified?: boolean
+          jj_notified?: boolean
+          last_message_at?: string | null
+          metadata?: Json | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          started_at?: string
+          status?: string
+        }
+        Update: {
+          company_name?: string | null
+          domain?: string | null
+          email?: string | null
+          id?: string
+          is_verified?: boolean
+          jj_notified?: boolean
+          last_message_at?: string | null
+          metadata?: Json | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          started_at?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      components: {
+        Row: {
+          airtable_id: string | null
+          can_be_back: boolean | null
+          can_be_face: boolean | null
+          component_name: string
+          created_at: string | null
+          id: string
+          is_illuminated: boolean | null
+          material_category: string | null
+          notes: string | null
+          sub_type: string | null
+          thickness: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          airtable_id?: string | null
+          can_be_back?: boolean | null
+          can_be_face?: boolean | null
+          component_name: string
+          created_at?: string | null
+          id?: string
+          is_illuminated?: boolean | null
+          material_category?: string | null
+          notes?: string | null
+          sub_type?: string | null
+          thickness?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          airtable_id?: string | null
+          can_be_back?: boolean | null
+          can_be_face?: boolean | null
+          component_name?: string
+          created_at?: string | null
+          id?: string
+          is_illuminated?: boolean | null
+          material_category?: string | null
+          notes?: string | null
+          sub_type?: string | null
+          thickness?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       contacts: {
         Row: {
           account_id: string
@@ -256,6 +396,33 @@ export type Database = {
           },
         ]
       }
+      default_thickness_rules: {
+        Row: {
+          created_at: string | null
+          face_thickness_mm: number
+          height_range: string
+          id: string
+          notes: string | null
+          return_thickness_mm: number
+        }
+        Insert: {
+          created_at?: string | null
+          face_thickness_mm: number
+          height_range: string
+          id?: string
+          notes?: string | null
+          return_thickness_mm: number
+        }
+        Update: {
+          created_at?: string | null
+          face_thickness_mm?: number
+          height_range?: string
+          id?: string
+          notes?: string | null
+          return_thickness_mm?: number
+        }
+        Relationships: []
+      }
       draft_quotes: {
         Row: {
           created_at: string | null
@@ -283,6 +450,105 @@ export type Database = {
           title?: string
           updated_at?: string | null
           user_email?: string
+        }
+        Relationships: []
+      }
+      finishes: {
+        Row: {
+          airtable_id: string | null
+          created_at: string | null
+          finish_category: string | null
+          finish_name: string
+          id: string
+          notes: string | null
+        }
+        Insert: {
+          airtable_id?: string | null
+          created_at?: string | null
+          finish_category?: string | null
+          finish_name: string
+          id?: string
+          notes?: string | null
+        }
+        Update: {
+          airtable_id?: string | null
+          created_at?: string | null
+          finish_category?: string | null
+          finish_name?: string
+          id?: string
+          notes?: string | null
+        }
+        Relationships: []
+      }
+      material_finish_compatibility: {
+        Row: {
+          finish_2b: boolean | null
+          finish_hl: boolean | null
+          finish_n4: boolean | null
+          finish_n8: boolean | null
+          finish_po: boolean | null
+          id: string
+          material: string
+        }
+        Insert: {
+          finish_2b?: boolean | null
+          finish_hl?: boolean | null
+          finish_n4?: boolean | null
+          finish_n8?: boolean | null
+          finish_po?: boolean | null
+          id?: string
+          material: string
+        }
+        Update: {
+          finish_2b?: boolean | null
+          finish_hl?: boolean | null
+          finish_n4?: boolean | null
+          finish_n8?: boolean | null
+          finish_po?: boolean | null
+          id?: string
+          material?: string
+        }
+        Relationships: []
+      }
+      materials: {
+        Row: {
+          airtable_id: string | null
+          available_thicknesses: string | null
+          base_material: string
+          created_at: string | null
+          default_finish: string | null
+          grade: string | null
+          id: string
+          light_transmission: string | null
+          material_name: string
+          notes: string | null
+          outdoor_rated: boolean | null
+        }
+        Insert: {
+          airtable_id?: string | null
+          available_thicknesses?: string | null
+          base_material: string
+          created_at?: string | null
+          default_finish?: string | null
+          grade?: string | null
+          id?: string
+          light_transmission?: string | null
+          material_name: string
+          notes?: string | null
+          outdoor_rated?: boolean | null
+        }
+        Update: {
+          airtable_id?: string | null
+          available_thicknesses?: string | null
+          base_material?: string
+          created_at?: string | null
+          default_finish?: string | null
+          grade?: string | null
+          id?: string
+          light_transmission?: string | null
+          material_name?: string
+          notes?: string | null
+          outdoor_rated?: boolean | null
         }
         Relationships: []
       }
@@ -318,6 +584,161 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      portal_projects: {
+        Row: {
+          account_id: string | null
+          airtable_project_id: string | null
+          contact_id: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          project_name: string
+          quote_ref: string | null
+          status: string
+          submitted_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          account_id?: string | null
+          airtable_project_id?: string | null
+          contact_id?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          project_name: string
+          quote_ref?: string | null
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string | null
+          airtable_project_id?: string | null
+          contact_id?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          project_name?: string
+          quote_ref?: string | null
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "portal_projects_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "portal_projects_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      portal_signs: {
+        Row: {
+          acrylic_face: string | null
+          airtable_sign_id: string | null
+          artwork_urls: string[] | null
+          back_type: string | null
+          created_at: string
+          depth: string | null
+          finish: string | null
+          height: string | null
+          id: string
+          is_complete: boolean | null
+          lead_wires: string | null
+          led_color: string | null
+          metal_type: string | null
+          mounting: string | null
+          notes: string | null
+          profile_code: string | null
+          profile_type: string | null
+          project_id: string
+          sets: number | null
+          sign_name: string
+          sign_text: string | null
+          sort_order: number | null
+          spec_data: Json | null
+          ul_label: string | null
+          updated_at: string
+          user_email: string | null
+          wire_exit: string | null
+        }
+        Insert: {
+          acrylic_face?: string | null
+          airtable_sign_id?: string | null
+          artwork_urls?: string[] | null
+          back_type?: string | null
+          created_at?: string
+          depth?: string | null
+          finish?: string | null
+          height?: string | null
+          id?: string
+          is_complete?: boolean | null
+          lead_wires?: string | null
+          led_color?: string | null
+          metal_type?: string | null
+          mounting?: string | null
+          notes?: string | null
+          profile_code?: string | null
+          profile_type?: string | null
+          project_id: string
+          sets?: number | null
+          sign_name?: string
+          sign_text?: string | null
+          sort_order?: number | null
+          spec_data?: Json | null
+          ul_label?: string | null
+          updated_at?: string
+          user_email?: string | null
+          wire_exit?: string | null
+        }
+        Update: {
+          acrylic_face?: string | null
+          airtable_sign_id?: string | null
+          artwork_urls?: string[] | null
+          back_type?: string | null
+          created_at?: string
+          depth?: string | null
+          finish?: string | null
+          height?: string | null
+          id?: string
+          is_complete?: boolean | null
+          lead_wires?: string | null
+          led_color?: string | null
+          metal_type?: string | null
+          mounting?: string | null
+          notes?: string | null
+          profile_code?: string | null
+          profile_type?: string | null
+          project_id?: string
+          sets?: number | null
+          sign_name?: string
+          sign_text?: string | null
+          sort_order?: number | null
+          spec_data?: Json | null
+          ul_label?: string | null
+          updated_at?: string
+          user_email?: string | null
+          wire_exit?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "portal_signs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "portal_projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       product_specs: {
         Row: {
@@ -366,6 +787,102 @@ export type Database = {
           profile_image_url?: string | null
           sku?: string
           specs_text?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      profile_components: {
+        Row: {
+          airtable_id: string | null
+          component_id: string | null
+          created_at: string | null
+          id: string
+          is_default: boolean | null
+          layer_position: string
+          notes: string | null
+          position_order: number
+          profile_id: string | null
+        }
+        Insert: {
+          airtable_id?: string | null
+          component_id?: string | null
+          created_at?: string | null
+          id?: string
+          is_default?: boolean | null
+          layer_position: string
+          notes?: string | null
+          position_order: number
+          profile_id?: string | null
+        }
+        Update: {
+          airtable_id?: string | null
+          component_id?: string | null
+          created_at?: string | null
+          id?: string
+          is_default?: boolean | null
+          layer_position?: string
+          notes?: string | null
+          position_order?: number
+          profile_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_components_component_id_fkey"
+            columns: ["component_id"]
+            isOneToOne: false
+            referencedRelation: "components"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profile_components_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          airtable_id: string | null
+          created_at: string | null
+          face_style: string | null
+          id: string
+          is_active: boolean | null
+          lighting_code: string
+          notes: string | null
+          profile_code: string
+          profile_name: string
+          return_type: string | null
+          technology: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          airtable_id?: string | null
+          created_at?: string | null
+          face_style?: string | null
+          id?: string
+          is_active?: boolean | null
+          lighting_code: string
+          notes?: string | null
+          profile_code: string
+          profile_name: string
+          return_type?: string | null
+          technology?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          airtable_id?: string | null
+          created_at?: string | null
+          face_style?: string | null
+          id?: string
+          is_active?: boolean | null
+          lighting_code?: string
+          notes?: string | null
+          profile_code?: string
+          profile_name?: string
+          return_type?: string | null
+          technology?: string | null
           updated_at?: string | null
         }
         Relationships: []
@@ -420,31 +937,40 @@ export type Database = {
           created_at: string | null
           id: string
           image_url: string | null
+          location_type: string | null
           name: string
+          notes: string | null
           quote_number: string | null
           status: string
           updated_at: string | null
           user_email: string
+          wall_type: string | null
         }
         Insert: {
           created_at?: string | null
           id?: string
           image_url?: string | null
+          location_type?: string | null
           name: string
+          notes?: string | null
           quote_number?: string | null
           status?: string
           updated_at?: string | null
           user_email: string
+          wall_type?: string | null
         }
         Update: {
           created_at?: string | null
           id?: string
           image_url?: string | null
+          location_type?: string | null
           name?: string
+          notes?: string | null
           quote_number?: string | null
           status?: string
           updated_at?: string | null
           user_email?: string
+          wall_type?: string | null
         }
         Relationships: []
       }
@@ -823,6 +1349,13 @@ export type Database = {
             foreignKeyName: "signs_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
+            referencedRelation: "project_summary"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "signs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id"]
           },
@@ -860,6 +1393,48 @@ export type Database = {
           profile_type?: string
           required?: boolean | null
           sort_order?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      stock_materials: {
+        Row: {
+          base_material: string
+          created_at: string | null
+          finish_code: string | null
+          id: string
+          in_stock: boolean | null
+          material_name: string
+          notes: string | null
+          surface_finish: string | null
+          thickness_in: number | null
+          thickness_mm: number
+          updated_at: string | null
+        }
+        Insert: {
+          base_material: string
+          created_at?: string | null
+          finish_code?: string | null
+          id?: string
+          in_stock?: boolean | null
+          material_name: string
+          notes?: string | null
+          surface_finish?: string | null
+          thickness_in?: number | null
+          thickness_mm: number
+          updated_at?: string | null
+        }
+        Update: {
+          base_material?: string
+          created_at?: string | null
+          finish_code?: string | null
+          id?: string
+          in_stock?: boolean | null
+          material_name?: string
+          notes?: string | null
+          surface_finish?: string | null
+          thickness_in?: number | null
+          thickness_mm?: number
           updated_at?: string | null
         }
         Relationships: []
@@ -923,6 +1498,21 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      surface_finish_codes: {
+        Row: {
+          code: string
+          description: string
+        }
+        Insert: {
+          code: string
+          description: string
+        }
+        Update: {
+          code?: string
+          description?: string
+        }
+        Relationships: []
       }
       sync_state: {
         Row: {
@@ -995,7 +1585,20 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      project_summary: {
+        Row: {
+          complete_sign_count: number | null
+          created_at: string | null
+          id: string | null
+          name: string | null
+          quote_number: string | null
+          sign_count: number | null
+          status: string | null
+          updated_at: string | null
+          user_email: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       archive_stale_projects: { Args: never; Returns: undefined }
