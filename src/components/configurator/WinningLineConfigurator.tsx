@@ -1372,6 +1372,11 @@ export default function WinningLineConfigurator({
           </div>
         </div>
       )}
+
+      {/* ════════════════════════════════════════════
+          PRODUCT GUIDE PANEL
+          ════════════════════════════════════════════ */}
+      <ProductGuidePanel techClasses={techClasses} lightingStyles={lightingStyles} />
     </div>
   );
 }
