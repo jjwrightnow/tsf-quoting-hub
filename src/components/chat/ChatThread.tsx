@@ -143,6 +143,11 @@ const ChatThread = () => {
       msgs.push({ id: `canned-a-${i}`, role: 'assistant', content: entry.a });
     });
 
+    // AI conversation messages
+    signStore.aiMessages.forEach((msg, i) => {
+      msgs.push({ id: `ai-${i}`, role: msg.role, content: msg.content });
+    });
+
     if (phase === 'welcome') { setMessages(msgs); return; }
 
     // Access request flow
