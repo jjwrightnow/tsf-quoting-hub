@@ -908,7 +908,7 @@ export default function WinningLineConfigurator({
         client_description: pc.components?.client_description || null,
       }));
       setComponents(mapped);
-      setStep(2);
+      setBrowseStep(3);
     }
     setLoadingComponents(false);
 
