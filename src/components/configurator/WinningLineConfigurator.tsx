@@ -3,6 +3,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { useShellStore, type PortalSign } from '@/stores/shellStore';
 import { toast } from 'sonner';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { BookOpen, ChevronUp, ChevronDown } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 
 /* ─── Types ─── */
 interface Profile {
