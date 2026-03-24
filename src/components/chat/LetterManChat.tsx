@@ -15,7 +15,7 @@ export const LetterManChat: React.FC<LetterManChatProps> = ({ mode, onClose }) =
   const [messages, setMessages] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [systemPrompt, setSystemPrompt] = useState('');
-  const [cannedQuestions, setCannedQuestions] = useState<string[]>([]);
+  const [cannedQuestions, setCannedQuestions] = useState<any[]>([]);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const store = useShellStore() as any;
@@ -25,13 +25,18 @@ export const LetterManChat: React.FC<LetterManChatProps> = ({ mode, onClose }) =
 
   useEffect(() => {
     const fetchConfig = async () => {
-      const { data } = await supabase
-        .from('operator_config')
-        .select('context_instruction, chatbot_name, canned_questions')
-        .single();
-      if (data) {
-        setSystemPrompt(data.context_instruction || '');
-        setCannedQuestions(data.canned_questions || []);
+      try {
+        const { data } = await supabase
+          .from('operator_config')
+          .select('context_instruction, chatbot_name, canned_questions')
+          .single();
+        if (data) {
+          setSystemPrompt(data.context_instruction || '');
+          setCannedQuestions(data.canned_questions || []);
+        }
+      } catch (err) {
+        console.error('LetterManChat config fetch error:', err);
+        setSystemPrompt('You are a helpful AI assistant for a sign shop.');
       }
     };
     fetchConfig();
@@ -160,15 +165,18 @@ export const LetterManChat: React.FC<LetterManChatProps> = ({ mode, onClose }) =
               <MessageCircle className="w-8 h-8 mx-auto mb-2" />
               <p className="text-[10px] uppercase tracking-widest font-semibold">Ask about materials, lighting, or upload artwork</p>
             </div>
-            {cannedQuestions.map((q: string, i: number) => (
-              <button
-                key={i}
-                onClick={() => handleSend(q)}
-                className="text-left text-xs text-muted-foreground border border-[#1e1e35] rounded-lg px-3 py-2 hover:border-blue-500/40 hover:text-foreground transition-colors bg-[#0d0d1a]"
-              >
-                {q}
-              </button>
-            ))}
+            {cannedQuestions.map((q: any, i: number) => {
+              const questionText = typeof q === 'string' ? q : (q?.label || q?.value || '');
+              return (
+                <button
+                  key={i}
+                  onClick={() => handleSend(questionText)}
+                  className="text-left text-xs text-muted-foreground border border-[#1e1e35] rounded-lg px-3 py-2 hover:border-blue-500/40 hover:text-foreground transition-colors bg-[#0d0d1a]"
+                >
+                  {questionText}
+                </button>
+              );
+            })}
           </div>
         )}
         {messages.map((msg: any) => (

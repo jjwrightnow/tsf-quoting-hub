@@ -1,3 +1,9 @@
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useShellStore } from '@/stores/shellStore';
+import { LetterManChat } from '@/components/chat/LetterManChat';
+import { BookOpen, ChevronDown, ChevronUp, LogOut, MessageCircle } from 'lucide-react';
+
 interface TechClass {
   code: string;
   short_name: string;
@@ -19,18 +25,22 @@ function ProductGuide() {
 
   useEffect(() => {
     const fetchGuide = async () => {
-      const { data: tech } = await supabase
-        .from('technology_classes')
-        .select('code, short_name, price_tier, hover_description')
-        .eq('is_active', true)
-        .order('sort_order');
-      const { data: light } = await supabase
-        .from('lighting_styles')
-        .select('lighting_code, display_name, sku_label, hover_description')
-        .eq('is_active', true)
-        .order('sort_order');
-      if (tech) setTechClasses(tech);
-      if (light) setLightingStyles(light);
+      try {
+        const { data: tech } = await supabase
+          .from('technology_classes')
+          .select('code, short_name, price_tier, hover_description')
+          .eq('is_active', true)
+          .order('sort_order');
+        const { data: light } = await supabase
+          .from('lighting_styles')
+          .select('lighting_code, display_name, sku_label, hover_description')
+          .eq('is_active', true)
+          .order('sort_order');
+        if (tech) setTechClasses(tech);
+        if (light) setLightingStyles(light);
+      } catch (err) {
+        console.error('ProductGuide fetch error:', err);
+      }
     };
     fetchGuide();
   }, []);
@@ -109,11 +119,13 @@ export function ProjectShell({ children }: ProjectShellProps) {
     const saved = localStorage.getItem('signmaker_ui_mode');
     return (saved as 'pro' | 'client') || 'pro';
   });
-  const store = useShellStore() as any;
-  const shellState = store.shellState;
-  const activeProject = store.activeProject;
-  const userEmail = store.userEmail;
-  const signOut = store.signOut;
+  
+  let store: any = { shellState: 'loading', activeProject: null, userEmail: '', signOut: null };
+  try {
+    store = useShellStore() as any;
+  } catch (e) {
+    console.error('Failed to initialize useShellStore:', e);
+  }
 
   const setUiMode = (mode: 'pro' | 'client') => {
     setUiModeState(mode);
@@ -121,7 +133,7 @@ export function ProjectShell({ children }: ProjectShellProps) {
   };
 
   return (
-    <div className="h-screen w-screen flex flex-col overflow-hidden bg-[#0a0a14]">
+    <div className="h-full w-full flex flex-col overflow-hidden bg-[#0a0a14]">
 
       <header className="h-12 flex-shrink-0 flex items-center justify-between px-4 bg-[#0a0a14] border-b border-[#1e1e35] z-50">
         <div className="flex items-center gap-1.5">
@@ -129,16 +141,16 @@ export function ProjectShell({ children }: ProjectShellProps) {
           <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
         </div>
         <div className="flex-1 text-center hidden sm:block">
-          {shellState === 'in_project' && activeProject && (
+          {store.shellState === 'in_project' && store.activeProject && (
             <span className="text-sm text-white/80 font-medium">
-              {activeProject.project_name}
+              {store.activeProject.project_name}
             </span>
           )}
         </div>
         <div className="flex items-center gap-3">
-          {userEmail && (
+          {store.userEmail && (
             <span className="text-[10px] text-muted-foreground font-mono hidden md:block truncate max-w-[160px]">
-              {userEmail}
+              {store.userEmail}
             </span>
           )}
           <div className="flex bg-[#16162a] p-0.5 rounded border border-[#1e1e35]">
@@ -159,9 +171,9 @@ export function ProjectShell({ children }: ProjectShellProps) {
               Client
             </button>
           </div>
-          {signOut && (
+          {store.signOut && (
             <button
-              onClick={signOut}
+              onClick={store.signOut}
               className="text-muted-foreground hover:text-white transition-colors p-1"
               title="Sign out"
             >
