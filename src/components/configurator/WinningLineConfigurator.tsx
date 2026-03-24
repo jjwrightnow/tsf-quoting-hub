@@ -937,7 +937,11 @@ export default function WinningLineConfigurator({
   const handleSaved = () => {
     setSelectedProfile(null);
     setComponents([]);
-    setStep(0);
+    setBrowseStep(0);
+    setSelectedTechCode(null);
+    setSelectedLightingCode(null);
+    setTechFilter(new Set());
+    setLightingCodeFilters(new Set());
     setShowAddForm(false);
     setShowQuoteForm(false);
     onSignSaved?.();
