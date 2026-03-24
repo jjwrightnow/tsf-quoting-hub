@@ -881,7 +881,7 @@ export default function WinningLineConfigurator({
   // Select profile
   const selectProfile = async (profile: Profile) => {
     setSelectedProfile(profile);
-    setStep(1);
+    setBrowseStep(3);
     setShowAddForm(false);
     setShowQuoteForm(false);
     setLoadingComponents(true);
