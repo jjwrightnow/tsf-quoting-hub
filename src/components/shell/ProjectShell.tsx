@@ -105,13 +105,20 @@ interface ProjectShellProps {
 
 export function ProjectShell({ children }: ProjectShellProps) {
   const [chatOpen, setChatOpen] = useState(false);
+  const [uiMode, setUiModeState] = useState<'pro' | 'client'>(() => {
+    const saved = localStorage.getItem('signmaker_ui_mode');
+    return (saved as 'pro' | 'client') || 'pro';
+  });
   const store = useShellStore() as any;
   const shellState = store.shellState;
   const activeProject = store.activeProject;
   const userEmail = store.userEmail;
-  const uiMode = store.uiMode || 'pro';
-  const setUiMode = store.setUiMode;
   const signOut = store.signOut;
+
+  const setUiMode = (mode: 'pro' | 'client') => {
+    setUiModeState(mode);
+    localStorage.setItem('signmaker_ui_mode', mode);
+  };
 
   return (
     <div className="h-screen w-screen flex flex-col overflow-hidden bg-[#0a0a14]">
@@ -134,26 +141,24 @@ export function ProjectShell({ children }: ProjectShellProps) {
               {userEmail}
             </span>
           )}
-          {setUiMode && (
-            <div className="flex bg-[#16162a] p-0.5 rounded border border-[#1e1e35]">
-              <button
-                onClick={() => { setUiMode('pro'); localStorage.setItem('signmaker_ui_mode', 'pro'); }}
-                className={`px-2.5 py-0.5 text-[10px] font-bold rounded transition-all ${
-                  uiMode === 'pro' ? 'bg-blue-600 text-white' : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                Pro
-              </button>
-              <button
-                onClick={() => { setUiMode('client'); localStorage.setItem('signmaker_ui_mode', 'client'); }}
-                className={`px-2.5 py-0.5 text-[10px] font-bold rounded transition-all ${
-                  uiMode === 'client' ? 'bg-pink-600 text-white' : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                Client
-              </button>
-            </div>
-          )}
+          <div className="flex bg-[#16162a] p-0.5 rounded border border-[#1e1e35]">
+            <button
+              onClick={() => setUiMode('pro')}
+              className={`px-2.5 py-0.5 text-[10px] font-bold rounded transition-all ${
+                uiMode === 'pro' ? 'bg-blue-600 text-white' : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Pro
+            </button>
+            <button
+              onClick={() => setUiMode('client')}
+              className={`px-2.5 py-0.5 text-[10px] font-bold rounded transition-all ${
+                uiMode === 'client' ? 'bg-pink-600 text-white' : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Client
+            </button>
+          </div>
           {signOut && (
             <button
               onClick={signOut}
