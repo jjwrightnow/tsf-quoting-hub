@@ -349,6 +349,30 @@ export type Database = {
         }
         Relationships: []
       }
+      complexity_tiers: {
+        Row: {
+          code: string
+          customer_hint: string
+          description: string
+          display_name: string
+          sort_order: number | null
+        }
+        Insert: {
+          code: string
+          customer_hint: string
+          description: string
+          display_name: string
+          sort_order?: number | null
+        }
+        Update: {
+          code?: string
+          customer_hint?: string
+          description?: string
+          display_name?: string
+          sort_order?: number | null
+        }
+        Relationships: []
+      }
       components: {
         Row: {
           airtable_id: string | null
@@ -528,6 +552,98 @@ export type Database = {
           finish_name?: string
           id?: string
           notes?: string | null
+        }
+        Relationships: []
+      }
+      font_categories: {
+        Row: {
+          category_code: string
+          category_name: string
+          description: string | null
+          display_label: string
+          id: string
+          sort_order: number | null
+        }
+        Insert: {
+          category_code: string
+          category_name: string
+          description?: string | null
+          display_label: string
+          id?: string
+          sort_order?: number | null
+        }
+        Update: {
+          category_code?: string
+          category_name?: string
+          description?: string | null
+          display_label?: string
+          id?: string
+          sort_order?: number | null
+        }
+        Relationships: []
+      }
+      font_options: {
+        Row: {
+          category_code: string
+          font_family: string
+          font_name: string
+          id: string
+          is_popular: boolean | null
+          sort_order: number | null
+        }
+        Insert: {
+          category_code: string
+          font_family: string
+          font_name: string
+          id?: string
+          is_popular?: boolean | null
+          sort_order?: number | null
+        }
+        Update: {
+          category_code?: string
+          font_family?: string
+          font_name?: string
+          id?: string
+          is_popular?: boolean | null
+          sort_order?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "font_options_category_code_fkey"
+            columns: ["category_code"]
+            isOneToOne: false
+            referencedRelation: "font_categories"
+            referencedColumns: ["category_code"]
+          },
+        ]
+      }
+      form_factors: {
+        Row: {
+          code: string
+          description: string | null
+          display_name: string
+          icon: string | null
+          requires_copy: boolean | null
+          requires_font: boolean | null
+          sort_order: number | null
+        }
+        Insert: {
+          code: string
+          description?: string | null
+          display_name: string
+          icon?: string | null
+          requires_copy?: boolean | null
+          requires_font?: boolean | null
+          sort_order?: number | null
+        }
+        Update: {
+          code?: string
+          description?: string | null
+          display_name?: string
+          icon?: string | null
+          requires_copy?: boolean | null
+          requires_font?: boolean | null
+          sort_order?: number | null
         }
         Relationships: []
       }
@@ -741,9 +857,13 @@ export type Database = {
           airtable_sign_id: string | null
           artwork_urls: string[] | null
           back_type: string | null
+          complexity_tier: string | null
           created_at: string
           depth: string | null
           finish: string | null
+          font_category: string | null
+          font_name: string | null
+          form_factor: string | null
           height: string | null
           height_inches: number | null
           id: string
@@ -753,6 +873,8 @@ export type Database = {
           metal_type: string | null
           mounting: string | null
           notes: string | null
+          overall_height_inches: number | null
+          overall_width_inches: number | null
           profile_code: string | null
           profile_type: string | null
           project_id: string
@@ -771,9 +893,13 @@ export type Database = {
           airtable_sign_id?: string | null
           artwork_urls?: string[] | null
           back_type?: string | null
+          complexity_tier?: string | null
           created_at?: string
           depth?: string | null
           finish?: string | null
+          font_category?: string | null
+          font_name?: string | null
+          form_factor?: string | null
           height?: string | null
           height_inches?: number | null
           id?: string
@@ -783,6 +909,8 @@ export type Database = {
           metal_type?: string | null
           mounting?: string | null
           notes?: string | null
+          overall_height_inches?: number | null
+          overall_width_inches?: number | null
           profile_code?: string | null
           profile_type?: string | null
           project_id: string
@@ -801,9 +929,13 @@ export type Database = {
           airtable_sign_id?: string | null
           artwork_urls?: string[] | null
           back_type?: string | null
+          complexity_tier?: string | null
           created_at?: string
           depth?: string | null
           finish?: string | null
+          font_category?: string | null
+          font_name?: string | null
+          form_factor?: string | null
           height?: string | null
           height_inches?: number | null
           id?: string
@@ -813,6 +945,8 @@ export type Database = {
           metal_type?: string | null
           mounting?: string | null
           notes?: string | null
+          overall_height_inches?: number | null
+          overall_width_inches?: number | null
           profile_code?: string | null
           profile_type?: string | null
           project_id?: string
@@ -827,6 +961,13 @@ export type Database = {
           wire_exit?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "portal_signs_complexity_tier_fkey"
+            columns: ["complexity_tier"]
+            isOneToOne: false
+            referencedRelation: "complexity_tiers"
+            referencedColumns: ["code"]
+          },
           {
             foreignKeyName: "portal_signs_project_id_fkey"
             columns: ["project_id"]
