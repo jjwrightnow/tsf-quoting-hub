@@ -983,13 +983,37 @@ export default function WinningLineConfigurator({
 
   return (
     <div ref={containerRef} className="w-full font-sans">
-      {/* ── Persistent top bar: Summary + Mode toggle ── */}
+      {/* ── Persistent top bar: Breadcrumb + Mode toggle ── */}
       <div className="flex items-center gap-3 px-4 py-3 border-b border-border">
         <div className="flex-1 min-w-0">
-          <SummaryBar
-            profile={selectedProfile?.display_name || selectedProfile?.profile_name || null}
-            technology={selectedProfile?.technology || null}
-            onScrollTo={scrollTo}
+          <ConfiguratorBreadcrumb
+            browseStep={browseStep}
+            selectedTech={selectedTechCode}
+            selectedLighting={selectedLightingCode}
+            selectedProfile={selectedProfile}
+            techClasses={techClasses}
+            lightingStyles={lightingStyles}
+            onClickTech={() => {
+              setSelectedProfile(null);
+              setComponents([]);
+              setSelectedLightingCode(null);
+              setLightingCodeFilters(new Set());
+              setSelectedTechCode(null);
+              setTechFilter(new Set());
+              setBrowseStep(0);
+            }}
+            onClickLighting={() => {
+              setSelectedProfile(null);
+              setComponents([]);
+              setSelectedLightingCode(null);
+              setLightingCodeFilters(new Set());
+              setBrowseStep(1);
+            }}
+            onClickProfile={() => {
+              setSelectedProfile(null);
+              setComponents([]);
+              setBrowseStep(2);
+            }}
           />
         </div>
         <div className="flex rounded-md bg-secondary p-0.5 shrink-0">
@@ -1013,74 +1037,53 @@ export default function WinningLineConfigurator({
       </div>
 
       {/* ════════════════════════════════════════════
-          VIEW A — Browse Mode (no profile selected)
+          VIEW A — Progressive Disclosure Browse Mode
           ════════════════════════════════════════════ */}
       {!isProfileSelected && (
         <div>
-          {/* SECTION 1 — Lighting & Tech Filters */}
+          {/* STEP 1 — What type of sign? (Technology) */}
           <div ref={zone0Ref} className="px-4 py-4 border-b border-border bg-[#0f0f1a]">
             <div className="flex items-center gap-2 mb-3">
-              <span className="flex h-6 w-6 items-center justify-center rounded bg-[#1e1e35] text-[#3b82f6] text-xs font-bold shrink-0">1</span>
-              <h2 className="text-sm font-semibold text-foreground">Choose a Lighting Style</h2>
+              <span className="flex h-6 w-6 items-center justify-center rounded bg-[#1e1e35] text-primary text-xs font-bold shrink-0">1</span>
+              <h2 className="text-sm font-semibold text-foreground">What type of sign?</h2>
             </div>
 
-            {/* Lighting Style label */}
-            <p className="text-xs font-semibold text-[#6b7280] uppercase tracking-wider mb-2">Lighting Style</p>
-
-            {/* Lighting Style thumbnail grid */}
             <TooltipProvider>
-              <div className="grid grid-cols-4 md:grid-cols-8 gap-1.5 mb-4">
-                {/* Show All reset button */}
-                <button
-                  onClick={() => setLightingCodeFilters(new Set())}
-                  className={`flex flex-col items-center rounded-lg border overflow-hidden transition-all cursor-pointer
-                    ${lightingCodeFilters.size === 0
-                      ? 'border-[#3b82f6] ring-1 ring-[#3b82f6] bg-[#3b82f6]/10'
-                      : 'border-[#2a2a40] bg-[#1a1a2e] hover:border-[#3b82f6]/40'
-                    }`}
-                >
-                  <div className="w-full aspect-square bg-[#151525] overflow-hidden flex items-center justify-center">
-                    <span className={`text-xl font-bold ${lightingCodeFilters.size === 0 ? 'text-[#3b82f6]' : 'text-[#374151]'}`}>✦</span>
-                  </div>
-                  <div className="px-1 py-1 w-full text-center">
-                    <div className={`text-[8px] font-medium leading-tight ${lightingCodeFilters.size === 0 ? 'text-[#3b82f6]' : 'text-[#9ca3af]'}`}>All</div>
-                    <div className="text-[7px] text-[#4b5563]">&nbsp;</div>
-                  </div>
-                </button>
-                {(lightingStyles || []).map((style) => {
-                  const active = isLightingCodeActive(style.lighting_code);
+              <div className="grid grid-cols-4 md:grid-cols-7 gap-2">
+                {(techClasses || []).map((tech) => {
+                  const active = selectedTechCode === tech.code;
                   return (
-                    <Tooltip key={style.lighting_code}>
+                    <Tooltip key={tech.code}>
                       <TooltipTrigger asChild>
                         <button
-                          onClick={() => toggleLightingCode(style.lighting_code)}
-                          className={`flex flex-col items-center rounded-lg border overflow-hidden transition-all cursor-pointer
-                            ${active
-                              ? 'border-[#3b82f6] ring-1 ring-[#3b82f6] bg-[#3b82f6]/10'
-                              : 'border-[#2a2a40] bg-[#1a1a2e] hover:border-[#3b82f6]/40'
-                            }`}
+                          onClick={() => selectTech(tech.code)}
+                          className={`relative flex flex-col items-center rounded-lg border overflow-hidden transition-all
+                            ${active ? 'border-primary ring-1 ring-primary bg-primary/10' : 'border-border bg-card hover:border-primary/40'}`}
                         >
-                          <div className="w-full aspect-square bg-[#151525] overflow-hidden">
-                            {style.thumbnail_url ? (
-                              <img src={style.thumbnail_url} alt={style.display_name}
-                                className="w-full h-full object-cover" />
+                          <div className="w-full aspect-square bg-secondary/30 overflow-hidden">
+                            {tech.thumbnail_url ? (
+                              <img src={tech.thumbnail_url} alt={tech.short_name} className="w-full h-full object-cover" />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center">
-                                <span className={`text-xl font-bold ${active ? 'text-[#3b82f6]' : 'text-[#374151]'}`}>A</span>
+                                <span className={`text-2xl font-bold ${active ? 'text-primary' : 'text-muted-foreground/30'}`}>A</span>
                               </div>
                             )}
                           </div>
-                          <div className="px-1 py-1 w-full text-center">
-                            <div className={`text-[8px] font-medium leading-tight truncate ${active ? 'text-[#3b82f6]' : 'text-[#9ca3af]'}`}>
-                              {style.display_name}
+                          <div className="w-full px-1 py-1.5 text-center">
+                            <div className={`text-[9px] font-semibold leading-tight truncate ${active ? 'text-primary' : 'text-muted-foreground'}`}>
+                              {tech.short_name}
                             </div>
-                            <div className="text-[7px] text-[#4b5563]">{style.sku_label}</div>
+                            <div className={`text-[8px] font-medium ${active ? 'text-primary/70' : 'text-muted-foreground/50'}`}>
+                              {tech.price_tier}
+                            </div>
                           </div>
+                          {active && <div className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-primary" />}
                         </button>
                       </TooltipTrigger>
-                      <TooltipContent side="bottom" className="max-w-[200px] text-xs text-center">
-                        <p className="font-semibold mb-0.5">{style.display_name}</p>
-                        <p className="text-muted-foreground">{style.hover_description}</p>
+                      <TooltipContent side="bottom" className="max-w-[220px] text-xs">
+                        <p className="font-semibold mb-0.5">{tech.display_name} — {tech.price_tier}</p>
+                        <p className="text-muted-foreground text-[10px]">{tech.materials}</p>
+                        <p className="text-muted-foreground mt-1">{tech.hover_description}</p>
                       </TooltipContent>
                     </Tooltip>
                   );
@@ -1088,127 +1091,132 @@ export default function WinningLineConfigurator({
               </div>
             </TooltipProvider>
 
-            {/* Construction (Technology) section */}
-            <div className="border-t border-border pt-3">
-              <p className="text-xs font-semibold text-[#6b7280] uppercase tracking-wider mb-2">Construction</p>
-
-              <TooltipProvider>
-                <div className="flex flex-wrap gap-1.5 mb-3">
-                  {(techClasses || []).map((tech) => {
-                    const active = techFilter.has(tech.code);
-                    return (
-                      <Tooltip key={tech.code}>
-                        <TooltipTrigger asChild>
-                          <button
-                            onClick={() => toggleTech(tech.code)}
-                            className={`relative flex flex-col items-center justify-end rounded-lg border overflow-hidden transition-all w-[72px]
-                              ${active ? 'border-[#3b82f6] ring-1 ring-[#3b82f6]' : 'border-[#2a2a40] bg-[#1a1a2e] hover:border-[#3b82f6]/40'}`}
-                          >
-                            <div className="w-full aspect-square bg-[#151525] overflow-hidden">
-                              {tech.thumbnail_url ? (
-                                <img src={tech.thumbnail_url} alt={tech.short_name} className="w-full h-full object-cover" />
-                              ) : (
-                                <div className="w-full h-full flex items-center justify-center">
-                                  <span className={`text-2xl font-bold ${active ? 'text-[#3b82f6]' : 'text-[#374151]'}`}>A</span>
-                                </div>
-                              )}
-                            </div>
-                            <div className="w-full px-1 py-1 text-center">
-                              <div className={`text-[8px] font-semibold leading-tight truncate ${active ? 'text-[#3b82f6]' : 'text-[#9ca3af]'}`}>
-                                {tech.short_name}
-                              </div>
-                              <div className={`text-[8px] font-medium ${active ? 'text-[#3b82f6]/70' : 'text-[#4b5563]'}`}>
-                                {tech.price_tier}
-                              </div>
-                            </div>
-                            {active && <div className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-[#3b82f6]" />}
-                          </button>
-                        </TooltipTrigger>
-                        <TooltipContent side="bottom" className="max-w-[220px] text-xs">
-                          <p className="font-semibold mb-0.5">{tech.display_name} — {tech.price_tier}</p>
-                          <p className="text-muted-foreground text-[10px]">{tech.materials}</p>
-                          <p className="text-muted-foreground mt-1">{tech.hover_description}</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    );
-                  })}
-                </div>
-              </TooltipProvider>
-            </div>
-
-            <div className="mt-2">
-              <ContextRibbon
-                filteredCount={filteredProfiles.length}
-                lightingCodeFilters={lightingCodeFilters}
-                techFilter={techFilter}
-                selectedProfile={null}
-                lightingStyles={lightingStyles}
-                techClasses={techClasses}
-              />
-            </div>
-            <div className="flex items-center gap-2 mt-2">
-              <span className="text-[10px] text-cfg-muted">Letter height</span>
-              <input
-                type="number"
-                min={1}
-                max={200}
-                value={letterHeightInches}
-                onChange={(e) => {
-                  const v = parseFloat(e.target.value);
-                  if (!isNaN(v) && v > 0) setLetterHeightInches(v);
-                }}
-                className="w-14 rounded border border-input bg-background px-2 py-0.5 text-xs text-foreground text-center focus:outline-none focus:ring-1 focus:ring-ring"
-              />
-              <span className="text-[10px] text-cfg-muted">in</span>
-            </div>
-          </div>
-
-          {/* SECTION 2 — Profile Grid */}
-          <div ref={zone1Ref} className="px-4 py-4 border-b border-border bg-[#13131f]">
-            <div className="flex items-center gap-2 mb-3">
-              <span className="flex h-6 w-6 items-center justify-center rounded bg-[#1e1e35] text-[#3b82f6] text-xs font-bold shrink-0">2</span>
-              <h2 className="text-sm font-semibold text-foreground">Select a Profile</h2>
-            </div>
-            {loadingProfiles ? (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="h-40 rounded-lg shimmer-skeleton" />
-                ))}
-              </div>
-            ) : filteredProfiles.length === 0 ? (
-              <div className="text-center py-8">
-                <p className="text-sm text-cfg-muted">No profiles match</p>
-                <button
-                  onClick={() => { setLightingCodeFilters(new Set()); setTechFilter(new Set()); }}
-                  className="text-xs text-cfg-blue hover:underline mt-1"
-                >
-                  Clear filters
-                </button>
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                {filteredProfiles.map((p) => (
-                  <ProfileCard
-                    key={p.id}
-                    profile={p}
-                    selected={false}
-                    onClick={() => selectProfile(p)}
-                    mode={uiMode}
-                    letterHeight={letterHeightInches}
-                  />
-                ))}
-              </div>
+            {!selectedTechCode && (
+              <p className="text-[11px] italic text-muted-foreground mt-3">Select a technology to continue</p>
             )}
           </div>
 
-          {/* SECTION 3 — Review placeholder */}
-          <div ref={zone2Ref} className="px-4 py-4 opacity-40 bg-[#0f0f1a]">
-            <div className="flex items-center gap-2 mb-3">
-              <span className="flex h-6 w-6 items-center justify-center rounded bg-[#1e1e35] text-[#3b82f6] text-xs font-bold shrink-0">3</span>
-              <h2 className="text-sm font-semibold text-foreground">Review and Build</h2>
+          {/* STEP 2 — How should it be lit? (Lighting) — only after tech selected */}
+          {browseStep >= 1 && (
+            <div ref={zone1Ref} className="px-4 py-4 border-b border-border bg-[#13131f] animate-fade-in-up">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="flex h-6 w-6 items-center justify-center rounded bg-[#1e1e35] text-primary text-xs font-bold shrink-0">2</span>
+                <h2 className="text-sm font-semibold text-foreground">How should it be lit?</h2>
+              </div>
+
+              <TooltipProvider>
+                <div className="grid grid-cols-4 md:grid-cols-8 gap-1.5">
+                  {/* Available lighting styles filtered by selected technology */}
+                  {(() => {
+                    // Get unique lighting codes from profiles that match the selected tech
+                    const availableCodes = new Set(
+                      profiles
+                        .filter(p => p.technology === selectedTechCode)
+                        .map(p => p.lighting_code)
+                    );
+                    const availableStyles = lightingStyles.filter(s => availableCodes.has(s.lighting_code));
+
+                    return availableStyles.map((style) => {
+                      const active = selectedLightingCode === style.lighting_code;
+                      return (
+                        <Tooltip key={style.lighting_code}>
+                          <TooltipTrigger asChild>
+                            <button
+                              onClick={() => selectLighting(style.lighting_code)}
+                              className={`flex flex-col items-center rounded-lg border overflow-hidden transition-all cursor-pointer
+                                ${active
+                                  ? 'border-primary ring-1 ring-primary bg-primary/10'
+                                  : 'border-border bg-card hover:border-primary/40'
+                                }`}
+                            >
+                              <div className="w-full aspect-square bg-secondary/30 overflow-hidden">
+                                {style.thumbnail_url ? (
+                                  <img src={style.thumbnail_url} alt={style.display_name}
+                                    className="w-full h-full object-cover" />
+                                ) : (
+                                  <div className="w-full h-full flex items-center justify-center">
+                                    <span className={`text-xl font-bold ${active ? 'text-primary' : 'text-muted-foreground/30'}`}>A</span>
+                                  </div>
+                                )}
+                              </div>
+                              <div className="px-1 py-1 w-full text-center">
+                                <div className={`text-[8px] font-medium leading-tight truncate ${active ? 'text-primary' : 'text-muted-foreground'}`}>
+                                  {style.display_name}
+                                </div>
+                                <div className="text-[7px] text-muted-foreground/50">{style.sku_label}</div>
+                              </div>
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent side="bottom" className="max-w-[200px] text-xs text-center">
+                            <p className="font-semibold mb-0.5">{style.display_name}</p>
+                            <p className="text-muted-foreground">{style.hover_description}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      );
+                    });
+                  })()}
+                </div>
+              </TooltipProvider>
+
+              {!selectedLightingCode && (
+                <p className="text-[11px] italic text-muted-foreground mt-3">
+                  Pick a lighting style — {profiles.filter(p => p.technology === selectedTechCode).length} profiles available
+                </p>
+              )}
             </div>
-            <p className="text-sm text-cfg-muted">Select a profile above to see how it's built.</p>
-          </div>
+          )}
+
+          {/* STEP 3 — Pick your profile — only after lighting selected */}
+          {browseStep >= 2 && (
+            <div ref={zone2Ref} className="px-4 py-4 border-b border-border bg-[#0f0f1a] animate-fade-in-up">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="flex h-6 w-6 items-center justify-center rounded bg-[#1e1e35] text-primary text-xs font-bold shrink-0">3</span>
+                <h2 className="text-sm font-semibold text-foreground">Pick your profile</h2>
+                <span className="text-xs text-muted-foreground ml-auto">{filteredProfiles.length} match{filteredProfiles.length !== 1 ? 'es' : ''}</span>
+              </div>
+
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-[10px] text-muted-foreground">Letter height</span>
+                <input
+                  type="number"
+                  min={1}
+                  max={200}
+                  value={letterHeightInches}
+                  onChange={(e) => {
+                    const v = parseFloat(e.target.value);
+                    if (!isNaN(v) && v > 0) setLetterHeightInches(v);
+                  }}
+                  className="w-14 rounded border border-input bg-background px-2 py-0.5 text-xs text-foreground text-center focus:outline-none focus:ring-1 focus:ring-ring"
+                />
+                <span className="text-[10px] text-muted-foreground">in</span>
+              </div>
+
+              {loadingProfiles ? (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="h-40 rounded-lg shimmer-skeleton" />
+                  ))}
+                </div>
+              ) : filteredProfiles.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-sm text-muted-foreground">No profiles match this combination</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {filteredProfiles.map((p) => (
+                    <ProfileCard
+                      key={p.id}
+                      profile={p}
+                      selected={false}
+                      onClick={() => selectProfile(p)}
+                      mode={uiMode}
+                      letterHeight={letterHeightInches}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
 
