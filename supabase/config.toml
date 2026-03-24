@@ -35,3 +35,6 @@ verify_jwt = false
 
 [functions.verify-customer-email]
 verify_jwt = false
+
+[functions.letterman-chat]
+verify_jwt = false

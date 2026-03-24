@@ -2,8 +2,11 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { useAppStore } from '@/stores/appStore';
 import { useWizardStore } from '@/stores/wizardStore';
 import { useSignStore } from '@/stores/signStore';
+import { useShellStore } from '@/stores/shellStore';
 import { supabase } from '@/integrations/supabase/client';
+import { streamChat, type ChatMsg } from '@/lib/letterman-chat';
 import { Send, Plus, Upload } from 'lucide-react';
+import { toast } from 'sonner';
 
 const STEP_LABELS = [
   'Artwork', 'Profile', 'Illumination Style', 'Material & Finish', 'Dimensions', 'Project Details',
@@ -16,6 +19,7 @@ const MIN_ROWS = 4;
 const InputBar = () => {
   const [text, setText] = useState('');
   const [showUploadMenu, setShowUploadMenu] = useState(false);
+  const [isStreaming, setIsStreaming] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -30,12 +34,22 @@ const InputBar = () => {
   const addUploadedFile = useSignStore((s) => s.addUploadedFile);
   const addCannedEntry = useSignStore((s) => s.addCannedEntry);
 
+  // Get role from shellStore for access control
+  const userRole = useShellStore((s) => s.userRole);
+
   const isSignChat = !wizardActive && chatPhase !== 'welcome';
   const showPersistentUpload = isSignChat && chatPhase !== 'done';
 
-  // Canned questions mode for tier 0/1
-  const isCannedMode = userTier < 2;
+  // Role-based: guest/pending only get canned questions
+  const isRestrictedRole = userRole === 'guest' || userRole === 'pending';
+  const isCannedMode = userTier < 2 || isRestrictedRole;
   const cannedQuestions = operatorConfig?.canned_questions || [];
+
+  // Conversation history for AI chat
+  const [conversationHistory, setConversationHistory] = useState<ChatMsg[]>([]);
+  // Callback to update ChatThread with AI messages
+  const onAiMessage = useSignStore((s) => s.addAiMessage);
+  const onAiDelta = useSignStore((s) => s.updateLastAiMessage);
 
   // Auto-resize textarea
   const autoResize = useCallback(() => {
@@ -52,10 +66,47 @@ const InputBar = () => {
     autoResize();
   }, [text, autoResize]);
 
-  const handleSubmit = () => {
-    if (!text.trim()) return;
-    console.log('[InputBar] submit:', text);
+  const handleSubmit = async () => {
+    const trimmed = text.trim();
+    if (!trimmed || isStreaming) return;
+
     setText('');
+
+    // Add user message to conversation
+    const userMsg: ChatMsg = { role: 'user', content: trimmed };
+    const updatedHistory = [...conversationHistory, userMsg];
+    setConversationHistory(updatedHistory);
+
+    // Notify ChatThread of user message
+    onAiMessage({ role: 'user', content: trimmed });
+
+    // Start streaming
+    setIsStreaming(true);
+    onAiMessage({ role: 'assistant', content: '' });
+
+    const chatSessionId = localStorage.getItem('chat_session_id');
+
+    try {
+      let fullResponse = '';
+      await streamChat({
+        messages: updatedHistory,
+        sessionId: chatSessionId,
+        onDelta: (chunk) => {
+          fullResponse += chunk;
+          onAiDelta(fullResponse);
+        },
+        onDone: (finalText) => {
+          setConversationHistory(prev => [...prev, { role: 'assistant', content: finalText }]);
+          setIsStreaming(false);
+        },
+      });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to get response';
+      toast.error(msg);
+      setIsStreaming(false);
+      // Remove the empty assistant message
+      onAiDelta('[Error: ' + msg + ']');
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -99,7 +150,7 @@ const InputBar = () => {
     ? `Step ${currentStep} of 6 — ${STEP_LABELS[currentStep - 1] || ''}`
     : null;
 
-  // Canned question chips for tier 0/1
+  // Canned question chips for restricted users
   if (isCannedMode) {
     if (cannedQuestions.length === 0) {
       return (
@@ -122,22 +173,27 @@ const InputBar = () => {
               </button>
             ))}
           </div>
+          {isRestrictedRole && (
+            <p className="text-center text-xs text-muted-foreground mt-3">
+              Verify your account to chat freely with LetterMan.
+            </p>
+          )}
         </div>
       </div>
     );
   }
 
-  // Full input bar for tier 2
+  // Full input bar for pro/admin users
   const placeholderText = (() => {
     if (wizardActive) return 'Describe your sign project...';
     switch (chatPhase) {
       case 'chat': return 'Type your message...';
-      case 'welcome': return 'Describe your sign project...';
+      case 'welcome': return 'Ask LetterMan anything...';
       default: return 'Type a message...';
     }
   })();
 
-  const inputDisabled = chatPhase === 'welcome' || chatPhase === 'done';
+  const inputDisabled = chatPhase === 'done' || isStreaming;
 
   return (
     <div className="w-full flex justify-center px-4 pb-6 pt-2">
@@ -214,7 +270,7 @@ const InputBar = () => {
 
             <button
               onClick={handleSubmit}
-              disabled={!text.trim()}
+              disabled={!text.trim() || isStreaming}
               className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground transition-all duration-200 hover:bg-primary/90 disabled:opacity-30 disabled:cursor-not-allowed"
             >
               <Send size={16} />
