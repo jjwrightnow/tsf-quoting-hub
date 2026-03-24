@@ -92,6 +92,7 @@ const ChatThread = () => {
     signStore.chatPhase, signStore.uploadedFiles, signStore.signs,
     signStore.currentSignIndex, signStore.postUploadChoice,
     signStore.pendingSignName, signStore.uploadPath, signStore.cannedHistory,
+    signStore.aiMessages,
     appStore.userTier, appStore.operatorConfig,
   ]);
 
