@@ -83,14 +83,15 @@ function IdentityGate() {
         .limit(1)
         .maybeSingle();
 
-      if (customer) {
+      // Always check effective role first
+      const { data: effectiveRole } = await supabase
+        .rpc('get_effective_user_role', { p_email: normalized });
+      const role = effectiveRole || 'guest';
+
+      // Admin, pro, or temp_pro — immediately verify and proceed
+      if (role === 'admin' || role === 'pro' || role === 'temp_pro') {
         localStorage.setItem('signmaker_user_email', normalized);
         store.setUserEmail(normalized);
-
-        // Get effective role (handles temp_pro 48hr pass)
-        const { data: effectiveRole } = await supabase
-          .rpc('get_effective_user_role', { p_email: normalized });
-        const role = effectiveRole || 'guest';
         store.setUserRole(role === 'temp_pro' ? 'pro' : role);
 
         // If on temp pass, show a toast so they know it's time-limited
@@ -110,8 +111,15 @@ function IdentityGate() {
 
         await loadUserData(normalized, store);
         store.setShellState('verified');
+      } else if (customer) {
+        // Known customer but guest/pending role — still let them in
+        localStorage.setItem('signmaker_user_email', normalized);
+        store.setUserEmail(normalized);
+        store.setUserRole(role);
+        await loadUserData(normalized, store);
+        store.setShellState('verified');
       } else {
-        // Check if access request already exists
+        // Not a verified customer and not admin/pro — show pending message
         const { data: existing } = await supabase
           .from('access_requests')
           .select('id, status')
