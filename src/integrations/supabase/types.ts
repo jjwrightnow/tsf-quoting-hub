@@ -83,6 +83,51 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_task_queue: {
+        Row: {
+          context: Json | null
+          created_at: string | null
+          error: string | null
+          from_agent: string
+          id: string
+          instruction: string
+          priority: number | null
+          result: string | null
+          status: string
+          title: string
+          to_agent: string
+          updated_at: string | null
+        }
+        Insert: {
+          context?: Json | null
+          created_at?: string | null
+          error?: string | null
+          from_agent: string
+          id?: string
+          instruction: string
+          priority?: number | null
+          result?: string | null
+          status?: string
+          title: string
+          to_agent: string
+          updated_at?: string | null
+        }
+        Update: {
+          context?: Json | null
+          created_at?: string | null
+          error?: string | null
+          from_agent?: string
+          id?: string
+          instruction?: string
+          priority?: number | null
+          result?: string | null
+          status?: string
+          title?: string
+          to_agent?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       autocomplete_options: {
         Row: {
           active: boolean | null
@@ -2099,7 +2144,7 @@ export type Database = {
       }
       get_project_for_pdf: { Args: { p_project_id: string }; Returns: Json }
       init_chat_session: {
-        Args: { p_company_name?: string; p_email?: string }
+        Args: { p_company?: string; p_email: string }
         Returns: string
       }
       is_business_email: { Args: { p_email: string }; Returns: boolean }
