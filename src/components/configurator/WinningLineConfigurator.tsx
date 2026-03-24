@@ -857,26 +857,44 @@ export default function WinningLineConfigurator({
     return result;
   }, [profiles, lightingCodeFilters, techFilter]);
 
-  // Toggle lighting code
-  const toggleLightingCode = (code: string) => {
-    setLightingCodeFilters((prev) => {
-      const next = new Set(prev);
-      next.has(code) ? next.delete(code) : next.add(code);
-      return next;
-    });
+  // Select technology — single select, advance to step 1
+  const selectTech = (code: string) => {
+    if (selectedTechCode === code) {
+      // Deselect — go back to step 0
+      setSelectedTechCode(null);
+      setTechFilter(new Set());
+      setSelectedLightingCode(null);
+      setLightingCodeFilters(new Set());
+      setBrowseStep(0);
+    } else {
+      setSelectedTechCode(code);
+      setTechFilter(new Set([code]));
+      // Reset lighting selection when tech changes
+      setSelectedLightingCode(null);
+      setLightingCodeFilters(new Set());
+      setBrowseStep(1);
+    }
+  };
+
+  // Select lighting — single select, advance to step 2
+  const selectLighting = (code: string) => {
+    if (selectedLightingCode === code) {
+      // Deselect — go back to step 1
+      setSelectedLightingCode(null);
+      setLightingCodeFilters(new Set());
+      setBrowseStep(1);
+    } else {
+      setSelectedLightingCode(code);
+      setLightingCodeFilters(new Set([code]));
+      setBrowseStep(2);
+    }
   };
 
   // Helper: check if a lighting code is active
   const isLightingCodeActive = (code: string) => lightingCodeFilters.has(code);
 
-  // Toggle tech
-  const toggleTech = (tech: string) => {
-    setTechFilter((prev) => {
-      const next = new Set(prev);
-      next.has(tech) ? next.delete(tech) : next.add(tech);
-      return next;
-    });
-  };
+  // Legacy toggle (unused but kept for compat)
+  const toggleTech = (tech: string) => selectTech(tech);
 
   // Select profile
   const selectProfile = async (profile: Profile) => {
