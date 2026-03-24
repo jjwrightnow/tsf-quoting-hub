@@ -847,10 +847,8 @@ export default function WinningLineConfigurator({
   const [showAddForm, setShowAddForm] = useState(false);
   const [showQuoteForm, setShowQuoteForm] = useState(false);
 
-  // UI mode
-  const [uiMode, setUiMode] = useState<UiMode>(
-    () => (localStorage.getItem('signmaker_ui_mode') as UiMode) || 'pro'
-  );
+  // UI mode — always pro
+  const uiMode: UiMode = 'pro';
 
   // Letter height
   const [letterHeightInches, setLetterHeightInches] = useState(12);
@@ -1087,24 +1085,6 @@ export default function WinningLineConfigurator({
               setBrowseStep(2);
             }}
           />
-        </div>
-        <div className="flex rounded-md bg-secondary p-0.5 shrink-0">
-          <button
-            onClick={() => { setUiMode('pro'); localStorage.setItem('signmaker_ui_mode', 'pro'); }}
-            className={`rounded px-2.5 py-1 text-[10px] font-semibold transition-colors ${
-              uiMode === 'pro' ? 'bg-cfg-blue text-primary-foreground' : 'text-cfg-muted hover:text-foreground'
-            }`}
-          >
-            Pro
-          </button>
-          <button
-            onClick={() => { setUiMode('client'); localStorage.setItem('signmaker_ui_mode', 'client'); }}
-            className={`rounded px-2.5 py-1 text-[10px] font-semibold transition-colors ${
-              uiMode === 'client' ? 'bg-cfg-blue text-primary-foreground' : 'text-cfg-muted hover:text-foreground'
-            }`}
-          >
-            Client
-          </button>
         </div>
       </div>
 
