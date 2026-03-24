@@ -50,6 +50,11 @@ export interface UploadedFile {
   path: string;
 }
 
+export interface AiChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
 interface SignState {
   chatPhase: ChatPhase;
   sessionId: string | null;
@@ -62,6 +67,7 @@ interface SignState {
   pendingSignName: string | null;
   uploadPath: 'dump_run' | 'tag_go' | 'one_done' | 'letterman_assist' | null;
   cannedHistory: { q: string; a: string }[];
+  aiMessages: AiChatMessage[];
 
   setChatPhase: (phase: ChatPhase) => void;
   setSessionId: (id: string | null) => void;
@@ -77,6 +83,8 @@ interface SignState {
   setPendingSignName: (name: string | null) => void;
   setUploadPath: (path: SignState['uploadPath']) => void;
   addCannedEntry: (entry: { q: string; a: string }) => void;
+  addAiMessage: (msg: AiChatMessage) => void;
+  updateLastAiMessage: (content: string) => void;
   reset: () => void;
 }
 
@@ -92,6 +100,7 @@ const initialState = {
   pendingSignName: null as string | null,
   uploadPath: null as SignState['uploadPath'],
   cannedHistory: [] as { q: string; a: string }[],
+  aiMessages: [] as AiChatMessage[],
 };
 
 export const useSignStore = create<SignState>((set) => ({
