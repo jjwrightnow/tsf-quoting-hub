@@ -1,728 +1,233 @@
-import { useEffect, useState, useCallback } from 'react';
-import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
-import { useShellStore, type PortalProject, type PortalSign } from '@/stores/shellStore';
-import { generateAndDownloadPDF } from '@/utils/generateWorkOrder';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-
-/* ─── Icons ─── */
-const ArrowLeft = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" />
-  </svg>
-);
-
-const CopyIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <rect x="9" y="9" width="13" height="13" rx="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-  </svg>
-);
-
-const TrashIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-  </svg>
-);
-
-const EditIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-  </svg>
-);
-
-const CheckCircle = ({ filled }: { filled: boolean }) => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill={filled ? 'hsl(157,100%,50%)' : 'none'} stroke={filled ? 'hsl(157,100%,50%)' : 'hsl(240,17%,60%)'} strokeWidth="2">
-    <circle cx="12" cy="12" r="10" />{filled && <polyline points="9 12 11.5 14.5 16 9.5" stroke="hsl(240,20%,4%)" strokeWidth="2.5" />}
-  </svg>
-);
-
-/* ─── Status badge helper ─── */
-const statusBadgeClass: Record<string, string> = {
-  draft: 'bg-muted text-muted-foreground',
-  ready: 'bg-primary/20 text-primary',
-  submitted: 'bg-[hsl(157,100%,50%)]/20 text-[hsl(157,100%,50%)]',
-};
-
-function StatusBadge({ status }: { status: string }) {
-  return (
-    <span className={`rounded px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide ${statusBadgeClass[status] || statusBadgeClass.draft}`}>
-      {status}
-    </span>
-  );
+interface TechClass {
+  code: string;
+  short_name: string;
+  price_tier: string;
+  hover_description: string;
 }
 
-/* ─── Identity Gate (inline panel) ─── */
-function IdentityGate() {
-  const [email, setEmail] = useState('');
-  const [submitting, setSubmitting] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
-  const store = useShellStore();
+interface LightingStyle {
+  lighting_code: string;
+  display_name: string;
+  sku_label: string;
+  hover_description: string;
+}
 
-  const handleSubmit = async () => {
-    if (!email.trim()) return;
-    setSubmitting(true);
-    setMessage(null);
-    const normalized = email.toLowerCase().trim();
+function ProductGuide() {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [techClasses, setTechClasses] = useState<TechClass[]>([]);
+  const [lightingStyles, setLightingStyles] = useState<LightingStyle[]>([]);
 
-    try {
-      // Check verified_customers
-      const { data: customer } = await supabase
-        .from('verified_customers')
-        .select('id')
-        .eq('email', normalized)
-        .limit(1)
-        .maybeSingle();
-
-      // Always check effective role first
-      const { data: effectiveRole } = await supabase
-        .rpc('get_effective_user_role', { p_email: normalized });
-      const role = effectiveRole || 'guest';
-
-      // Admin, pro, or temp_pro — immediately verify and proceed
-      if (role === 'admin' || role === 'pro' || role === 'temp_pro') {
-        localStorage.setItem('signmaker_user_email', normalized);
-        store.setUserEmail(normalized);
-        store.setUserRole(role === 'temp_pro' ? 'pro' : role);
-
-        // If on temp pass, show a toast so they know it's time-limited
-        if (role === 'temp_pro') {
-          const { data: vc } = await supabase
-            .from('verified_customers')
-            .select('temp_pro_expires_at')
-            .eq('email', normalized)
-            .single();
-          if (vc?.temp_pro_expires_at) {
-            const hours = Math.ceil(
-              (new Date(vc.temp_pro_expires_at).getTime() - Date.now()) / 3600000
-            );
-            toast.info(`Pro access active for ${hours} more hours. Complete your application to keep it.`);
-          }
-        }
-
-        await loadUserData(normalized, store);
-        store.setShellState('verified');
-      } else if (customer) {
-        // Known customer but guest/pending role — still let them in
-        localStorage.setItem('signmaker_user_email', normalized);
-        store.setUserEmail(normalized);
-        store.setUserRole(role);
-        await loadUserData(normalized, store);
-        store.setShellState('verified');
-      } else {
-        // Not a verified customer and not admin/pro — show pending message
-        const { data: existing } = await supabase
-          .from('access_requests')
-          .select('id, status')
-          .eq('email', normalized)
-          .limit(1)
-          .maybeSingle();
-
-        if (existing) {
-          setMessage('Your access request is pending — we\'ll email you when approved.');
-        } else {
-          await supabase.from('access_requests').insert({
-            email: normalized,
-            full_name: '',
-            company_name: '',
-            status: 'pending',
-          } as any);
-          setMessage('Thanks — we\'ll verify your account and email you within 24 hours.');
-        }
-      }
-    } catch {
-      setMessage('Something went wrong. Please try again.');
-    } finally {
-      setSubmitting(false);
-    }
-  };
+  useEffect(() => {
+    const fetchGuide = async () => {
+      const { data: tech } = await supabase
+        .from('technology_classes')
+        .select('code, short_name, price_tier, hover_description')
+        .eq('is_active', true)
+        .order('sort_order');
+      const { data: light } = await supabase
+        .from('lighting_styles')
+        .select('lighting_code, display_name, sku_label, hover_description')
+        .eq('is_active', true)
+        .order('sort_order');
+      if (tech) setTechClasses(tech);
+      if (light) setLightingStyles(light);
+    };
+    fetchGuide();
+  }, []);
 
   return (
-    <div className="rounded-lg border border-border bg-card p-4 animate-fade-in-up">
-      <p className="text-sm font-medium text-foreground mb-3">Sign In or Create Account</p>
-      <div className="flex gap-2">
-        <input
-          type="email"
-          placeholder="you@company.com"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
-          className="flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-        />
-        <button
-          onClick={handleSubmit}
-          disabled={submitting || !email.trim()}
-          className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors"
-        >
-          {submitting ? '...' : 'Continue'}
-        </button>
-      </div>
-      {message && (
-        <p className="mt-3 text-xs text-muted-foreground">{message}</p>
-      )}
-    </div>
-  );
-}
-
-/* ─── Data loading helpers ─── */
-async function loadUserData(
-  email: string,
-  store: ReturnType<typeof useShellStore.getState>,
-) {
-  store.setLoading(true);
-
-  // Get or create contact via RPC
-  const { data: contact, error } = await supabase
-    .rpc('get_or_create_contact', { p_email: email })
-    .single();
-
-  if (error || !contact) {
-    store.setLoading(false);
-    return;
-  }
-
-  const { contact_id, account_id } = contact as { contact_id: string; account_id: string };
-  store.setContactId(contact_id);
-  store.setAccountId(account_id);
-
-  // Get projects
-  const { data: projects } = await supabase
-    .from('portal_projects')
-    .select('*')
-    .eq('contact_id', contact_id)
-    .neq('status', 'submitted')
-    .order('created_at', { ascending: false });
-
-  if (projects) {
-    const projectList: PortalProject[] = [];
-    for (const p of projects as any[]) {
-      const { count } = await supabase
-        .from('portal_signs')
-        .select('id', { count: 'exact', head: true })
-        .eq('project_id', p.id);
-      projectList.push({ ...p, sign_count: count || 0 });
-    }
-    store.setProjects(projectList);
-  }
-
-  store.setLoading(false);
-}
-
-async function loadProjectSigns(projectId: string, store: ReturnType<typeof useShellStore.getState>) {
-  const { data } = await supabase
-    .from('portal_signs')
-    .select('*')
-    .eq('project_id', projectId)
-    .order('sort_order', { ascending: true });
-
-  if (data) {
-    store.setActiveSigns(data as unknown as PortalSign[]);
-  }
-}
-
-/* ─── Explore Banner ─── */
-function ExploreBanner({ onOpen }: { onOpen: () => void }) {
-  return (
-    <div className="flex items-center justify-between rounded-lg border border-border bg-card/60 px-4 py-2.5">
-      <span className="text-xs text-muted-foreground">
-        Exploring as guest — save your build to a project
-      </span>
-      <button
-        onClick={onOpen}
-        className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+    <div className="flex-shrink-0">
+      <div
+        className="overflow-hidden transition-all duration-300 bg-[#0f0f1a] border-t border-[#1e1e35]"
+        style={{ height: isExpanded ? '300px' : '0px' }}
       >
-        Sign In or Create Account
-      </button>
-    </div>
-  );
-}
-
-/* ─── Project Dashboard ─── */
-function ProjectDashboard() {
-  const store = useShellStore();
-  const [creating, setCreating] = useState(false);
-  const [newName, setNewName] = useState('');
-
-  const handleCreate = async () => {
-    if (!newName.trim() || !store.contactId) return;
-    const { data, error } = await supabase
-      .from('portal_projects')
-      .insert({
-        project_name: newName.trim(),
-        status: 'draft',
-        contact_id: store.contactId,
-        account_id: store.accountId,
-      } as any)
-      .select()
-      .single();
-
-    if (!error && data) {
-      const project = { ...(data as any), sign_count: 0 } as PortalProject;
-      store.setProjects([project, ...store.projects]);
-      store.setActiveProject(project);
-      store.setActiveSigns([]);
-      store.setShellState('in_project');
-      setNewName('');
-      setCreating(false);
-    }
-  };
-
-  const openProject = async (project: PortalProject) => {
-    store.setActiveProject(project);
-    await loadProjectSigns(project.id, store);
-    store.setShellState('in_project');
-  };
-
-  return (
-    <div className="rounded-lg border border-border bg-card p-4 animate-fade-in-up">
-      {/* User bar */}
-      <div className="flex items-center justify-between mb-4">
-        <span className="text-xs text-muted-foreground truncate">{store.userEmail}</span>
-        <button
-          onClick={() => store.signOut()}
-          className="text-[11px] text-muted-foreground hover:text-foreground transition-colors"
-        >
-          Sign out
-        </button>
-      </div>
-
-      {/* Header */}
-      <div className="flex items-center justify-between mb-3">
-        <span className="text-sm font-semibold text-foreground">Your Projects</span>
-        <button
-          onClick={() => setCreating(true)}
-          className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
-        >
-          New Project
-        </button>
-      </div>
-
-      {/* Inline create */}
-      {creating && (
-        <div className="flex gap-2 mb-3">
-          <input
-            autoFocus
-            placeholder="Project name"
-            value={newName}
-            onChange={(e) => setNewName(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
-            className="flex-1 rounded-md border border-input bg-background px-3 py-1.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-          />
-          <button onClick={handleCreate} disabled={!newName.trim()} className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors">
-            Create
-          </button>
-          <button onClick={() => { setCreating(false); setNewName(''); }} className="text-xs text-muted-foreground hover:text-foreground">
-            Cancel
-          </button>
-        </div>
-      )}
-
-      {/* Project list */}
-      {store.loading ? (
-        <div className="space-y-2">
-          {[1, 2].map((i) => <div key={i} className="h-12 rounded-md shimmer-skeleton" />)}
-        </div>
-      ) : store.projects.length === 0 ? (
-        <p className="text-xs text-muted-foreground py-4 text-center">No projects yet. Create one to get started.</p>
-      ) : (
-        <ul className="space-y-1.5">
-          {store.projects.map((p) => (
-            <li key={p.id} className="flex items-center justify-between rounded-md border border-border bg-secondary/30 px-3 py-2.5 hover:bg-secondary/60 transition-colors">
-              <div className="min-w-0 flex-1">
-                <p className="text-xs font-medium text-foreground truncate">{p.project_name}</p>
-                <div className="flex items-center gap-2 mt-0.5">
-                  <StatusBadge status={p.status} />
-                  <span className="text-[10px] text-muted-foreground">{p.sign_count ?? 0} sign{(p.sign_count ?? 0) !== 1 ? 's' : ''}</span>
-                </div>
-              </div>
-              <button
-                onClick={() => openProject(p)}
-                className="rounded-md border border-border px-2.5 py-1 text-[11px] font-medium text-foreground hover:bg-secondary transition-colors"
-              >
-                Open
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-}
-
-/* ─── Project Context Bar ─── */
-function ProjectContextBar() {
-  const store = useShellStore();
-  const project = store.activeProject;
-  const [submitOpen, setSubmitOpen] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  if (!project) return null;
-
-  const goBack = () => {
-    store.setActiveProject(null);
-    store.setActiveSigns([]);
-    store.setEditingSignId(null);
-    store.setShellState('verified');
-  };
-
-  const handleSubmit = async () => {
-    if (store.activeSigns.length === 0) {
-      toast.error('Add at least one sign before submitting.');
-      setSubmitOpen(false);
-      return;
-    }
-    setSubmitting(true);
-    try {
-      // Step 1 — fetch project + signs
-      const { data: pdfData } = await supabase
-        .rpc('get_project_for_pdf', { p_project_id: project.id });
-
-      // Step 2 — update status (triggers factory notification automatically)
-      const { error } = await supabase
-        .from('portal_projects')
-        .update({ status: 'ready', submitted_at: new Date().toISOString() } as any)
-        .eq('id', project.id);
-
-      if (!error && pdfData) {
-        store.setActiveProject({ ...project, status: 'ready' });
-        generateAndDownloadPDF((pdfData as any).project, (pdfData as any).signs);
-        store.setShellState('submitted');
-      } else if (error) {
-        toast.error('Failed to submit. Please try again.');
-      }
-    } catch {
-      toast.error('Failed to submit. Please try again.');
-    } finally {
-      setSubmitting(false);
-      setSubmitOpen(false);
-    }
-  };
-
-  const isLocked = project.status === 'ready' || project.status === 'submitted';
-
-  return (
-    <>
-      <div className="flex items-center justify-between rounded-lg border border-border bg-card px-4 py-2.5">
-        <div className="flex items-center gap-2 min-w-0">
-          <button onClick={goBack} className="text-muted-foreground hover:text-foreground transition-colors">
-            <ArrowLeft />
-          </button>
-          <span className="text-sm font-semibold text-foreground truncate">{project.project_name}</span>
-          <StatusBadge status={project.status} />
-        </div>
-        {isLocked ? (
-          <span className="rounded-full bg-muted px-3 py-1 text-[10px] font-medium text-muted-foreground">Submitted</span>
-        ) : (
-          <button
-            onClick={() => {
-              if (store.activeSigns.length === 0) {
-                toast.error('Add at least one sign before submitting.');
-                return;
-              }
-              setSubmitOpen(true);
-            }}
-            className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
-          >
-            Submit for Quote
-          </button>
-        )}
-      </div>
-
-      <AlertDialog open={submitOpen} onOpenChange={setSubmitOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Submit to Factory?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will lock the project and send a work order to our production team. You will receive a PDF spec sheet to download.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={submitting}>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleSubmit} disabled={submitting}>
-              {submitting ? 'Submitting…' : 'Submit'}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </>
-  );
-}
-
-/* ─── Sign List (below configurator) ─── */
-function SignList() {
-  const store = useShellStore();
-  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
-
-  const addSign = async () => {
-    if (!store.activeProject) return;
-    const sortOrder = store.activeSigns.length;
-    const { data, error } = await supabase
-      .from('portal_signs')
-      .insert({
-        project_id: store.activeProject.id,
-        sign_name: `Sign ${String.fromCharCode(65 + sortOrder)}`,
-        sort_order: sortOrder,
-      } as any)
-      .select()
-      .single();
-
-    if (!error && data) {
-      store.setActiveSigns([...store.activeSigns, data as unknown as PortalSign]);
-    }
-  };
-
-  const duplicateSign = async (sign: PortalSign) => {
-    if (!store.activeProject) return;
-    const sortOrder = store.activeSigns.length;
-    const { data, error } = await supabase
-      .from('portal_signs')
-      .insert({
-        project_id: store.activeProject.id,
-        sign_name: `${sign.sign_name} (copy)`,
-        profile_code: sign.profile_code,
-        profile_type: sign.profile_type,
-        spec_data: sign.spec_data,
-        height: sign.height,
-        metal_type: sign.metal_type,
-        finish: sign.finish,
-        mounting: sign.mounting,
-        back_type: sign.back_type,
-        notes: sign.notes,
-        sort_order: sortOrder,
-      } as any)
-      .select()
-      .single();
-
-    if (!error && data) {
-      store.setActiveSigns([...store.activeSigns, data as unknown as PortalSign]);
-    }
-  };
-
-  const deleteSign = async (signId: string) => {
-    await supabase.from('portal_signs').delete().eq('id', signId);
-    store.setActiveSigns(store.activeSigns.filter((s) => s.id !== signId));
-    if (store.editingSignId === signId) store.setEditingSignId(null);
-    setDeleteConfirm(null);
-  };
-
-  const editSign = (sign: PortalSign) => {
-    store.setEditingSignId(sign.id);
-    store.setEditingSign(sign);
-  };
-
-  const isLocked = store.activeProject?.status === 'ready' || store.activeProject?.status === 'submitted';
-
-  return (
-    <div className="rounded-lg border border-border bg-card p-4 animate-fade-in-up">
-      {isLocked && (
-        <p className="text-[10px] text-muted-foreground mb-3 italic">Locked — submitted for quote.</p>
-      )}
-      <div className="flex items-center justify-between mb-3">
-        <span className="text-xs font-semibold text-foreground uppercase tracking-wide">Signs</span>
-        {!isLocked && (
-          <button
-            onClick={addSign}
-            className="text-xs text-primary hover:text-primary/80 font-medium transition-colors"
-          >
-            + Add Sign
-          </button>
-        )}
-      </div>
-
-      {store.activeSigns.length === 0 ? (
-        <p className="text-xs text-muted-foreground py-3 text-center">No signs yet. Add one to start configuring.</p>
-      ) : (
-        <ul className="space-y-1.5">
-          {store.activeSigns.map((sign) => (
-            <li
-              key={sign.id}
-              className={`flex items-center gap-3 rounded-md border px-3 py-2 transition-colors ${
-                store.editingSignId === sign.id
-                  ? 'border-primary/40 bg-primary/5'
-                  : 'border-border bg-secondary/20 hover:bg-secondary/40'
-              }`}
-            >
-              <CheckCircle filled={!!sign.is_complete} />
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-medium text-foreground truncate">{sign.sign_name}</p>
-                {sign.profile_code && (
-                  <span className="text-[10px] font-mono text-primary">{sign.profile_code}</span>
-                )}
-                {(sign.height_inches || sign.height) && (
-                  <span className="text-[10px] text-muted-foreground ml-1">
-                    {sign.height_inches ? `${sign.height_inches}"` : sign.height}
+        <div className="grid grid-cols-2 h-full divide-x divide-[#1e1e35]">
+          <div className="overflow-y-auto p-4 space-y-3">
+            <h4 className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold pb-2 border-b border-white/5">
+              Construction Types
+            </h4>
+            {techClasses.map(t => (
+              <div key={t.code} className="pb-3 border-b border-white/5 last:border-0">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-semibold text-foreground">{t.short_name}</span>
+                  <span className="text-[9px] bg-blue-500/10 text-blue-400 px-1.5 py-0.5 rounded font-bold uppercase">
+                    {t.price_tier}
                   </span>
-                )}
-              </div>
-              {!isLocked && (
-                <div className="flex items-center gap-1">
-                  <button onClick={() => editSign(sign)} className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors" title="Edit">
-                    <EditIcon />
-                  </button>
-                  <button onClick={() => duplicateSign(sign)} className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors" title="Duplicate">
-                    <CopyIcon />
-                  </button>
-                  {deleteConfirm === sign.id ? (
-                    <div className="flex items-center gap-1">
-                      <button onClick={() => deleteSign(sign.id)} className="text-[10px] text-destructive font-medium">Yes</button>
-                      <button onClick={() => setDeleteConfirm(null)} className="text-[10px] text-muted-foreground">No</button>
-                    </div>
-                  ) : (
-                    <button onClick={() => setDeleteConfirm(sign.id)} className="p-1 rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors" title="Delete">
-                      <TrashIcon />
-                    </button>
-                  )}
                 </div>
-              )}
-            </li>
-          ))}
-        </ul>
-      )}
+                <p className="text-xs text-muted-foreground mt-1 leading-relaxed opacity-70">
+                  {t.hover_description}
+                </p>
+              </div>
+            ))}
+          </div>
+          <div className="overflow-y-auto p-4 space-y-3">
+            <h4 className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold pb-2 border-b border-white/5">
+              Lighting Styles
+            </h4>
+            {lightingStyles.map(l => (
+              <div key={l.lighting_code} className="pb-3 border-b border-white/5 last:border-0">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-semibold text-foreground">{l.display_name}</span>
+                  <span className="text-[9px] font-mono text-muted-foreground opacity-50">
+                    [{l.sku_label}]
+                  </span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1 leading-relaxed opacity-70">
+                  {l.hover_description}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+      <div
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="h-10 flex items-center justify-between px-4 bg-[#0a0a14] border-t border-[#1e1e35] cursor-pointer hover:bg-[#16162a] transition-colors"
+      >
+        <div className="flex items-center gap-2">
+          <BookOpen className="w-4 h-4 text-blue-500" />
+          <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+            Product Guide
+          </span>
+        </div>
+        {isExpanded
+          ? <ChevronDown size={14} className="text-muted-foreground" />
+          : <ChevronUp size={14} className="text-muted-foreground" />
+        }
+      </div>
     </div>
   );
 }
 
-/* ─── Main Shell ─── */
 interface ProjectShellProps {
   children: React.ReactNode;
 }
 
-export default function ProjectShell({ children }: ProjectShellProps) {
-  const store = useShellStore();
-  const [gateOpen, setGateOpen] = useState(false);
-
-  // Restore session on mount
-  useEffect(() => {
-    const saved = localStorage.getItem('signmaker_user_email');
-    if (saved) {
-      (async () => {
-        const { data } = await supabase
-          .from('verified_customers')
-          .select('id')
-          .eq('email', saved)
-          .limit(1)
-          .maybeSingle();
-
-        if (data) {
-          store.setUserEmail(saved);
-
-          // Get effective role on restore
-          const { data: effectiveRole } = await supabase
-            .rpc('get_effective_user_role', { p_email: saved });
-          const role = effectiveRole || 'guest';
-          store.setUserRole(role === 'temp_pro' ? 'pro' : role);
-
-          if (role === 'temp_pro') {
-            const { data: vc } = await supabase
-              .from('verified_customers')
-              .select('temp_pro_expires_at')
-              .eq('email', saved)
-              .single();
-            if (vc?.temp_pro_expires_at) {
-              const hours = Math.ceil(
-                (new Date(vc.temp_pro_expires_at).getTime() - Date.now()) / 3600000
-              );
-              toast.info(`Pro access active for ${hours} more hours. Complete your application to keep it.`);
-            }
-          }
-
-          await loadUserData(saved, store);
-          store.setShellState('verified');
-        } else {
-          localStorage.removeItem('signmaker_user_email');
-        }
-      })();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+export function ProjectShell({ children }: ProjectShellProps) {
+  const [chatOpen, setChatOpen] = useState(false);
+  const store = useShellStore() as any;
+  const shellState = store.shellState;
+  const activeProject = store.activeProject;
+  const userEmail = store.userEmail;
+  const uiMode = store.uiMode || 'pro';
+  const setUiMode = store.setUiMode;
+  const signOut = store.signOut;
 
   return (
-    <div className="flex flex-col gap-3 p-3 h-full overflow-y-auto">
-      {/* Top bar — state-dependent */}
-      {store.shellState === 'explore' && !gateOpen && (
-        <ExploreBanner onOpen={() => setGateOpen(true)} />
-      )}
-      {store.shellState === 'explore' && gateOpen && (
-        <IdentityGate />
-      )}
-      {store.shellState === 'verified' && (
-        <ProjectDashboard />
-      )}
-      {store.shellState === 'in_project' && (
-        <ProjectContextBar />
-      )}
+    <div className="h-screen w-screen flex flex-col overflow-hidden bg-[#0a0a14]">
 
-      {/* Submitted success screen replaces content */}
-      {store.shellState === 'submitted' ? (
-        <SubmissionSuccess />
-      ) : (
-        <>
-          {/* Configurator / main content */}
-          <div className="flex-1 min-h-0">
+      <header className="h-12 flex-shrink-0 flex items-center justify-between px-4 bg-[#0a0a14] border-b border-[#1e1e35] z-50">
+        <div className="flex items-center gap-1.5">
+          <span className="font-bold text-lg text-white tracking-tight">SignMaker</span>
+          <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+        </div>
+        <div className="flex-1 text-center hidden sm:block">
+          {shellState === 'in_project' && activeProject && (
+            <span className="text-sm text-white/80 font-medium">
+              {activeProject.project_name}
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-3">
+          {userEmail && (
+            <span className="text-[10px] text-muted-foreground font-mono hidden md:block truncate max-w-[160px]">
+              {userEmail}
+            </span>
+          )}
+          {setUiMode && (
+            <div className="flex bg-[#16162a] p-0.5 rounded border border-[#1e1e35]">
+              <button
+                onClick={() => { setUiMode('pro'); localStorage.setItem('signmaker_ui_mode', 'pro'); }}
+                className={`px-2.5 py-0.5 text-[10px] font-bold rounded transition-all ${
+                  uiMode === 'pro' ? 'bg-blue-600 text-white' : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                Pro
+              </button>
+              <button
+                onClick={() => { setUiMode('client'); localStorage.setItem('signmaker_ui_mode', 'client'); }}
+                className={`px-2.5 py-0.5 text-[10px] font-bold rounded transition-all ${
+                  uiMode === 'client' ? 'bg-pink-600 text-white' : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                Client
+              </button>
+            </div>
+          )}
+          {signOut && (
+            <button
+              onClick={signOut}
+              className="text-muted-foreground hover:text-white transition-colors p-1"
+              title="Sign out"
+            >
+              <LogOut size={14} />
+            </button>
+          )}
+        </div>
+      </header>
+
+      <div className="flex-1 flex overflow-hidden">
+        <div className="flex-1 flex flex-col bg-[#0d0d1a] overflow-hidden min-w-0">
+          <div className="flex-1 overflow-y-auto">
             {children}
           </div>
+          <ProductGuide />
+        </div>
 
-          {/* Sign list — only in IN_PROJECT state */}
-          {store.shellState === 'in_project' && (
-            <SignList />
-          )}
-        </>
+        <aside className="hidden lg:flex w-[400px] flex-shrink-0 flex-col border-l border-[#1e1e35] bg-[#111120]">
+          <div className="h-12 flex-shrink-0 flex items-center justify-between px-4 border-b border-[#1e1e35] bg-[#0d0d1a]">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-semibold text-white uppercase tracking-wide">
+                LetterMan
+              </span>
+              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.5)]" />
+            </div>
+            <div className={`rounded px-2 py-0.5 border text-[9px] font-bold uppercase tracking-tight ${
+              uiMode === 'pro'
+                ? 'bg-blue-500/10 border-blue-500/20 text-blue-400'
+                : 'bg-pink-500/10 border-pink-500/20 text-pink-400'
+            }`}>
+              {uiMode} Mode
+            </div>
+          </div>
+          <div className="flex-1 overflow-hidden">
+            <LetterManChat mode="embedded" />
+          </div>
+        </aside>
+      </div>
+
+      <button
+        onClick={() => setChatOpen(true)}
+        className="fixed bottom-4 right-4 z-50 lg:hidden w-12 h-12 rounded-full bg-blue-600 shadow-lg flex items-center justify-center hover:scale-105 active:scale-95 transition-all"
+        aria-label="Open chat"
+      >
+        <MessageCircle className="w-5 h-5 text-white" />
+      </button>
+
+      {chatOpen && (
+        <div className="fixed inset-0 z-[60] lg:hidden">
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => setChatOpen(false)}
+          />
+          <div className="absolute inset-x-0 bottom-0 h-[70vh] bg-[#111120] rounded-t-2xl shadow-2xl flex flex-col">
+            <div className="h-12 flex items-center justify-between px-6 border-b border-[#1e1e35] flex-shrink-0">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-bold uppercase tracking-widest">LetterMan</span>
+                <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
+              </div>
+              <button onClick={() => setChatOpen(false)} className="text-muted-foreground hover:text-white p-1">
+                <ChevronDown size={20} />
+              </button>
+            </div>
+            <div className="flex-1 overflow-hidden">
+              <LetterManChat mode="overlay" onClose={() => setChatOpen(false)} />
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
 }
 
-/* ─── Submission Success Screen ─── */
-function SubmissionSuccess() {
-  const store = useShellStore();
-  const project = store.activeProject;
-
-  const downloadPdf = async () => {
-    if (!project) return;
-    const { data } = await supabase
-      .rpc('get_project_for_pdf', { p_project_id: project.id });
-    if (data) generateAndDownloadPDF((data as any).project, (data as any).signs);
-  };
-
-  return (
-    <div className="flex flex-col items-center justify-center py-16 px-6 animate-fade-in-up">
-      <div className="flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-6">
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--primary))" strokeWidth="2">
-          <circle cx="12" cy="12" r="10" />
-          <polyline points="9 12 11.5 14.5 16 9.5" />
-        </svg>
-      </div>
-
-      <h2 className="text-xl font-semibold text-foreground mb-2">Work Order Submitted</h2>
-      <p className="text-sm text-muted-foreground text-center max-w-md mb-8">
-        {project?.quote_ref
-          ? `Project ${project.quote_ref} has`
-          : 'Your project has'}{' '}
-        been sent to the factory floor. Download your spec sheet below for your records.
-      </p>
-
-      <div className="flex flex-col gap-3 w-full max-w-xs">
-        <button
-          onClick={downloadPdf}
-          className="w-full rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
-        >
-          Download PDF Spec Sheet
-        </button>
-        <button
-          onClick={() => store.setShellState('verified')}
-          className="w-full rounded-md border border-border px-4 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-        >
-          Return to Dashboard
-        </button>
-      </div>
-    </div>
-  );
-}
+export default ProjectShell;
