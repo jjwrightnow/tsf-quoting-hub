@@ -757,17 +757,19 @@ export default function WinningLineConfigurator({
   const [lightingStyles, setLightingStyles] = useState<LightingStyle[]>([]);
   const [techClasses, setTechClasses] = useState<TechClass[]>([]);
 
-  // Filters — lighting codes as strings now
+  // Filters — single selection for progressive flow
   const [lightingCodeFilters, setLightingCodeFilters] = useState<Set<string>>(new Set<string>());
   const [techFilter, setTechFilter] = useState<Set<string>>(new Set<string>());
+  const [selectedTechCode, setSelectedTechCode] = useState<string | null>(null);
+  const [selectedLightingCode, setSelectedLightingCode] = useState<string | null>(null);
 
   // Selection
   const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
   const [components, setComponents] = useState<ProfileComponent[]>([]);
   const [loadingComponents, setLoadingComponents] = useState(false);
 
-  // Stepper
-  const [step, setStep] = useState(0);
+  // Browse step: 0=tech, 1=lighting, 2=profile
+  const [browseStep, setBrowseStep] = useState(0);
 
   // CTA
   const [showAddForm, setShowAddForm] = useState(false);
