@@ -202,24 +202,79 @@ function SummaryBar({
   );
 }
 
-/* ─── Stepper ─── */
-function Stepper({ step }: { step: number }) {
-  const steps = ['Choose lighting', 'Pick style', 'Review and build'];
+/* ─── Breadcrumb ─── */
+function ConfiguratorBreadcrumb({
+  browseStep,
+  selectedTech,
+  selectedLighting,
+  selectedProfile,
+  techClasses,
+  lightingStyles,
+  onClickTech,
+  onClickLighting,
+  onClickProfile,
+}: {
+  browseStep: number;
+  selectedTech: string | null;
+  selectedLighting: string | null;
+  selectedProfile: Profile | null;
+  techClasses: TechClass[];
+  lightingStyles: LightingStyle[];
+  onClickTech: () => void;
+  onClickLighting: () => void;
+  onClickProfile: () => void;
+}) {
+  const crumbs = [
+    {
+      label: selectedTech
+        ? (techClasses.find(t => t.code === selectedTech)?.short_name || selectedTech)
+        : 'Technology',
+      active: browseStep >= 0,
+      done: browseStep > 0 || !!selectedProfile,
+      onClick: onClickTech,
+    },
+    {
+      label: selectedLighting
+        ? (lightingStyles.find(s => s.lighting_code === selectedLighting)?.display_name || selectedLighting)
+        : 'Lighting',
+      active: browseStep >= 1,
+      done: browseStep > 1 || !!selectedProfile,
+      onClick: onClickLighting,
+    },
+    {
+      label: selectedProfile
+        ? (selectedProfile.display_name || selectedProfile.profile_name)
+        : 'Profile',
+      active: browseStep >= 2,
+      done: !!selectedProfile,
+      onClick: onClickProfile,
+    },
+    {
+      label: 'Configure',
+      active: !!selectedProfile,
+      done: false,
+      onClick: () => {},
+    },
+  ];
+
   return (
-    <div className="flex items-center gap-4 w-full text-[11px] font-medium">
-      {steps.map((label, i) => (
-        <span
-          key={i}
-          className={`flex items-center gap-1.5 ${
-            i === step ? 'text-cfg-blue' : 'text-cfg-muted'
-          }`}
-        >
-          <span className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold ${
-            i === step ? 'bg-cfg-blue text-primary-foreground' : 'bg-secondary text-cfg-muted'
-          }`}>
-            {i + 1}
-          </span>
-          {label}
+    <div className="flex items-center gap-1 text-[11px] font-medium overflow-x-auto">
+      {crumbs.map((c, i) => (
+        <span key={i} className="flex items-center gap-1 whitespace-nowrap">
+          {i > 0 && <span className="text-muted-foreground mx-0.5">›</span>}
+          <button
+            onClick={c.done ? c.onClick : undefined}
+            className={`transition-colors ${
+              c.active
+                ? c.done
+                  ? 'text-primary hover:underline cursor-pointer'
+                  : 'text-foreground font-semibold'
+                : 'text-muted-foreground cursor-default'
+            }`}
+            disabled={!c.done}
+          >
+            {c.label}
+          </button>
         </span>
       ))}
     </div>
