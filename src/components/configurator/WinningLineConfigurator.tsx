@@ -300,120 +300,67 @@ function ProfileCard({
   );
 }
 
+/* ─── Material Color Function ─── */
+const getMaterialColor = (category: string): string => {
+  const colors: Record<string, string> = {
+    'metal': '#1e2a3a',
+    'acrylic': '#0e2a2e',
+    'LED': '#1a1a0e',
+    'wire/electrical': '#1a0e2e',
+    'hardware': '#1e1e1e',
+    'neon flex': '#2a0e2e',
+    'adhesive': '#2a1a0e',
+    'paint': '#1a2a1a',
+    'PVC': '#2a2a1a',
+    'vinyl': '#2a1a2a',
+  };
+  return colors[category] || '#1a1a2e';
+};
+
 /* ─── Construction Stack ─── */
 function ConstructionStack({ components, mode }: { components: ProfileComponent[]; mode: UiMode }) {
-  const [expanded, setExpanded] = useState<Set<string>>(new Set());
-
-  const groups = useMemo(() => {
-    const face = components.filter(
-      (c) => c.layer_position === 'face cover' || c.layer_position === 'face type',
-    );
-    const body = components.filter(
-      (c) => c.layer_position === 'return body' || c.layer_position === 'back insert',
-    );
-    const systems = components.filter(
-      (c) =>
-        c.layer_position === 'LED' ||
-        c.layer_position === 'wiring' ||
-        c.layer_position === 'mounting',
-    );
-    return [
-      { title: 'Face Assembly', items: face },
-      { title: 'Body', items: body },
-      { title: 'Systems', items: systems },
-    ].filter((g) => g.items.length > 0);
-  }, [components]);
-
-  const toggleExpand = (pos: string) => {
-    setExpanded((prev) => {
-      const next = new Set(prev);
-      next.has(pos) ? next.delete(pos) : next.add(pos);
-      return next;
-    });
-  };
-
-  const groupSlots = (items: ProfileComponent[]) => {
-    const map = new Map<string, ProfileComponent[]>();
-    for (const item of items) {
-      const existing = map.get(item.layer_position) || [];
-      existing.push(item);
-      map.set(item.layer_position, existing);
-    }
-    return Array.from(map.entries());
-  };
+  const isClientMode = mode === 'client';
 
   const displayPosition = (pos: string) =>
-    mode === 'client' ? (CLIENT_LAYER_LABELS[pos] || pos) : pos;
+    isClientMode ? (CLIENT_LAYER_LABELS[pos] || pos) : pos;
 
   const displayName = (name: string | null) =>
-    mode === 'client' ? clientComponentName(name) : (name || 'Unknown');
+    isClientMode ? clientComponentName(name) : (name || 'Unknown');
+
+  // Order components by position_order ascending, filter defaults only
+  const orderedComponents = useMemo(() => {
+    return components
+      .filter((c) => c.is_default !== false)
+      .sort((a, b) => a.position_order - b.position_order);
+  }, [components]);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 animate-fade-in-up">
-      {groups.map((group) => (
-        <div key={group.title} className="rounded-lg bg-cfg-surface p-3">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-cfg-muted mb-2">
-            {group.title}
-          </p>
-          <div className="space-y-2">
-            {groupSlots(group.items).map(([position, slots]) => {
-              const defaults = slots.filter((s) => s.is_default !== false);
-              const alternates = slots.filter((s) => s.is_default === false);
-              const isExpanded = expanded.has(position);
-              const borderColor =
-                MATERIAL_BORDER[defaults[0]?.material_category || ''] || 'border-l-cfg-muted';
-
-              return (
-                <div key={position}>
-                  {defaults.map((slot) => (
-                    <div
-                      key={slot.id}
-                      className={`rounded border-l-2 ${borderColor} bg-background/40 px-2.5 py-1.5`}
-                    >
-                      <p className="text-[9px] uppercase tracking-wide text-cfg-muted">
-                        {displayPosition(position)}
-                      </p>
-                      <p className="text-xs font-semibold text-foreground">
-                        {displayName(slot.component_name)}
-                      </p>
-                      {mode === 'client' && slot.client_badge && (
-                        <span className="inline-block text-[9px] font-medium px-1.5 py-0.5 rounded-full bg-green-500/15 text-green-400" title={slot.client_description || ''}>
-                          {slot.client_badge}
-                        </span>
-                      )}
-                      {mode === 'pro' && slot.material_category && (
-                        <span className="text-[9px] text-cfg-muted">{slot.material_category}</span>
-                      )}
-                    </div>
-                  ))}
-                  {alternates.length > 0 && (
-                    <button
-                      onClick={() => toggleExpand(position)}
-                      className="text-[10px] text-cfg-blue hover:underline mt-1"
-                    >
-                      {isExpanded ? 'Hide alternates' : `... ${alternates.length} alternate${alternates.length > 1 ? 's' : ''}`}
-                    </button>
-                  )}
-                  {isExpanded &&
-                    alternates.map((alt) => (
-                      <div
-                        key={alt.id}
-                        className={`rounded border-l-2 ${
-                          MATERIAL_BORDER[alt.material_category || ''] || 'border-l-cfg-muted'
-                        } bg-background/20 px-2.5 py-1.5 mt-1`}
-                      >
-                        <p className="text-xs text-foreground/80">{displayName(alt.component_name)}</p>
-                        {mode === 'pro' && alt.material_category && (
-                          <span className="text-[9px] text-cfg-muted">{alt.material_category}</span>
-                        )}
-                      </div>
-                    ))}
-                </div>
-              );
-            })}
+    <div className="overflow-x-auto animate-fade-in-up">
+      <div className="flex items-stretch min-h-[120px]">
+        {orderedComponents.map((component, index) => (
+          <div key={component.id} className="flex flex-col items-center relative">
+            {/* Connector arrow between slices */}
+            {index > 0 && (
+              <div className="absolute left-0 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 text-[#3b82f6] text-xs">→</div>
+            )}
+            {/* Layer slice */}
+            <div
+              className="flex flex-col items-center justify-center px-3 py-4 min-w-[80px] max-w-[100px] border-r border-[#2a2a40] text-center"
+              style={{ background: getMaterialColor(component.material_category || '') }}
+            >
+              <span className="text-[9px] font-bold uppercase tracking-wider text-white/60 mb-1">
+                {displayPosition(component.layer_position)}
+              </span>
+              <span className="text-[11px] font-semibold text-white leading-tight">
+                {isClientMode ? (component.client_badge || displayName(component.component_name)) : displayName(component.component_name)}
+              </span>
+              {isClientMode && component.client_description && (
+                <span className="text-[9px] text-white/50 mt-1 leading-tight">{component.client_description}</span>
+              )}
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 }
@@ -756,8 +703,8 @@ export default function WinningLineConfigurator({
   const [techClasses, setTechClasses] = useState<TechClass[]>([]);
 
   // Filters — lighting codes as strings now
-  const [lightingCodeFilters, setLightingCodeFilters] = useState<Set<string>>(new Set());
-  const [techFilter, setTechFilter] = useState<Set<string>>(new Set());
+  const [lightingCodeFilters, setLightingCodeFilters] = useState<Set<string>>(new Set<string>());
+  const [techFilter, setTechFilter] = useState<Set<string>>(new Set<string>());
 
   // Selection
   const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
@@ -788,27 +735,45 @@ export default function WinningLineConfigurator({
   // Fetch profiles + lighting styles
   useEffect(() => {
     (async () => {
-      const [profilesRes, lightingRes, techRes] = await Promise.all([
-        supabase
-          .from('profiles')
-          .select('*')
-          .eq('is_active', true)
-          .order('profile_code', { ascending: true }),
-        supabase
-          .from('lighting_styles')
-          .select('lighting_code, display_name, sku_label, thumbnail_url, hover_description, sort_order')
-          .eq('is_active', true)
-          .order('sort_order'),
-        supabase
-          .from('technology_classes')
-          .select('code, display_name, short_name, materials, price_tier, hover_description, thumbnail_url, sort_order')
-          .eq('is_active', true)
-          .order('sort_order'),
-      ]);
-      if (profilesRes.data) setProfiles(profilesRes.data as unknown as Profile[]);
-      if (lightingRes.data) setLightingStyles(lightingRes.data as LightingStyle[]);
-      if (techRes.data) setTechClasses(techRes.data as TechClass[]);
-      setLoadingProfiles(false);
+      try {
+        const [profilesRes, lightingRes, techRes] = await Promise.all([
+          supabase
+            .from('profiles')
+            .select('*')
+            .eq('is_active', true)
+            .order('profile_code', { ascending: true }),
+          supabase
+            .from('lighting_styles')
+            .select('lighting_code, display_name, sku_label, thumbnail_url, hover_description, sort_order')
+            .eq('is_active', true)
+            .order('sort_order'),
+          supabase
+            .from('technology_classes')
+            .select('code, display_name, short_name, materials, price_tier, hover_description, thumbnail_url, sort_order')
+            .eq('is_active', true)
+            .order('sort_order'),
+        ]);
+        
+        if (profilesRes.data) setProfiles(profilesRes.data as unknown as Profile[]);
+        if (lightingRes.data) setLightingStyles(lightingRes.data as LightingStyle[]);
+        if (techRes.data) setTechClasses(techRes.data as TechClass[]);
+        
+        if (profilesRes.error) {
+          console.error('Failed to fetch profiles:', profilesRes.error);
+          toast.error('Failed to load profiles');
+        }
+        if (lightingRes.error) {
+          console.error('Failed to fetch lighting styles:', lightingRes.error);
+        }
+        if (techRes.error) {
+          console.error('Failed to fetch technology classes:', techRes.error);
+        }
+      } catch (error) {
+        console.error('Error fetching configurator data:', error);
+        toast.error('Failed to load configurator data');
+      } finally {
+        setLoadingProfiles(false);
+      }
     })();
   }, []);
 
@@ -999,7 +964,7 @@ export default function WinningLineConfigurator({
                     <div className="text-[7px] text-[#4b5563]">&nbsp;</div>
                   </div>
                 </button>
-                {lightingStyles.map((style) => {
+                {(lightingStyles || []).map((style) => {
                   const active = isLightingCodeActive(style.lighting_code);
                   return (
                     <Tooltip key={style.lighting_code}>
@@ -1046,7 +1011,7 @@ export default function WinningLineConfigurator({
 
               <TooltipProvider>
                 <div className="flex flex-wrap gap-1.5 mb-3">
-                  {techClasses.map((tech) => {
+                  {(techClasses || []).map((tech) => {
                     const active = techFilter.has(tech.code);
                     return (
                       <Tooltip key={tech.code}>
