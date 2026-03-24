@@ -951,7 +951,11 @@ export default function WinningLineConfigurator({
   const handleBackToBrowse = () => {
     setSelectedProfile(null);
     setComponents([]);
-    setStep(0);
+    setBrowseStep(0);
+    setSelectedTechCode(null);
+    setSelectedLightingCode(null);
+    setTechFilter(new Set());
+    setLightingCodeFilters(new Set());
     setShowAddForm(false);
     setShowQuoteForm(false);
     containerRef.current?.scrollTo({ top: 0, behavior: 'instant' });
