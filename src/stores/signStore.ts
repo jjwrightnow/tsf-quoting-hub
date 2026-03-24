@@ -126,5 +126,15 @@ export const useSignStore = create<SignState>((set) => ({
   setUploadPath: (uploadPath) => set({ uploadPath }),
   addCannedEntry: (entry) =>
     set((s) => ({ cannedHistory: [...s.cannedHistory, entry] })),
+  addAiMessage: (msg) =>
+    set((s) => ({ aiMessages: [...s.aiMessages, msg] })),
+  updateLastAiMessage: (content) =>
+    set((s) => {
+      const msgs = [...s.aiMessages];
+      if (msgs.length > 0 && msgs[msgs.length - 1].role === 'assistant') {
+        msgs[msgs.length - 1] = { ...msgs[msgs.length - 1], content };
+      }
+      return { aiMessages: msgs };
+    }),
   reset: () => set(initialState),
 }));
