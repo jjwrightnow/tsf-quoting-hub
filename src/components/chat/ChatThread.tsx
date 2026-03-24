@@ -92,6 +92,7 @@ const ChatThread = () => {
     signStore.chatPhase, signStore.uploadedFiles, signStore.signs,
     signStore.currentSignIndex, signStore.postUploadChoice,
     signStore.pendingSignName, signStore.uploadPath, signStore.cannedHistory,
+    signStore.aiMessages,
     appStore.userTier, appStore.operatorConfig,
   ]);
 
@@ -140,6 +141,11 @@ const ChatThread = () => {
     signStore.cannedHistory.forEach((entry, i) => {
       msgs.push({ id: `canned-q-${i}`, role: 'user', content: entry.q });
       msgs.push({ id: `canned-a-${i}`, role: 'assistant', content: entry.a });
+    });
+
+    // AI conversation messages
+    signStore.aiMessages.forEach((msg, i) => {
+      msgs.push({ id: `ai-${i}`, role: msg.role, content: msg.content });
     });
 
     if (phase === 'welcome') { setMessages(msgs); return; }
