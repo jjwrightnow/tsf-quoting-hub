@@ -3,6 +3,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { useShellStore, type PortalSign } from '@/stores/shellStore';
 import { toast } from 'sonner';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { BookOpen, ChevronUp, ChevronDown } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 
 /* ─── Types ─── */
 interface Profile {
@@ -743,6 +746,75 @@ function ContextRibbon({
   );
 }
 
+/* ─── Product Guide Panel ─── */
+function ProductGuidePanel({ techClasses, lightingStyles }: { techClasses: TechClass[]; lightingStyles: LightingStyle[] }) {
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <div className="border-t border-border">
+      {/* Collapsed bar */}
+      <button
+        onClick={() => setExpanded(!expanded)}
+        className="w-full flex items-center justify-between px-4 bg-card cursor-pointer hover:bg-card/80 transition-colors"
+        style={{ height: 40 }}
+      >
+        <div className="flex items-center gap-2">
+          <BookOpen className="h-3.5 w-3.5 text-muted-foreground" />
+          <span className="text-xs font-semibold text-muted-foreground">Product Guide</span>
+        </div>
+        {expanded ? (
+          <ChevronDown className="h-4 w-4 text-muted-foreground" />
+        ) : (
+          <ChevronUp className="h-4 w-4 text-muted-foreground" />
+        )}
+      </button>
+
+      {/* Expandable content */}
+      <div
+        className="overflow-hidden transition-all duration-300"
+        style={{ maxHeight: expanded ? 320 : 0 }}
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-0 bg-[#0f0f1a]" style={{ height: 320 }}>
+          {/* LEFT — Technologies */}
+          <div className="overflow-y-auto border-r border-border px-4 py-3">
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-2">Construction Types</p>
+            {techClasses.map((tech, i) => (
+              <div key={tech.code}>
+                {i > 0 && <Separator className="my-2" />}
+                <div>
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className="text-sm font-semibold text-foreground">{tech.short_name}</span>
+                    <Badge variant="secondary" className="text-[9px] px-1.5 py-0">{tech.price_tier}</Badge>
+                  </div>
+                  <p className="text-xs text-muted-foreground mb-0.5">{tech.materials}</p>
+                  <p className="text-xs text-muted-foreground/70">{tech.hover_description}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* RIGHT — Lighting Styles */}
+          <div className="overflow-y-auto px-4 py-3">
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-2">Lighting Styles</p>
+            {lightingStyles.map((style, i) => (
+              <div key={style.lighting_code}>
+                {i > 0 && <Separator className="my-2" />}
+                <div>
+                  <span className="text-sm font-semibold text-foreground">{style.display_name}</span>
+                  <span className="ml-2 text-xs font-mono text-muted-foreground">{style.sku_label}</span>
+                  {style.hover_description && (
+                    <p className="text-xs text-muted-foreground/70 mt-0.5">{style.hover_description}</p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ═══════════════════════════════════════════════
    MAIN COMPONENT
    ═══════════════════════════════════════════════ */
@@ -1369,6 +1441,11 @@ export default function WinningLineConfigurator({
           </div>
         </div>
       )}
+
+      {/* ════════════════════════════════════════════
+          PRODUCT GUIDE PANEL
+          ════════════════════════════════════════════ */}
+      <ProductGuidePanel techClasses={techClasses} lightingStyles={lightingStyles} />
     </div>
   );
 }
