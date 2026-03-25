@@ -212,36 +212,6 @@ export function ProjectShell({ children }: ProjectShellProps) {
         </aside>
       </div>
 
-      <button
-        onClick={() => setChatOpen(true)}
-        className="fixed bottom-4 right-4 z-50 lg:hidden w-12 h-12 rounded-full bg-primary shadow-lg flex items-center justify-center hover:scale-105 active:scale-95 transition-all"
-        aria-label="Open chat"
-      >
-        <MessageCircle className="w-5 h-5 text-primary-foreground" />
-      </button>
-
-      {chatOpen && (
-        <div className="fixed inset-0 z-[60] lg:hidden">
-          <div
-            className="absolute inset-0 bg-foreground/40 backdrop-blur-sm"
-            onClick={() => setChatOpen(false)}
-          />
-          <div className="absolute inset-x-0 bottom-0 h-[70vh] bg-card rounded-t-2xl shadow-2xl flex flex-col">
-            <div className="h-12 flex items-center justify-between px-6 border-b border-border flex-shrink-0">
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-bold uppercase tracking-widest text-foreground">LetterMan</span>
-                <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
-              </div>
-              <button onClick={() => setChatOpen(false)} className="text-muted-foreground hover:text-foreground p-1">
-                <ChevronDown size={20} />
-              </button>
-            </div>
-            <div className="flex-1 overflow-hidden">
-              <LetterManChat mode="overlay" onClose={() => setChatOpen(false)} />
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
