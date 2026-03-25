@@ -174,7 +174,7 @@ const Dashboard = () => {
               </div>
             )}
             {operatorConfig?.brand_name && (
-              <span className="text-sm font-semibold text-foreground hidden sm:inline">
+              <span className="text-sm font-semibold text-primary-foreground hidden sm:inline">
                 {operatorConfig.brand_name}
               </span>
             )}
