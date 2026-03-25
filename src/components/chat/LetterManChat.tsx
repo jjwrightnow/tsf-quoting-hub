@@ -32,7 +32,7 @@ export const LetterManChat: React.FC<LetterManChatProps> = ({ mode, onClose }) =
           .single();
         if (data) {
           setSystemPrompt(data.context_instruction || '');
-          setCannedQuestions(data.canned_questions || []);
+          setCannedQuestions(Array.isArray(data.canned_questions) ? data.canned_questions : []);
         }
       } catch (err) {
         console.error('LetterManChat config fetch error:', err);
