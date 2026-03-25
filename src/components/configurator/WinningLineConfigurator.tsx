@@ -398,22 +398,22 @@ function ConstructionStack({ components, mode }: { components: ProfileComponent[
         {orderedComponents.map((component, index) => (
           <div key={component.id} className="flex flex-col items-center relative">
             {/* Connector arrow between slices */}
-            {index > 0 && (
-              <div className="absolute left-0 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 text-[#3b82f6] text-xs">→</div>
+          {index > 0 && (
+              <div className="absolute left-0 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 text-primary text-xs">→</div>
             )}
             {/* Layer slice */}
             <div
-              className="flex flex-col items-center justify-center px-3 py-4 min-w-[80px] max-w-[100px] border-r border-[#2a2a40] text-center"
+              className="flex flex-col items-center justify-center px-3 py-4 min-w-[80px] max-w-[100px] border-r border-border text-center"
               style={{ background: getMaterialColor(component.material_category || '') }}
             >
-              <span className="text-[9px] font-bold uppercase tracking-wider text-white/60 mb-1">
+              <span className="text-[9px] font-bold uppercase tracking-wider text-foreground/60 mb-1">
                 {displayPosition(component.layer_position)}
               </span>
-              <span className="text-[11px] font-semibold text-white leading-tight">
+              <span className="text-[11px] font-semibold text-foreground leading-tight">
                 {isClientMode ? (component.client_badge || displayName(component.component_name)) : displayName(component.component_name)}
               </span>
               {isClientMode && component.client_description && (
-                <span className="text-[9px] text-white/50 mt-1 leading-tight">{component.client_description}</span>
+                <span className="text-[9px] text-foreground/50 mt-1 leading-tight">{component.client_description}</span>
               )}
             </div>
           </div>
