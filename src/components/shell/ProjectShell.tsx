@@ -114,7 +114,6 @@ interface ProjectShellProps {
 }
 
 export function ProjectShell({ children }: ProjectShellProps) {
-  const [chatOpen, setChatOpen] = useState(false);
   const [uiMode, setUiModeState] = useState<'pro' | 'client'>(() => {
     const saved = localStorage.getItem('signmaker_ui_mode');
     return (saved as 'pro' | 'client') || 'pro';
