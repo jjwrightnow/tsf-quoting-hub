@@ -77,10 +77,39 @@
 @layer base {
   * {
     @apply border-border;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Arial', sans-serif;
   }
   body {
     @apply bg-background text-foreground;
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Arial', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    letter-spacing: normal;
+  }
+
+  /* Global typography scale */
+  label, .text-xs {
+    font-size: 13px !important;
+    line-height: 1.5;
+  }
+  .text-sm {
+    font-size: 15px !important;
+    line-height: 1.6;
+  }
+  .text-base {
+    font-size: 16px !important;
+    line-height: 1.6;
+  }
+  input, select, textarea, [role="combobox"] {
+    font-size: 16px !important;
+  }
+  button {
+    font-size: 15px;
+    font-weight: 500;
+  }
+  .uppercase {
+    font-size: 13px !important;
+    letter-spacing: 0.05em;
   }
 }
 
