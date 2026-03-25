@@ -1316,6 +1316,87 @@ export type Database = {
         }
         Relationships: []
       }
+      project_messages: {
+        Row: {
+          attachments: Json | null
+          channel: Database["public"]["Enums"]["message_channel"]
+          content: string
+          created_at: string | null
+          id: string
+          is_internal: boolean | null
+          project_id: string
+          read_by: Json | null
+          sender_email: string | null
+          sender_name: string
+          sender_role: Database["public"]["Enums"]["message_sender_role"]
+          sign_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          attachments?: Json | null
+          channel?: Database["public"]["Enums"]["message_channel"]
+          content: string
+          created_at?: string | null
+          id?: string
+          is_internal?: boolean | null
+          project_id: string
+          read_by?: Json | null
+          sender_email?: string | null
+          sender_name: string
+          sender_role: Database["public"]["Enums"]["message_sender_role"]
+          sign_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          attachments?: Json | null
+          channel?: Database["public"]["Enums"]["message_channel"]
+          content?: string
+          created_at?: string | null
+          id?: string
+          is_internal?: boolean | null
+          project_id?: string
+          read_by?: Json | null
+          sender_email?: string | null
+          sender_name?: string
+          sender_role?: Database["public"]["Enums"]["message_sender_role"]
+          sign_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      project_participants: {
+        Row: {
+          added_at: string | null
+          email: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          project_id: string
+          role: string
+          stage_added: string
+        }
+        Insert: {
+          added_at?: string | null
+          email?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          project_id: string
+          role: string
+          stage_added?: string
+        }
+        Update: {
+          added_at?: string | null
+          email?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          project_id?: string
+          role?: string
+          stage_added?: string
+        }
+        Relationships: []
+      }
       quotes: {
         Row: {
           account_id: string
@@ -2365,7 +2446,9 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      message_channel: "quoting" | "pre_production" | "order"
+      message_sender_role: "customer" | "team" | "factory" | "system"
+      sender_role_type: "customer" | "admin" | "factory"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2492,6 +2575,10 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      message_channel: ["quoting", "pre_production", "order"],
+      message_sender_role: ["customer", "team", "factory", "system"],
+      sender_role_type: ["customer", "admin", "factory"],
+    },
   },
 } as const
