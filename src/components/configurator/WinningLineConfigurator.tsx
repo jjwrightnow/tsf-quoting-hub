@@ -361,18 +361,18 @@ function ProfileCard({
 /* ─── Material Color Function ─── */
 const getMaterialColor = (category: string): string => {
   const colors: Record<string, string> = {
-    'metal': '#1e2a3a',
-    'acrylic': '#0e2a2e',
-    'LED': '#1a1a0e',
-    'wire/electrical': '#1a0e2e',
-    'hardware': '#1e1e1e',
-    'neon flex': '#2a0e2e',
-    'adhesive': '#2a1a0e',
-    'paint': '#1a2a1a',
-    'PVC': '#2a2a1a',
-    'vinyl': '#2a1a2a',
+    'metal': '#e2e8f0',
+    'acrylic': '#dbeafe',
+    'LED': '#fef9c3',
+    'wire/electrical': '#ede9fe',
+    'hardware': '#f1f5f9',
+    'neon flex': '#fce7f3',
+    'adhesive': '#ffedd5',
+    'paint': '#dcfce7',
+    'PVC': '#ecfccb',
+    'vinyl': '#f5f3ff',
   };
-  return colors[category] || '#1a1a2e';
+  return colors[category] || '#f0f4f8';
 };
 
 /* ─── Construction Stack ─── */
