@@ -774,7 +774,7 @@ function ProductGuidePanel({ techClasses, lightingStyles }: { techClasses: TechC
         className="overflow-hidden transition-all duration-300"
         style={{ maxHeight: expanded ? 320 : 0 }}
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-0 bg-[#0f0f1a]" style={{ height: 320 }}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-0 bg-background" style={{ height: 320 }}>
           {/* LEFT — Technologies */}
           <div className="overflow-y-auto border-r border-border px-4 py-3">
             <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-2">Construction Types</p>
