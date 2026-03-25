@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useShellStore } from '@/stores/shellStore';
 import { LetterManChat } from '@/components/chat/LetterManChat';
-import { BookOpen, ChevronDown, ChevronUp, LogOut, MessageCircle } from 'lucide-react';
+import { BookOpen, ChevronDown, ChevronUp, LogOut } from 'lucide-react';
 
 interface TechClass {
   code: string;
