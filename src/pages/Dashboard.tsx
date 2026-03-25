@@ -7,11 +7,8 @@ import { useOperatorConfig } from "@/hooks/useOperatorConfig";
 import { useQuotePolling } from "@/hooks/usePolling";
 import { useWizardAutoSave } from "@/hooks/useWizardAutoSave";
 import AppSidebar from "@/components/layout/AppSidebar";
-import InputBar from "@/components/layout/InputBar";
 import ProjectShell from "@/components/shell/ProjectShell";
 import WinningLineConfigurator from "@/components/configurator/WinningLineConfigurator";
-import ChatThread from "@/components/chat/ChatThread";
-import ChatErrorBoundary from "@/components/chat/ChatErrorBoundary";
 
 /** Bridge reads shell state and passes props to configurator */
 function ConfiguratorBridge() {
