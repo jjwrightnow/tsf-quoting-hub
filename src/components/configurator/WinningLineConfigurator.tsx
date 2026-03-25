@@ -1150,9 +1150,9 @@ export default function WinningLineConfigurator({
 
           {/* STEP 2 — How should it be lit? (Lighting) — only after tech selected */}
           {browseStep >= 1 && (
-            <div ref={zone1Ref} className="px-4 py-4 border-b border-border bg-[#13131f] animate-fade-in-up">
+            <div ref={zone1Ref} className="px-4 py-4 border-b border-border bg-background animate-fade-in-up">
               <div className="flex items-center gap-2 mb-3">
-                <span className="flex h-6 w-6 items-center justify-center rounded bg-[#1e1e35] text-primary text-xs font-bold shrink-0">2</span>
+                <span className="flex h-6 w-6 items-center justify-center rounded bg-primary text-primary-foreground text-xs font-bold shrink-0">2</span>
                 <h2 className="text-sm font-semibold text-foreground">How should it be lit?</h2>
               </div>
 
