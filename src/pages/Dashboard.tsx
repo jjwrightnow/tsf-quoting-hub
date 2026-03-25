@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAppStore } from "@/stores/appStore";
 import { useShellStore } from "@/stores/shellStore";
@@ -7,11 +7,8 @@ import { useOperatorConfig } from "@/hooks/useOperatorConfig";
 import { useQuotePolling } from "@/hooks/usePolling";
 import { useWizardAutoSave } from "@/hooks/useWizardAutoSave";
 import AppSidebar from "@/components/layout/AppSidebar";
-import InputBar from "@/components/layout/InputBar";
 import ProjectShell from "@/components/shell/ProjectShell";
 import WinningLineConfigurator from "@/components/configurator/WinningLineConfigurator";
-import ChatThread from "@/components/chat/ChatThread";
-import ChatErrorBoundary from "@/components/chat/ChatErrorBoundary";
 
 /** Bridge reads shell state and passes props to configurator */
 function ConfiguratorBridge() {
@@ -44,67 +41,6 @@ function ConfiguratorBridge() {
       editingSign={shellState === "in_project" ? editingSign : null}
       onSignSaved={handleSignSaved}
     />
-  );
-}
-
-/** Floating chat overlay */
-function FloatingChat() {
-  const [chatOpen, setChatOpen] = useState(() => localStorage.getItem("signmaker_chat_open") === "true");
-  const [pulse, setPulse] = useState(false);
-  const lastProfileSelected = useShellStore((s) => s.lastProfileSelected);
-  const addSignFormOpen = useShellStore((s) => s.addSignFormOpen);
-
-  useEffect(() => {
-    if (lastProfileSelected) {
-      setPulse(true);
-      const t = setTimeout(() => setPulse(false), 600);
-      return () => clearTimeout(t);
-    }
-  }, [lastProfileSelected]);
-
-  const toggle = () => {
-    const next = !chatOpen;
-    setChatOpen(next);
-    localStorage.setItem("signmaker_chat_open", String(next));
-  };
-
-  return (
-    <>
-      {chatOpen && (
-        <div
-          className={`fixed z-[55] bg-card border border-border rounded-t-2xl shadow-2xl flex flex-col
-            bottom-20 w-[420px] h-[560px]
-            max-md:inset-x-0 max-md:bottom-0 max-md:w-full max-md:h-[min(65vh,calc(100vh-env(safe-area-inset-bottom)-120px))] max-md:rounded-t-2xl
-            transition-all duration-200
-          `}
-          style={addSignFormOpen ? { right: 460 } : { right: 24 }}
-        >
-          <div className="flex items-center justify-between px-4 py-3 border-b border-border shrink-0">
-            <span className="text-sm font-semibold text-foreground">LetterMan</span>
-            <button onClick={toggle} className="text-muted-foreground hover:text-foreground transition-colors text-xs">
-              ✕
-            </button>
-          </div>
-          <div className="flex-1 min-h-0 flex flex-col">
-            <ChatErrorBoundary>
-              <ChatThread />
-            </ChatErrorBoundary>
-          </div>
-          <div className="shrink-0">
-            <InputBar />
-          </div>
-        </div>
-      )}
-
-      <button
-        onClick={toggle}
-        className={`fixed bottom-6 right-6 z-50 rounded-full bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground shadow-lg hover:bg-primary/90 transition-all duration-200 ${
-          pulse ? "ring-2 ring-primary ring-offset-2 ring-offset-background" : ""
-        }`}
-      >
-        {chatOpen ? "Close" : "Ask LetterMan"}
-      </button>
-    </>
   );
 }
 
@@ -190,7 +126,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <FloatingChat />
+      
 
       {/* Mobile sidebar overlay */}
       {userTier === 2 && sidebarOpen && (
