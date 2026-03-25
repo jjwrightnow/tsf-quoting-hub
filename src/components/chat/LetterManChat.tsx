@@ -51,7 +51,7 @@ export const LetterManChat: React.FC<LetterManChatProps> = ({ mode, onClose }) =
   const getFileIcon = (file: File | null) => {
     if (!file) return null;
     if (file.type.startsWith('image/')) return <ImageIcon className="w-4 h-4 text-muted-foreground" />;
-    if (file.name.endsWith('.ai') || file.name.endsWith('.eps') || file.type.includes('svg')) return <FileCode className="w-4 h-4 text-blue-400" />;
+    if (file.name.endsWith('.ai') || file.name.endsWith('.eps') || file.type.includes('svg')) return <FileCode className="w-4 h-4 text-primary" />;
     return <FileCheck className="w-4 h-4 text-muted-foreground" />;
   };
 
@@ -157,13 +157,13 @@ export const LetterManChat: React.FC<LetterManChatProps> = ({ mode, onClose }) =
   };
 
   return (
-    <div className={`flex flex-col h-full bg-[#111120] ${!isEmbedded ? 'rounded-t-2xl' : ''}`}>
+    <div className={`flex flex-col h-full bg-secondary ${!isEmbedded ? 'rounded-t-2xl' : ''}`}>
       <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3">
         {messages.length === 0 && (
           <div className="flex flex-col gap-2 pt-4">
             <div className="text-center py-6 opacity-40">
-              <MessageCircle className="w-8 h-8 mx-auto mb-2" />
-              <p className="text-[10px] uppercase tracking-widest font-semibold">Ask about materials, lighting, or upload artwork</p>
+              <MessageCircle className="w-8 h-8 mx-auto mb-2 text-foreground" />
+              <p className="text-[10px] uppercase tracking-widest font-semibold text-foreground">Ask about materials, lighting, or upload artwork</p>
             </div>
             {cannedQuestions.map((q: any, i: number) => {
               const questionText = typeof q === 'string' ? q : (q?.label || q?.value || '');
@@ -171,7 +171,7 @@ export const LetterManChat: React.FC<LetterManChatProps> = ({ mode, onClose }) =
                 <button
                   key={i}
                   onClick={() => handleSend(questionText)}
-                  className="text-left text-xs text-muted-foreground border border-[#1e1e35] rounded-lg px-3 py-2 hover:border-blue-500/40 hover:text-foreground transition-colors bg-[#0d0d1a]"
+                  className="text-left text-xs text-muted-foreground border border-border rounded-lg px-3 py-2 hover:border-ring/40 hover:text-foreground transition-colors bg-card"
                 >
                   {questionText}
                 </button>
@@ -183,21 +183,21 @@ export const LetterManChat: React.FC<LetterManChatProps> = ({ mode, onClose }) =
           <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             <div className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm leading-relaxed ${
               msg.role === 'user'
-                ? 'bg-blue-600 text-white rounded-br-sm'
-                : 'bg-[#1a1a2e] border border-[#1e1e35] text-foreground rounded-bl-sm'
+                ? 'bg-primary text-primary-foreground rounded-br-sm'
+                : 'bg-card border border-border text-foreground rounded-bl-sm'
             }`}>
               {msg.content}
               {msg.metadata?.file_url && (
                 <div
-                  className="mt-2 p-2 bg-black/30 rounded border border-white/10 flex items-center gap-2 cursor-pointer"
+                  className="mt-2 p-2 bg-muted rounded border border-border flex items-center gap-2 cursor-pointer"
                   onClick={() => window.open(msg.metadata.file_url, '_blank')}
                 >
                   {msg.metadata.file_type === 'jpg' || msg.metadata.file_type === 'png'
                     ? <ImageIcon size={14} className="text-muted-foreground" />
-                    : <FileCode size={14} className="text-blue-400" />
+                    : <FileCode size={14} className="text-primary" />
                   }
                   <div className="overflow-hidden">
-                    <p className="text-[10px] font-mono text-white/70 truncate">{msg.metadata.file_name}</p>
+                    <p className="text-[10px] font-mono text-foreground/70 truncate">{msg.metadata.file_name}</p>
                     <p className="text-[9px] text-muted-foreground uppercase font-bold">{msg.metadata.file_type}</p>
                   </div>
                 </div>
@@ -207,18 +207,18 @@ export const LetterManChat: React.FC<LetterManChatProps> = ({ mode, onClose }) =
         ))}
         {loading && (
           <div className="flex justify-start">
-            <div className="bg-[#1a1a2e] border border-[#1e1e35] rounded-2xl rounded-bl-sm px-4 py-2">
+            <div className="bg-card border border-border rounded-2xl rounded-bl-sm px-4 py-2">
               <div className="flex gap-1 items-center h-4">
-                <div className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-bounce" style={{ animationDelay: '0ms' }} />
-                <div className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-bounce" style={{ animationDelay: '150ms' }} />
-                <div className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-bounce" style={{ animationDelay: '300ms' }} />
+                <div className="w-1.5 h-1.5 rounded-full bg-primary animate-bounce" style={{ animationDelay: '0ms' }} />
+                <div className="w-1.5 h-1.5 rounded-full bg-primary animate-bounce" style={{ animationDelay: '150ms' }} />
+                <div className="w-1.5 h-1.5 rounded-full bg-primary animate-bounce" style={{ animationDelay: '300ms' }} />
               </div>
             </div>
           </div>
         )}
       </div>
 
-      <div className="p-3 border-t border-[#1e1e35] bg-[#0d0d1a] relative">
+      <div className="p-3 border-t border-border bg-card relative">
         <input
           type="file"
           ref={fileInputRef}
@@ -227,11 +227,11 @@ export const LetterManChat: React.FC<LetterManChatProps> = ({ mode, onClose }) =
           className="hidden"
         />
         {selectedFile && (
-          <div className="absolute bottom-[calc(100%+1px)] left-0 right-0 p-3 bg-[#0d0d1a] border-t border-[#1e1e35] flex items-center gap-3">
-            <div className="p-2 bg-[#1a1a2e] rounded border border-[#1e1e35] flex items-center gap-2 flex-1">
-              {isUploading ? <Loader2 className="w-4 h-4 animate-spin text-blue-500" /> : getFileIcon(selectedFile)}
+          <div className="absolute bottom-[calc(100%+1px)] left-0 right-0 p-3 bg-card border-t border-border flex items-center gap-3">
+            <div className="p-2 bg-muted rounded border border-border flex items-center gap-2 flex-1">
+              {isUploading ? <Loader2 className="w-4 h-4 animate-spin text-primary" /> : getFileIcon(selectedFile)}
               <div className="flex-1 overflow-hidden">
-                <p className="text-xs text-white truncate font-medium">{selectedFile.name}</p>
+                <p className="text-xs text-foreground truncate font-medium">{selectedFile.name}</p>
                 <p className="text-[9px] text-muted-foreground uppercase font-bold">
                   {isUploading ? 'Uploading...' : `${(selectedFile.size / 1024 / 1024).toFixed(2)} MB — Ready to send`}
                 </p>
@@ -242,11 +242,11 @@ export const LetterManChat: React.FC<LetterManChatProps> = ({ mode, onClose }) =
             </Button>
           </div>
         )}
-        <div className="flex items-center gap-2 bg-[#1a1a2e] rounded-xl px-3 py-2 border border-[#1e1e35] focus-within:border-blue-500/50 transition-colors">
+        <div className="flex items-center gap-2 bg-background rounded-xl px-3 py-2 border border-input focus-within:border-ring transition-colors">
           <button
             onClick={() => fileInputRef.current?.click()}
             disabled={isUploading}
-            className="text-muted-foreground hover:text-blue-400 transition-colors p-1 disabled:opacity-30"
+            className="text-muted-foreground hover:text-primary transition-colors p-1 disabled:opacity-30"
           >
             <Paperclip size={16} />
           </button>
@@ -257,12 +257,12 @@ export const LetterManChat: React.FC<LetterManChatProps> = ({ mode, onClose }) =
             onKeyDown={e => e.key === 'Enter' && !e.shiftKey && !isUploading && handleSend()}
             placeholder={isUploading ? 'Uploading...' : 'Ask a technical question or attach artwork...'}
             disabled={isUploading}
-            className="flex-1 bg-transparent border-none text-sm text-white focus:ring-0 focus:outline-none placeholder:text-muted-foreground/50"
+            className="flex-1 bg-transparent border-none text-sm text-foreground focus:ring-0 focus:outline-none placeholder:text-muted-foreground/50"
           />
           <button
             onClick={() => handleSend()}
             disabled={isUploading || (!input.trim() && !selectedFile)}
-            className="w-8 h-8 flex items-center justify-center rounded-lg bg-blue-600 text-white disabled:opacity-30 hover:bg-blue-500 transition-colors"
+            className="w-8 h-8 flex items-center justify-center rounded-lg bg-primary text-primary-foreground disabled:opacity-30 hover:bg-primary/90 transition-colors"
           >
             {isUploading ? <Loader2 size={14} className="animate-spin" /> : <CornerDownLeft size={14} />}
           </button>

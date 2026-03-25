@@ -48,19 +48,19 @@ function ProductGuide() {
   return (
     <div className="flex-shrink-0">
       <div
-        className="overflow-hidden transition-all duration-300 bg-[#0f0f1a] border-t border-[#1e1e35]"
+        className="overflow-hidden transition-all duration-300 bg-background border-t border-border"
         style={{ height: isExpanded ? '300px' : '0px' }}
       >
-        <div className="grid grid-cols-2 h-full divide-x divide-[#1e1e35]">
+        <div className="grid grid-cols-2 h-full divide-x divide-border">
           <div className="overflow-y-auto p-4 space-y-3">
-            <h4 className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold pb-2 border-b border-white/5">
+            <h4 className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold pb-2 border-b border-border">
               Construction Types
             </h4>
             {techClasses.map(t => (
-              <div key={t.code} className="pb-3 border-b border-white/5 last:border-0">
+              <div key={t.code} className="pb-3 border-b border-border last:border-0">
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-semibold text-foreground">{t.short_name}</span>
-                  <span className="text-[9px] bg-blue-500/10 text-blue-400 px-1.5 py-0.5 rounded font-bold uppercase">
+                  <span className="text-[9px] bg-primary/10 text-primary px-1.5 py-0.5 rounded font-bold uppercase">
                     {t.price_tier}
                   </span>
                 </div>
@@ -71,11 +71,11 @@ function ProductGuide() {
             ))}
           </div>
           <div className="overflow-y-auto p-4 space-y-3">
-            <h4 className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold pb-2 border-b border-white/5">
+            <h4 className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold pb-2 border-b border-border">
               Lighting Styles
             </h4>
             {lightingStyles.map(l => (
-              <div key={l.lighting_code} className="pb-3 border-b border-white/5 last:border-0">
+              <div key={l.lighting_code} className="pb-3 border-b border-border last:border-0">
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-semibold text-foreground">{l.display_name}</span>
                   <span className="text-[9px] font-mono text-muted-foreground opacity-50">
@@ -92,17 +92,17 @@ function ProductGuide() {
       </div>
       <div
         onClick={() => setIsExpanded(!isExpanded)}
-        className="h-10 flex items-center justify-between px-4 bg-[#0a0a14] border-t border-[#1e1e35] cursor-pointer hover:bg-[#16162a] transition-colors"
+        className="h-10 flex items-center justify-between px-4 bg-primary border-t border-border cursor-pointer hover:bg-primary/90 transition-colors"
       >
         <div className="flex items-center gap-2">
-          <BookOpen className="w-4 h-4 text-blue-500" />
-          <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">
+          <BookOpen className="w-4 h-4 text-primary-foreground" />
+          <span className="text-[11px] font-bold uppercase tracking-widest text-primary-foreground">
             Product Guide
           </span>
         </div>
         {isExpanded
-          ? <ChevronDown size={14} className="text-muted-foreground" />
-          : <ChevronUp size={14} className="text-muted-foreground" />
+          ? <ChevronDown size={14} className="text-primary-foreground" />
+          : <ChevronUp size={14} className="text-primary-foreground" />
         }
       </div>
     </div>
@@ -133,31 +133,31 @@ export function ProjectShell({ children }: ProjectShellProps) {
   };
 
   return (
-    <div className="h-full w-full flex flex-col overflow-hidden bg-[#0a0a14]">
+    <div className="h-full w-full flex flex-col overflow-hidden bg-background">
 
-      <header className="h-12 flex-shrink-0 flex items-center justify-between px-4 bg-[#0a0a14] border-b border-[#1e1e35] z-50">
+      <header className="h-12 flex-shrink-0 flex items-center justify-between px-4 bg-primary border-b border-sidebar-border z-50">
         <div className="flex items-center gap-1.5">
-          <span className="font-bold text-lg text-white tracking-tight">SignMaker</span>
-          <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+          <span className="font-bold text-lg text-primary-foreground tracking-tight">SignMaker</span>
+          <div className="w-1.5 h-1.5 rounded-full bg-ring" />
         </div>
         <div className="flex-1 text-center hidden sm:block">
           {store.shellState === 'in_project' && store.activeProject && (
-            <span className="text-sm text-white/80 font-medium">
+            <span className="text-sm text-primary-foreground/80 font-medium">
               {store.activeProject.project_name}
             </span>
           )}
         </div>
         <div className="flex items-center gap-3">
           {store.userEmail && (
-            <span className="text-[10px] text-muted-foreground font-mono hidden md:block truncate max-w-[160px]">
+            <span className="text-[10px] text-primary-foreground/60 font-mono hidden md:block truncate max-w-[160px]">
               {store.userEmail}
             </span>
           )}
-          <div className="flex bg-[#16162a] p-0.5 rounded border border-[#1e1e35]">
+          <div className="flex bg-sidebar-accent p-0.5 rounded border border-sidebar-border">
             <button
               onClick={() => setUiMode('pro')}
               className={`px-2.5 py-0.5 text-[10px] font-bold rounded transition-all ${
-                uiMode === 'pro' ? 'bg-blue-600 text-white' : 'text-muted-foreground hover:text-foreground'
+                uiMode === 'pro' ? 'bg-blue-600 text-white' : 'text-primary-foreground/60 hover:text-primary-foreground'
               }`}
             >
               Pro
@@ -165,7 +165,7 @@ export function ProjectShell({ children }: ProjectShellProps) {
             <button
               onClick={() => setUiMode('client')}
               className={`px-2.5 py-0.5 text-[10px] font-bold rounded transition-all ${
-                uiMode === 'client' ? 'bg-pink-600 text-white' : 'text-muted-foreground hover:text-foreground'
+                uiMode === 'client' ? 'bg-pink-600 text-white' : 'text-primary-foreground/60 hover:text-primary-foreground'
               }`}
             >
               Client
@@ -174,7 +174,7 @@ export function ProjectShell({ children }: ProjectShellProps) {
           {store.signOut && (
             <button
               onClick={store.signOut}
-              className="text-muted-foreground hover:text-white transition-colors p-1"
+              className="text-primary-foreground/60 hover:text-primary-foreground transition-colors p-1"
               title="Sign out"
             >
               <LogOut size={14} />
@@ -184,17 +184,17 @@ export function ProjectShell({ children }: ProjectShellProps) {
       </header>
 
       <div className="flex-1 flex overflow-hidden">
-        <div className="flex-1 flex flex-col bg-[#0d0d1a] overflow-hidden min-w-0">
+        <div className="flex-1 flex flex-col bg-background overflow-hidden min-w-0">
           <div className="flex-1 overflow-y-auto">
             {children}
           </div>
           <ProductGuide />
         </div>
 
-        <aside className="hidden lg:flex w-[400px] flex-shrink-0 flex-col border-l border-[#1e1e35] bg-[#111120]">
-          <div className="h-12 flex-shrink-0 flex items-center justify-between px-4 border-b border-[#1e1e35] bg-[#0d0d1a]">
+        <aside className="hidden lg:flex w-[400px] flex-shrink-0 flex-col border-l border-border bg-secondary">
+          <div className="h-12 flex-shrink-0 flex items-center justify-between px-4 border-b border-sidebar-border bg-primary">
             <div className="flex items-center gap-2">
-              <span className="text-sm font-semibold text-white uppercase tracking-wide">
+              <span className="text-sm font-semibold text-primary-foreground uppercase tracking-wide">
                 LetterMan
               </span>
               <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.5)]" />
@@ -215,25 +215,25 @@ export function ProjectShell({ children }: ProjectShellProps) {
 
       <button
         onClick={() => setChatOpen(true)}
-        className="fixed bottom-4 right-4 z-50 lg:hidden w-12 h-12 rounded-full bg-blue-600 shadow-lg flex items-center justify-center hover:scale-105 active:scale-95 transition-all"
+        className="fixed bottom-4 right-4 z-50 lg:hidden w-12 h-12 rounded-full bg-primary shadow-lg flex items-center justify-center hover:scale-105 active:scale-95 transition-all"
         aria-label="Open chat"
       >
-        <MessageCircle className="w-5 h-5 text-white" />
+        <MessageCircle className="w-5 h-5 text-primary-foreground" />
       </button>
 
       {chatOpen && (
         <div className="fixed inset-0 z-[60] lg:hidden">
           <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-foreground/40 backdrop-blur-sm"
             onClick={() => setChatOpen(false)}
           />
-          <div className="absolute inset-x-0 bottom-0 h-[70vh] bg-[#111120] rounded-t-2xl shadow-2xl flex flex-col">
-            <div className="h-12 flex items-center justify-between px-6 border-b border-[#1e1e35] flex-shrink-0">
+          <div className="absolute inset-x-0 bottom-0 h-[70vh] bg-card rounded-t-2xl shadow-2xl flex flex-col">
+            <div className="h-12 flex items-center justify-between px-6 border-b border-border flex-shrink-0">
               <div className="flex items-center gap-2">
-                <span className="text-sm font-bold uppercase tracking-widest">LetterMan</span>
+                <span className="text-sm font-bold uppercase tracking-widest text-foreground">LetterMan</span>
                 <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
               </div>
-              <button onClick={() => setChatOpen(false)} className="text-muted-foreground hover:text-white p-1">
+              <button onClick={() => setChatOpen(false)} className="text-muted-foreground hover:text-foreground p-1">
                 <ChevronDown size={20} />
               </button>
             </div>
