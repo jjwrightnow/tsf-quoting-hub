@@ -349,6 +349,48 @@ export type Database = {
         }
         Relationships: []
       }
+      code_tasks: {
+        Row: {
+          code_content: string | null
+          created_at: string | null
+          file_path: string | null
+          id: string
+          instruction: string
+          priority: number | null
+          result: string | null
+          status: string | null
+          task_type: string
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          code_content?: string | null
+          created_at?: string | null
+          file_path?: string | null
+          id?: string
+          instruction: string
+          priority?: number | null
+          result?: string | null
+          status?: string | null
+          task_type: string
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          code_content?: string | null
+          created_at?: string | null
+          file_path?: string | null
+          id?: string
+          instruction?: string
+          priority?: number | null
+          result?: string | null
+          status?: string | null
+          task_type?: string
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       complexity_tiers: {
         Row: {
           code: string
@@ -792,6 +834,7 @@ export type Database = {
         Row: {
           account_id: string | null
           airtable_project_id: string | null
+          artwork_urls: string[] | null
           contact_id: string | null
           created_at: string
           id: string
@@ -807,6 +850,7 @@ export type Database = {
         Insert: {
           account_id?: string | null
           airtable_project_id?: string | null
+          artwork_urls?: string[] | null
           contact_id?: string | null
           created_at?: string
           id?: string
@@ -822,6 +866,7 @@ export type Database = {
         Update: {
           account_id?: string | null
           airtable_project_id?: string | null
+          artwork_urls?: string[] | null
           contact_id?: string | null
           created_at?: string
           id?: string
