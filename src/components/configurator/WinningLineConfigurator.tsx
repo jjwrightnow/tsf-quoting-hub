@@ -285,19 +285,19 @@ function ConfiguratorBreadcrumb({
 }
 
 /* ─── Tech Placeholder ─── */
-const TECH_COLORS: Record<string, { bg: string; accent: string; label: string }> = {
-  PF: { bg: '#1a1a2e', accent: '#c0c0c0', label: 'Premium Metal' },
-  SF: { bg: '#1a1a2e', accent: '#9ca3af', label: 'Standard Metal' },
-  AF: { bg: '#1a1a2e', accent: '#3b82f6', label: 'Acrylic Face' },
-  SA: { bg: '#1a1a2e', accent: '#06b6d4', label: 'Solid Acrylic' },
-  FC: { bg: '#1a1a2e', accent: '#f59e0b', label: 'Flat Cut' },
+const TECH_COLORS: Record<string, { accent: string; label: string }> = {
+  PF: { accent: '#64748b', label: 'Premium Metal' },
+  SF: { accent: '#94a3b8', label: 'Standard Metal' },
+  AF: { accent: '#3b82f6', label: 'Acrylic Face' },
+  SA: { accent: '#06b6d4', label: 'Solid Acrylic' },
+  FC: { accent: '#f59e0b', label: 'Flat Cut' },
 };
 
 function TechPlaceholder({ technology }: { technology: string | null }) {
-  const t = TECH_COLORS[technology || ''] || { bg: '#1a1a2e', accent: '#6b7280', label: technology || '—' };
+  const t = TECH_COLORS[technology || ''] || { accent: '#6b7280', label: technology || '—' };
   return (
-    <div style={{ background: t.bg }} className="w-full h-full flex flex-col items-center justify-center gap-2">
-      <span style={{ color: t.accent, textShadow: `0 0 20px ${t.accent}40` }}
+    <div className="w-full h-full flex flex-col items-center justify-center gap-2 bg-muted">
+      <span style={{ color: t.accent }}
         className="text-[56px] font-bold leading-none select-none">
         A
       </span>
