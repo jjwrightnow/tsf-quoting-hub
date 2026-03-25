@@ -1358,7 +1358,7 @@ export default function WinningLineConfigurator({
           </div>
 
           {/* Construction Stack */}
-          <div className="px-4 py-4 border-b border-border bg-[#0f0f1a]">
+          <div className="px-4 py-4 border-b border-border bg-card">
             <p className="text-sm font-semibold text-foreground mb-3 pb-2 border-b border-border">
               What's inside this letter
             </p>
