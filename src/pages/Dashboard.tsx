@@ -151,7 +151,7 @@ const Dashboard = () => {
 
       <div className="relative flex flex-1 flex-col min-w-0">
         {/* Header — brand only, no sign-in button (ProjectShell handles identity) */}
-        <header className="flex h-12 items-center border-b border-border bg-card px-4">
+        <header className="flex h-12 items-center border-b border-border bg-primary px-4">
           <div className="flex items-center gap-3">
             {userTier === 2 && (
               <button onClick={() => setSidebarOpen(true)} className="text-foreground md:hidden" aria-label="Open menu">
