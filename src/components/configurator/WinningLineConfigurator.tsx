@@ -123,7 +123,7 @@ function clientComponentName(name: string | null): string {
 /* ─── Lighting code icon ─── */
 function LightingIcon({ code, mode }: { code: string; mode: UiMode }) {
   const positions = code.padEnd(4, '0').split('');
-  const colors = ['hsl(var(--cfg-blue))', '#eab308', '#eab308', '#eab308'];
+  const colors = ['hsl(var(--cfg-blue))', '#d97706', '#d97706', '#d97706'];
 
   if (mode === 'client') {
     return (
@@ -285,19 +285,19 @@ function ConfiguratorBreadcrumb({
 }
 
 /* ─── Tech Placeholder ─── */
-const TECH_COLORS: Record<string, { bg: string; accent: string; label: string }> = {
-  PF: { bg: '#1a1a2e', accent: '#c0c0c0', label: 'Premium Metal' },
-  SF: { bg: '#1a1a2e', accent: '#9ca3af', label: 'Standard Metal' },
-  AF: { bg: '#1a1a2e', accent: '#3b82f6', label: 'Acrylic Face' },
-  SA: { bg: '#1a1a2e', accent: '#06b6d4', label: 'Solid Acrylic' },
-  FC: { bg: '#1a1a2e', accent: '#f59e0b', label: 'Flat Cut' },
+const TECH_COLORS: Record<string, { accent: string; label: string }> = {
+  PF: { accent: '#64748b', label: 'Premium Metal' },
+  SF: { accent: '#94a3b8', label: 'Standard Metal' },
+  AF: { accent: '#3b82f6', label: 'Acrylic Face' },
+  SA: { accent: '#06b6d4', label: 'Solid Acrylic' },
+  FC: { accent: '#f59e0b', label: 'Flat Cut' },
 };
 
 function TechPlaceholder({ technology }: { technology: string | null }) {
-  const t = TECH_COLORS[technology || ''] || { bg: '#1a1a2e', accent: '#6b7280', label: technology || '—' };
+  const t = TECH_COLORS[technology || ''] || { accent: '#6b7280', label: technology || '—' };
   return (
-    <div style={{ background: t.bg }} className="w-full h-full flex flex-col items-center justify-center gap-2">
-      <span style={{ color: t.accent, textShadow: `0 0 20px ${t.accent}40` }}
+    <div className="w-full h-full flex flex-col items-center justify-center gap-2 bg-muted">
+      <span style={{ color: t.accent }}
         className="text-[56px] font-bold leading-none select-none">
         A
       </span>
@@ -361,18 +361,18 @@ function ProfileCard({
 /* ─── Material Color Function ─── */
 const getMaterialColor = (category: string): string => {
   const colors: Record<string, string> = {
-    'metal': '#1e2a3a',
-    'acrylic': '#0e2a2e',
-    'LED': '#1a1a0e',
-    'wire/electrical': '#1a0e2e',
-    'hardware': '#1e1e1e',
-    'neon flex': '#2a0e2e',
-    'adhesive': '#2a1a0e',
-    'paint': '#1a2a1a',
-    'PVC': '#2a2a1a',
-    'vinyl': '#2a1a2a',
+    'metal': '#e2e8f0',
+    'acrylic': '#dbeafe',
+    'LED': '#fef9c3',
+    'wire/electrical': '#ede9fe',
+    'hardware': '#f1f5f9',
+    'neon flex': '#fce7f3',
+    'adhesive': '#ffedd5',
+    'paint': '#dcfce7',
+    'PVC': '#ecfccb',
+    'vinyl': '#f5f3ff',
   };
-  return colors[category] || '#1a1a2e';
+  return colors[category] || '#f0f4f8';
 };
 
 /* ─── Construction Stack ─── */
@@ -398,22 +398,22 @@ function ConstructionStack({ components, mode }: { components: ProfileComponent[
         {orderedComponents.map((component, index) => (
           <div key={component.id} className="flex flex-col items-center relative">
             {/* Connector arrow between slices */}
-            {index > 0 && (
-              <div className="absolute left-0 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 text-[#3b82f6] text-xs">→</div>
+          {index > 0 && (
+              <div className="absolute left-0 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 text-primary text-xs">→</div>
             )}
             {/* Layer slice */}
             <div
-              className="flex flex-col items-center justify-center px-3 py-4 min-w-[80px] max-w-[100px] border-r border-[#2a2a40] text-center"
+              className="flex flex-col items-center justify-center px-3 py-4 min-w-[80px] max-w-[100px] border-r border-border text-center"
               style={{ background: getMaterialColor(component.material_category || '') }}
             >
-              <span className="text-[9px] font-bold uppercase tracking-wider text-white/60 mb-1">
+              <span className="text-[9px] font-bold uppercase tracking-wider text-foreground/60 mb-1">
                 {displayPosition(component.layer_position)}
               </span>
-              <span className="text-[11px] font-semibold text-white leading-tight">
+              <span className="text-[11px] font-semibold text-foreground leading-tight">
                 {isClientMode ? (component.client_badge || displayName(component.component_name)) : displayName(component.component_name)}
               </span>
               {isClientMode && component.client_description && (
-                <span className="text-[9px] text-white/50 mt-1 leading-tight">{component.client_description}</span>
+                <span className="text-[9px] text-foreground/50 mt-1 leading-tight">{component.client_description}</span>
               )}
             </div>
           </div>
@@ -774,7 +774,7 @@ function ProductGuidePanel({ techClasses, lightingStyles }: { techClasses: TechC
         className="overflow-hidden transition-all duration-300"
         style={{ maxHeight: expanded ? 320 : 0 }}
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-0 bg-[#0f0f1a]" style={{ height: 320 }}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-0 bg-background" style={{ height: 320 }}>
           {/* LEFT — Technologies */}
           <div className="overflow-y-auto border-r border-border px-4 py-3">
             <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-2">Construction Types</p>
@@ -1094,9 +1094,9 @@ export default function WinningLineConfigurator({
       {!isProfileSelected && (
         <div>
           {/* STEP 1 — What type of sign? (Technology) */}
-          <div ref={zone0Ref} className="px-4 py-4 border-b border-border bg-[#0f0f1a]">
+          <div ref={zone0Ref} className="px-4 py-4 border-b border-border bg-card">
             <div className="flex items-center gap-2 mb-3">
-              <span className="flex h-6 w-6 items-center justify-center rounded bg-[#1e1e35] text-primary text-xs font-bold shrink-0">1</span>
+              <span className="flex h-6 w-6 items-center justify-center rounded bg-primary text-primary-foreground text-xs font-bold shrink-0">1</span>
               <h2 className="text-sm font-semibold text-foreground">What type of sign?</h2>
             </div>
 
@@ -1150,9 +1150,9 @@ export default function WinningLineConfigurator({
 
           {/* STEP 2 — How should it be lit? (Lighting) — only after tech selected */}
           {browseStep >= 1 && (
-            <div ref={zone1Ref} className="px-4 py-4 border-b border-border bg-[#13131f] animate-fade-in-up">
+            <div ref={zone1Ref} className="px-4 py-4 border-b border-border bg-background animate-fade-in-up">
               <div className="flex items-center gap-2 mb-3">
-                <span className="flex h-6 w-6 items-center justify-center rounded bg-[#1e1e35] text-primary text-xs font-bold shrink-0">2</span>
+                <span className="flex h-6 w-6 items-center justify-center rounded bg-primary text-primary-foreground text-xs font-bold shrink-0">2</span>
                 <h2 className="text-sm font-semibold text-foreground">How should it be lit?</h2>
               </div>
 
@@ -1220,9 +1220,9 @@ export default function WinningLineConfigurator({
 
           {/* STEP 3 — Pick your profile — only after lighting selected */}
           {browseStep >= 2 && (
-            <div ref={zone2Ref} className="px-4 py-4 border-b border-border bg-[#0f0f1a] animate-fade-in-up">
+            <div ref={zone2Ref} className="px-4 py-4 border-b border-border bg-card animate-fade-in-up">
               <div className="flex items-center gap-2 mb-3">
-                <span className="flex h-6 w-6 items-center justify-center rounded bg-[#1e1e35] text-primary text-xs font-bold shrink-0">3</span>
+                <span className="flex h-6 w-6 items-center justify-center rounded bg-primary text-primary-foreground text-xs font-bold shrink-0">3</span>
                 <h2 className="text-sm font-semibold text-foreground">Pick your profile</h2>
                 <span className="text-xs text-muted-foreground ml-auto">{filteredProfiles.length} match{filteredProfiles.length !== 1 ? 'es' : ''}</span>
               </div>
@@ -1299,7 +1299,7 @@ export default function WinningLineConfigurator({
           </div>
 
           {/* Profile detail header */}
-          <div className="px-4 py-4 border-b border-border bg-[#13131f]">
+          <div className="px-4 py-4 border-b border-border bg-background">
             <div className="flex flex-col md:flex-row gap-6">
               {/* Left: illustration */}
               <div className="w-full md:w-[200px] h-[200px] rounded-lg bg-secondary/40 overflow-hidden shrink-0">
@@ -1358,7 +1358,7 @@ export default function WinningLineConfigurator({
           </div>
 
           {/* Construction Stack */}
-          <div className="px-4 py-4 border-b border-border bg-[#0f0f1a]">
+          <div className="px-4 py-4 border-b border-border bg-card">
             <p className="text-sm font-semibold text-foreground mb-3 pb-2 border-b border-border">
               What's inside this letter
             </p>
@@ -1374,7 +1374,7 @@ export default function WinningLineConfigurator({
           </div>
 
           {/* CTA */}
-          <div className="px-4 py-4 bg-[#13131f]">
+          <div className="px-4 py-4 bg-background">
             {!showAddForm && !showQuoteForm && (
               <div className="flex justify-end">
                 {activeProject ? (
