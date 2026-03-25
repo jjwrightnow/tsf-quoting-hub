@@ -129,7 +129,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <FloatingChat />
+      
 
       {/* Mobile sidebar overlay */}
       {userTier === 2 && sidebarOpen && (
