@@ -1094,9 +1094,9 @@ export default function WinningLineConfigurator({
       {!isProfileSelected && (
         <div>
           {/* STEP 1 — What type of sign? (Technology) */}
-          <div ref={zone0Ref} className="px-4 py-4 border-b border-border bg-[#0f0f1a]">
+          <div ref={zone0Ref} className="px-4 py-4 border-b border-border bg-card">
             <div className="flex items-center gap-2 mb-3">
-              <span className="flex h-6 w-6 items-center justify-center rounded bg-[#1e1e35] text-primary text-xs font-bold shrink-0">1</span>
+              <span className="flex h-6 w-6 items-center justify-center rounded bg-primary text-primary-foreground text-xs font-bold shrink-0">1</span>
               <h2 className="text-sm font-semibold text-foreground">What type of sign?</h2>
             </div>
 
