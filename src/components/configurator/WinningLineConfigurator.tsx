@@ -123,7 +123,7 @@ function clientComponentName(name: string | null): string {
 /* ─── Lighting code icon ─── */
 function LightingIcon({ code, mode }: { code: string; mode: UiMode }) {
   const positions = code.padEnd(4, '0').split('');
-  const colors = ['hsl(var(--cfg-blue))', '#eab308', '#eab308', '#eab308'];
+  const colors = ['hsl(var(--cfg-blue))', '#d97706', '#d97706', '#d97706'];
 
   if (mode === 'client') {
     return (
