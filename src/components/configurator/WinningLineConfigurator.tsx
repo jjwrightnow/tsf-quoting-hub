@@ -1220,9 +1220,9 @@ export default function WinningLineConfigurator({
 
           {/* STEP 3 — Pick your profile — only after lighting selected */}
           {browseStep >= 2 && (
-            <div ref={zone2Ref} className="px-4 py-4 border-b border-border bg-[#0f0f1a] animate-fade-in-up">
+            <div ref={zone2Ref} className="px-4 py-4 border-b border-border bg-card animate-fade-in-up">
               <div className="flex items-center gap-2 mb-3">
-                <span className="flex h-6 w-6 items-center justify-center rounded bg-[#1e1e35] text-primary text-xs font-bold shrink-0">3</span>
+                <span className="flex h-6 w-6 items-center justify-center rounded bg-primary text-primary-foreground text-xs font-bold shrink-0">3</span>
                 <h2 className="text-sm font-semibold text-foreground">Pick your profile</h2>
                 <span className="text-xs text-muted-foreground ml-auto">{filteredProfiles.length} match{filteredProfiles.length !== 1 ? 'es' : ''}</span>
               </div>
