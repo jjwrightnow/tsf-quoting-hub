@@ -692,6 +692,8 @@ export type Database = {
       lighting_styles: {
         Row: {
           display_name: string
+          full_image_url: string | null
+          gallery_urls: Json | null
           hover_description: string | null
           id: string
           is_active: boolean | null
@@ -699,9 +701,12 @@ export type Database = {
           sku_label: string
           sort_order: number
           thumbnail_url: string | null
+          valid_technologies: string[] | null
         }
         Insert: {
           display_name: string
+          full_image_url?: string | null
+          gallery_urls?: Json | null
           hover_description?: string | null
           id?: string
           is_active?: boolean | null
@@ -709,9 +714,12 @@ export type Database = {
           sku_label: string
           sort_order?: number
           thumbnail_url?: string | null
+          valid_technologies?: string[] | null
         }
         Update: {
           display_name?: string
+          full_image_url?: string | null
+          gallery_urls?: Json | null
           hover_description?: string | null
           id?: string
           is_active?: boolean | null
@@ -719,6 +727,7 @@ export type Database = {
           sku_label?: string
           sort_order?: number
           thumbnail_url?: string | null
+          valid_technologies?: string[] | null
         }
         Relationships: []
       }
@@ -1182,51 +1191,123 @@ export type Database = {
       profiles: {
         Row: {
           airtable_id: string | null
+          alternate_back_inserts: string[] | null
+          back_insert: string | null
           created_at: string | null
+          day_image_url: string | null
           display_name: string | null
           face_style: string | null
+          face_style_detail: string | null
+          full_image_url: string | null
+          gallery_urls: Json | null
           id: string
+          illumination_type: string | null
           illustration_url: string | null
           is_active: boolean | null
           lighting_code: string
+          lighting_style_detail: string | null
+          materials_options: string[] | null
+          max_letter_height: string | null
+          max_return_height: string | null
+          max_stroke_width: string | null
+          min_letter_height: string | null
+          min_return_height: string | null
+          min_stroke_width: string | null
+          mounting_options: string | null
+          night_image_url: string | null
           notes: string | null
           profile_code: string
           profile_name: string
+          return_detail: string | null
           return_type: string | null
+          section_diagram_local: string | null
+          section_diagram_url: string | null
+          spec_last_updated: string | null
+          spec_source: string | null
           technology: string | null
+          thumbnail_url: string | null
           updated_at: string | null
+          wall_mounting: string | null
         }
         Insert: {
           airtable_id?: string | null
+          alternate_back_inserts?: string[] | null
+          back_insert?: string | null
           created_at?: string | null
+          day_image_url?: string | null
           display_name?: string | null
           face_style?: string | null
+          face_style_detail?: string | null
+          full_image_url?: string | null
+          gallery_urls?: Json | null
           id?: string
+          illumination_type?: string | null
           illustration_url?: string | null
           is_active?: boolean | null
           lighting_code: string
+          lighting_style_detail?: string | null
+          materials_options?: string[] | null
+          max_letter_height?: string | null
+          max_return_height?: string | null
+          max_stroke_width?: string | null
+          min_letter_height?: string | null
+          min_return_height?: string | null
+          min_stroke_width?: string | null
+          mounting_options?: string | null
+          night_image_url?: string | null
           notes?: string | null
           profile_code: string
           profile_name: string
+          return_detail?: string | null
           return_type?: string | null
+          section_diagram_local?: string | null
+          section_diagram_url?: string | null
+          spec_last_updated?: string | null
+          spec_source?: string | null
           technology?: string | null
+          thumbnail_url?: string | null
           updated_at?: string | null
+          wall_mounting?: string | null
         }
         Update: {
           airtable_id?: string | null
+          alternate_back_inserts?: string[] | null
+          back_insert?: string | null
           created_at?: string | null
+          day_image_url?: string | null
           display_name?: string | null
           face_style?: string | null
+          face_style_detail?: string | null
+          full_image_url?: string | null
+          gallery_urls?: Json | null
           id?: string
+          illumination_type?: string | null
           illustration_url?: string | null
           is_active?: boolean | null
           lighting_code?: string
+          lighting_style_detail?: string | null
+          materials_options?: string[] | null
+          max_letter_height?: string | null
+          max_return_height?: string | null
+          max_stroke_width?: string | null
+          min_letter_height?: string | null
+          min_return_height?: string | null
+          min_stroke_width?: string | null
+          mounting_options?: string | null
+          night_image_url?: string | null
           notes?: string | null
           profile_code?: string
           profile_name?: string
+          return_detail?: string | null
           return_type?: string | null
+          section_diagram_local?: string | null
+          section_diagram_url?: string | null
+          spec_last_updated?: string | null
+          spec_source?: string | null
           technology?: string | null
+          thumbnail_url?: string | null
           updated_at?: string | null
+          wall_mounting?: string | null
         }
         Relationships: []
       }
@@ -1772,6 +1853,51 @@ export type Database = {
         }
         Relationships: []
       }
+      spec_sheet_uploads: {
+        Row: {
+          applied_at: string | null
+          applied_to_profile: boolean | null
+          filename: string
+          id: string
+          parse_error: string | null
+          parse_result: Json | null
+          parse_status: string | null
+          parsed_at: string | null
+          profile_code: string | null
+          public_url: string | null
+          storage_path: string
+          uploaded_at: string | null
+        }
+        Insert: {
+          applied_at?: string | null
+          applied_to_profile?: boolean | null
+          filename: string
+          id?: string
+          parse_error?: string | null
+          parse_result?: Json | null
+          parse_status?: string | null
+          parsed_at?: string | null
+          profile_code?: string | null
+          public_url?: string | null
+          storage_path: string
+          uploaded_at?: string | null
+        }
+        Update: {
+          applied_at?: string | null
+          applied_to_profile?: boolean | null
+          filename?: string
+          id?: string
+          parse_error?: string | null
+          parse_result?: Json | null
+          parse_status?: string | null
+          parsed_at?: string | null
+          profile_code?: string | null
+          public_url?: string | null
+          storage_path?: string
+          uploaded_at?: string | null
+        }
+        Relationships: []
+      }
       stock_materials: {
         Row: {
           base_material: string
@@ -1917,6 +2043,8 @@ export type Database = {
         Row: {
           code: string
           display_name: string
+          full_image_url: string | null
+          gallery_urls: Json | null
           hover_description: string
           id: string
           is_active: boolean | null
@@ -1925,10 +2053,13 @@ export type Database = {
           short_name: string
           sort_order: number
           thumbnail_url: string | null
+          valid_lighting_codes: string[] | null
         }
         Insert: {
           code: string
           display_name: string
+          full_image_url?: string | null
+          gallery_urls?: Json | null
           hover_description: string
           id?: string
           is_active?: boolean | null
@@ -1937,10 +2068,13 @@ export type Database = {
           short_name: string
           sort_order?: number
           thumbnail_url?: string | null
+          valid_lighting_codes?: string[] | null
         }
         Update: {
           code?: string
           display_name?: string
+          full_image_url?: string | null
+          gallery_urls?: Json | null
           hover_description?: string
           id?: string
           is_active?: boolean | null
@@ -1949,6 +2083,7 @@ export type Database = {
           short_name?: string
           sort_order?: number
           thumbnail_url?: string | null
+          valid_lighting_codes?: string[] | null
         }
         Relationships: []
       }
