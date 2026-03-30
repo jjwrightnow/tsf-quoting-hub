@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useAppStore } from "@/stores/appStore";
 import { useAuth } from "@/hooks/useAuth";
 import { useOperatorConfig } from "@/hooks/useOperatorConfig";
