@@ -86,7 +86,12 @@ export function UploadWorkspace() {
       const splitError = splitResponse.error;
 
       if (splitError) {
-        console.error('split-pdf error:', splitError);
+        try {
+          const errorBody = await splitError.context?.json();
+          console.error('split-pdf detailed error:', errorBody?.error || splitError.message);
+        } catch {
+          console.error('split-pdf error:', splitError.message);
+        }
       }
 
       if (splitData && splitData.project_id) {
