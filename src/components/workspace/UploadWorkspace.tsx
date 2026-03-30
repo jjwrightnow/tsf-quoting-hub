@@ -11,6 +11,8 @@ export function UploadWorkspace() {
   const [email, setEmail] = useState('');
   const [uploading, setUploading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [successDetail, setSuccessDetail] = useState('');
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -54,15 +56,39 @@ export function UploadWorkspace() {
         .upload(filePath, file);
       if (uploadErr) throw uploadErr;
 
-      const { error: dbErr } = await supabase
+      const { data: reviewSession, error: dbErr } = await supabase
         .from('review_sessions')
         .insert({
           upload_path: filePath,
           customer_name: projectName.trim(),
           customer_email: email.trim(),
           status: 'pending',
-        });
+        })
+        .select('id')
+        .single();
       if (dbErr) throw dbErr;
+
+      // Call split-pdf Edge Function
+      try {
+        const { data: splitResult } = await supabase.functions.invoke('split-pdf', {
+          body: {
+            session_id: reviewSession.id,
+            file_path: filePath,
+            project_name: projectName.trim(),
+          },
+        });
+
+        if (splitResult?.page_count) {
+          setSuccessMessage(`Project created! ${splitResult.page_count} page(s) detected.`);
+          setSuccessDetail('Your project is being prepared for review.');
+        } else {
+          setSuccessMessage('Project created!');
+          setSuccessDetail('Your artwork was uploaded. Our team will process it manually.');
+        }
+      } catch {
+        setSuccessMessage('Project created!');
+        setSuccessDetail('Your artwork was uploaded. Our team will process it manually.');
+      }
 
       setSubmitted(true);
       toast.success('Project submitted successfully!');
@@ -78,9 +104,9 @@ export function UploadWorkspace() {
       <div className="flex items-center justify-center h-full px-6">
         <div className="max-w-[500px] text-center space-y-4">
           <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto" />
-          <h2 className="text-xl font-semibold text-foreground">Project submitted!</h2>
+          <h2 className="text-xl font-semibold text-foreground">{successMessage}</h2>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            You will be notified when your artwork has been processed.
+            {successDetail}
           </p>
         </div>
       </div>
