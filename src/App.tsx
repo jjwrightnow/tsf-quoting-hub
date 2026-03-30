@@ -8,6 +8,7 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Admin from "./pages/Admin";
 import Review from "./pages/Review";
+import ProjectOrganizer from "./pages/ProjectOrganizer";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -48,6 +49,7 @@ const App = () => (
           <Route path="/login" element={<Login />} />
           <Route path="/" element={<Dashboard />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/project/:id" element={<ProjectOrganizer />} />
           <Route path="/review" element={<ProtectedRoute><Review /></ProtectedRoute>} />
           <Route path="*" element={<NotFound />} />
         </Routes>

@@ -1,11 +1,13 @@
 import { useState, useRef, useCallback } from 'react';
 import { Upload, FileUp, CheckCircle2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 
 export function UploadWorkspace() {
+  const navigate = useNavigate();
   const [file, setFile] = useState<File | null>(null);
   const [projectName, setProjectName] = useState('');
   const [email, setEmail] = useState('');
@@ -13,6 +15,7 @@ export function UploadWorkspace() {
   const [submitted, setSubmitted] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [successDetail, setSuccessDetail] = useState('');
+  const [projectId, setProjectId] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -85,6 +88,10 @@ export function UploadWorkspace() {
           setSuccessMessage('Project created!');
           setSuccessDetail('Your artwork was uploaded. Our team will process it manually.');
         }
+
+        if (splitResult?.project_id) {
+          setProjectId(splitResult.project_id);
+        }
       } catch {
         setSuccessMessage('Project created!');
         setSuccessDetail('Your artwork was uploaded. Our team will process it manually.');
@@ -108,6 +115,11 @@ export function UploadWorkspace() {
           <p className="text-sm text-muted-foreground leading-relaxed">
             {successDetail}
           </p>
+          {projectId && (
+            <Button onClick={() => navigate(`/project/${projectId}`)} className="mt-2">
+              View Project
+            </Button>
+          )}
         </div>
       </div>
     );
