@@ -1179,6 +1179,48 @@ export type Database = {
           },
         ]
       }
+      profile_defaults: {
+        Row: {
+          acrylic_insert: string | null
+          back_type: string | null
+          can_type: string | null
+          created_at: string | null
+          default_material: string | null
+          id: string
+          led_color: string | null
+          lighting_package: string | null
+          min_depth: string | null
+          profile_code: string
+          profile_name: string
+        }
+        Insert: {
+          acrylic_insert?: string | null
+          back_type?: string | null
+          can_type?: string | null
+          created_at?: string | null
+          default_material?: string | null
+          id?: string
+          led_color?: string | null
+          lighting_package?: string | null
+          min_depth?: string | null
+          profile_code: string
+          profile_name: string
+        }
+        Update: {
+          acrylic_insert?: string | null
+          back_type?: string | null
+          can_type?: string | null
+          created_at?: string | null
+          default_material?: string | null
+          id?: string
+          led_color?: string | null
+          lighting_package?: string | null
+          min_depth?: string | null
+          profile_code?: string
+          profile_name?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           airtable_id: string | null
