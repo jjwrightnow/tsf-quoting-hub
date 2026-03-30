@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 
 export function UploadWorkspace() {
+  const navigate = useNavigate();
   const [file, setFile] = useState<File | null>(null);
   const [projectName, setProjectName] = useState('');
   const [email, setEmail] = useState('');
@@ -14,6 +15,7 @@ export function UploadWorkspace() {
   const [submitted, setSubmitted] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [successDetail, setSuccessDetail] = useState('');
+  const [projectId, setProjectId] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
