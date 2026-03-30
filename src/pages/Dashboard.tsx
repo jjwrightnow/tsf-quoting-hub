@@ -19,31 +19,46 @@ const Dashboard = () => {
   const setSidebarOpen = useAppStore((s) => s.setSidebarOpen);
 
   const isDevMode = new URLSearchParams(window.location.search).get('dev') === 'true';
+  const devSignInAttempted = useRef(false);
 
   useOperatorConfig();
 
-  // Dev-mode bypass: fake tier 2 + default operator config
+  // Dev-mode bypass: sign in with real test account
   useEffect(() => {
-    if (isDevMode) {
-      setUserTier(2);
-      setOperatorConfig({
-        brand_name: 'Dev SignMaker',
-        chatbot_name: 'LetterMan',
-        logo_url: null,
-        primary_color: null,
-        support_email: 'dev@example.com',
-        canned_questions: [],
-        context_instruction: null,
-      });
-      return;
-    }
-    // Normal auth-tier sync
+    if (!isDevMode || devSignInAttempted.current) return;
+    devSignInAttempted.current = true;
+
+    supabase.auth.signInWithPassword({
+      email: 'dev@signmaker.ai',
+      password: 'devtest123',
+    }).then(({ error }) => {
+      if (error) {
+        console.error('[DevMode] sign-in failed:', error.message);
+        // Fallback: set tier + default config so UI still renders
+        setUserTier(2);
+        setOperatorConfig({
+          brand_name: 'Dev SignMaker',
+          chatbot_name: 'LetterMan',
+          logo_url: null,
+          primary_color: null,
+          support_email: 'dev@example.com',
+          canned_questions: [],
+          context_instruction: null,
+        });
+      } else {
+        console.log('[DevMode] signed in as dev@signmaker.ai');
+      }
+    });
+  }, [isDevMode, setUserTier, setOperatorConfig]);
+
+  // Normal auth-tier sync (works for both dev and regular sessions)
+  useEffect(() => {
     if (session) {
       if (userTier < 2) setUserTier(2);
-    } else {
+    } else if (!isDevMode) {
       if (userTier === 2) setUserTier(0);
     }
-  }, [session, userTier, setUserTier, setOperatorConfig, isDevMode]);
+  }, [session, userTier, setUserTier, isDevMode]);
 
   useQuotePolling(userTier === 2 && !!session);
   useWizardAutoSave();
