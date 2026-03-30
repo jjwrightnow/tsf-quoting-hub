@@ -88,6 +88,10 @@ export function UploadWorkspace() {
           setSuccessMessage('Project created!');
           setSuccessDetail('Your artwork was uploaded. Our team will process it manually.');
         }
+
+        if (splitResult?.project_id) {
+          setProjectId(splitResult.project_id);
+        }
       } catch {
         setSuccessMessage('Project created!');
         setSuccessDetail('Your artwork was uploaded. Our team will process it manually.');
