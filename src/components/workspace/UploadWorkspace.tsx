@@ -181,7 +181,7 @@ export function UploadWorkspace() {
         {/* Submit */}
         <Button
           onClick={handleSubmit}
-          disabled={!file || !projectName.trim() || uploading}
+          disabled={!file || !projectName.trim() || !isValidEmail || uploading}
           className="w-full h-12 text-sm font-semibold"
           size="lg"
         >

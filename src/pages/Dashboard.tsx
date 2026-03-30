@@ -5,7 +5,7 @@ import { useOperatorConfig } from '@/hooks/useOperatorConfig';
 import { LetterManChat } from '@/components/chat/LetterManChat';
 import { UploadWorkspace } from '@/components/workspace/UploadWorkspace';
 import { LogOut, MessageCircle, X } from 'lucide-react';
-import { safeStorage } from '@/lib/safeStorage';
+
 import { useAppStore } from '@/stores/appStore';
 
 type WorkspaceView = 'upload' | 'project';
