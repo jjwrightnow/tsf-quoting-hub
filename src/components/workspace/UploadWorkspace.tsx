@@ -115,6 +115,11 @@ export function UploadWorkspace() {
           <p className="text-sm text-muted-foreground leading-relaxed">
             {successDetail}
           </p>
+          {projectId && (
+            <Button onClick={() => navigate(`/project/${projectId}`)} className="mt-2">
+              View Project
+            </Button>
+          )}
         </div>
       </div>
     );
