@@ -16,7 +16,6 @@ const Dashboard = () => {
   const setOperatorConfig = useAppStore((s) => s.setOperatorConfig);
 
   const [workspaceView] = useState<WorkspaceView>('upload');
-  const [uiMode, setUiModeState] = useState<UiMode>(readUiMode);
   const [mobileChatOpen, setMobileChatOpen] = useState(false);
 
   const isDevMode = new URLSearchParams(window.location.search).get('dev') === 'true';
