@@ -66,7 +66,7 @@ export const LetterManChat: React.FC<LetterManChatProps> = ({ mode, onClose }) =
     setSelectedFile(file);
   };
 
-  const handleSend = async (text?: string) => {
+  const handleSend = async (text?: string, cannedAnswer?: string) => {
     const messageText = text || input.trim();
     if (!messageText && !selectedFile) return;
 
