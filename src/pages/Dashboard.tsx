@@ -4,7 +4,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { useOperatorConfig } from '@/hooks/useOperatorConfig';
 import { LetterManChat } from '@/components/chat/LetterManChat';
 import { UploadWorkspace } from '@/components/workspace/UploadWorkspace';
-import { LogOut, MessageCircle, X } from 'lucide-react';
+import { LogOut, MessageCircle, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { safeStorage } from '@/lib/safeStorage';
 
 import { useAppStore } from '@/stores/appStore';
 
@@ -17,6 +18,15 @@ const Dashboard = () => {
 
   const [workspaceView] = useState<WorkspaceView>('upload');
   const [mobileChatOpen, setMobileChatOpen] = useState(false);
+  const [chatCollapsed, setChatCollapsed] = useState(() => safeStorage.getItem('letterman_collapsed') === 'true');
+
+  const toggleChat = () => {
+    setChatCollapsed(prev => {
+      const next = !prev;
+      safeStorage.setItem('letterman_collapsed', String(next));
+      return next;
+    });
+  };
 
   const isDevMode = new URLSearchParams(window.location.search).get('dev') === 'true';
   const devSignInAttempted = useRef(false);
@@ -91,18 +101,49 @@ const Dashboard = () => {
         </div>
 
         {/* RIGHT: LetterMan chat (desktop) */}
-        <aside className="hidden lg:flex w-[400px] flex-shrink-0 flex-col border-l border-border bg-secondary">
-          <div className="h-12 flex-shrink-0 flex items-center justify-between px-4 border-b border-sidebar-border bg-primary">
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-semibold text-primary-foreground uppercase tracking-wide">
+        <aside
+          className="hidden lg:flex flex-shrink-0 flex-col border-l border-border bg-secondary transition-[width] duration-300 ease-in-out overflow-hidden relative"
+          style={{ width: chatCollapsed ? 48 : 400 }}
+        >
+          {/* Toggle button */}
+          <button
+            onClick={toggleChat}
+            className="absolute top-3 -left-0 z-10 w-6 h-10 flex items-center justify-center rounded-r-md bg-primary/80 hover:bg-primary text-primary-foreground transition-colors"
+            title={chatCollapsed ? 'Expand chat' : 'Collapse chat'}
+          >
+            {chatCollapsed ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
+          </button>
+
+          {chatCollapsed ? (
+            /* Collapsed state: thin bar */
+            <div
+              className="flex flex-col items-center justify-center h-full gap-3 cursor-pointer select-none"
+              onClick={toggleChat}
+            >
+              <MessageCircle size={20} className="text-muted-foreground" />
+              <span
+                className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground"
+                style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}
+              >
                 LetterMan
               </span>
-              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.5)]" />
             </div>
-          </div>
-          <div className="flex-1 overflow-hidden">
-            <LetterManChat mode="embedded" />
-          </div>
+          ) : (
+            /* Expanded state */
+            <>
+              <div className="h-12 flex-shrink-0 flex items-center justify-between px-4 border-b border-sidebar-border bg-primary pl-8">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-semibold text-primary-foreground uppercase tracking-wide">
+                    LetterMan
+                  </span>
+                  <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.5)]" />
+                </div>
+              </div>
+              <div className="flex-1 overflow-hidden">
+                <LetterManChat mode="embedded" />
+              </div>
+            </>
+          )}
         </aside>
       </div>
 
