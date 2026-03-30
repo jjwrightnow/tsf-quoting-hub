@@ -1,63 +1,45 @@
-import { useEffect, useRef } from "react";
-import { useAppStore } from "@/stores/appStore";
-import { useSignStore } from "@/stores/signStore";
-import { useAuth } from "@/hooks/useAuth";
-import { useOperatorConfig } from "@/hooks/useOperatorConfig";
-import { useQuotePolling } from "@/hooks/usePolling";
-import { useWizardAutoSave } from "@/hooks/useWizardAutoSave";
-import { supabase } from "@/integrations/supabase/client";
-import AppSidebar from "@/components/layout/AppSidebar";
-import MainPanel from "@/components/layout/MainPanel";
-import InputBar from "@/components/layout/InputBar";
-import ProjectShell from "@/components/shell/ProjectShell";
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
+import { useOperatorConfig } from '@/hooks/useOperatorConfig';
+import { LetterManChat } from '@/components/chat/LetterManChat';
+import { UploadWorkspace } from '@/components/workspace/UploadWorkspace';
+import { LogOut, MessageCircle, X } from 'lucide-react';
+import { safeStorage } from '@/lib/safeStorage';
+import { useAppStore } from '@/stores/appStore';
 
-/** Center panel content: hides InputBar during welcome phase for authenticated users */
-const DashboardContent = () => {
-  const chatPhase = useSignStore((s) => s.chatPhase);
-  const userTier = useAppStore((s) => s.userTier);
-  const wizardActive = useAppStore((s) => s.wizardActive);
+type WorkspaceView = 'upload' | 'project';
+type UiMode = 'pro' | 'client';
 
-  const hideInputBar = chatPhase === 'welcome' && userTier === 2 && !wizardActive;
-
-  return (
-    <div className="flex h-full min-h-0 flex-col">
-      <div className="min-h-0 flex-1 overflow-hidden">
-        <MainPanel />
-      </div>
-      {!hideInputBar && (
-        <div className="border-t border-border bg-background">
-          <InputBar />
-        </div>
-      )}
-    </div>
-  );
+const readUiMode = (): UiMode => {
+  const saved = safeStorage.getItem('signmaker_ui_mode');
+  return saved === 'client' ? 'client' : 'pro';
 };
 
 const Dashboard = () => {
   const { session, signOut } = useAuth();
-  const userTier = useAppStore((s) => s.userTier);
   const setUserTier = useAppStore((s) => s.setUserTier);
   const setOperatorConfig = useAppStore((s) => s.setOperatorConfig);
-  const sidebarOpen = useAppStore((s) => s.sidebarOpen);
-  const setSidebarOpen = useAppStore((s) => s.setSidebarOpen);
+
+  const [workspaceView] = useState<WorkspaceView>('upload');
+  const [uiMode, setUiModeState] = useState<UiMode>(readUiMode);
+  const [mobileChatOpen, setMobileChatOpen] = useState(false);
 
   const isDevMode = new URLSearchParams(window.location.search).get('dev') === 'true';
   const devSignInAttempted = useRef(false);
 
   useOperatorConfig();
 
-  // Dev-mode bypass: sign in with real test account
+  // Dev-mode bypass
   useEffect(() => {
     if (!isDevMode || devSignInAttempted.current) return;
     devSignInAttempted.current = true;
-
     supabase.auth.signInWithPassword({
       email: 'dev@signmaker.ai',
       password: 'devtest123',
     }).then(({ error }) => {
       if (error) {
         console.error('[DevMode] sign-in failed:', error.message);
-        // Fallback: set tier + default config so UI still renders
         setUserTier(2);
         setOperatorConfig({
           brand_name: 'Dev SignMaker',
@@ -68,42 +50,131 @@ const Dashboard = () => {
           canned_questions: [],
           context_instruction: null,
         });
-      } else {
-        console.log('[DevMode] signed in as dev@signmaker.ai');
       }
     });
   }, [isDevMode, setUserTier, setOperatorConfig]);
 
-  // Normal auth-tier sync (works for both dev and regular sessions)
+  // Auth-tier sync
   useEffect(() => {
     if (session) {
-      if (userTier < 2) setUserTier(2);
+      setUserTier(2);
     } else if (!isDevMode) {
-      if (userTier === 2) setUserTier(0);
+      setUserTier(0);
     }
-  }, [session, userTier, setUserTier, isDevMode]);
+  }, [session, setUserTier, isDevMode]);
 
-  useQuotePolling(userTier === 2 && !!session);
-  useWizardAutoSave();
+  const setUiMode = useCallback((mode: UiMode) => {
+    setUiModeState(mode);
+    safeStorage.setItem('signmaker_ui_mode', mode);
+  }, []);
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-background">
-      {/* Sidebar — authenticated tier 2 users only */}
-      {userTier === 2 && (
-        <AppSidebar open={sidebarOpen} onToggle={() => setSidebarOpen(!sidebarOpen)} onSignOut={signOut} />
-      )}
-
-      <div className="relative flex flex-1 flex-col min-w-0">
-        <div className="flex-1 overflow-hidden">
-          <ProjectShell>
-            <DashboardContent />
-          </ProjectShell>
+    <div className="flex h-screen w-full flex-col overflow-hidden bg-background">
+      {/* Header */}
+      <header className="h-12 flex-shrink-0 flex items-center justify-between px-4 bg-primary border-b border-sidebar-border z-50">
+        <div className="flex items-center gap-1.5">
+          <span className="font-bold text-lg text-primary-foreground tracking-tight">SignMaker</span>
+          <div className="w-1.5 h-1.5 rounded-full bg-ring" />
         </div>
+        <div className="flex items-center gap-3">
+          <div className="flex bg-sidebar-accent p-0.5 rounded border border-sidebar-border">
+            <button
+              onClick={() => setUiMode('pro')}
+              className={`px-2.5 py-0.5 text-[10px] font-bold rounded transition-all ${
+                uiMode === 'pro' ? 'bg-ring text-primary-foreground' : 'text-primary-foreground/60 hover:text-primary-foreground'
+              }`}
+            >
+              Pro
+            </button>
+            <button
+              onClick={() => setUiMode('client')}
+              className={`px-2.5 py-0.5 text-[10px] font-bold rounded transition-all ${
+                uiMode === 'client' ? 'bg-accent text-accent-foreground' : 'text-primary-foreground/60 hover:text-primary-foreground'
+              }`}
+            >
+              Client
+            </button>
+          </div>
+          {(session || isDevMode) && (
+            <button
+              onClick={signOut}
+              className="text-primary-foreground/60 hover:text-primary-foreground transition-colors p-1"
+              title="Sign out"
+            >
+              <LogOut size={14} />
+            </button>
+          )}
+        </div>
+      </header>
+
+      {/* Two-panel layout */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* LEFT: Workspace */}
+        <div className="flex-1 overflow-y-auto min-w-0">
+          {workspaceView === 'upload' && <UploadWorkspace />}
+          {workspaceView === 'project' && (
+            <div className="flex items-center justify-center h-full">
+              <p className="text-muted-foreground text-sm">Project view coming soon.</p>
+            </div>
+          )}
+        </div>
+
+        {/* RIGHT: LetterMan chat (desktop) */}
+        <aside className="hidden lg:flex w-[400px] flex-shrink-0 flex-col border-l border-border bg-secondary">
+          <div className="h-12 flex-shrink-0 flex items-center justify-between px-4 border-b border-sidebar-border bg-primary">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-semibold text-primary-foreground uppercase tracking-wide">
+                LetterMan
+              </span>
+              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.5)]" />
+            </div>
+            <div className={`rounded px-2 py-0.5 border text-[9px] font-bold uppercase tracking-tight ${
+              uiMode === 'pro'
+                ? 'bg-ring/10 border-ring/20 text-ring'
+                : 'bg-accent/10 border-accent/20 text-accent'
+            }`}>
+              {uiMode} Mode
+            </div>
+          </div>
+          <div className="flex-1 overflow-hidden">
+            <LetterManChat mode="embedded" />
+          </div>
+        </aside>
       </div>
 
-      {/* Mobile sidebar overlay */}
-      {userTier === 2 && sidebarOpen && (
-        <div className="fixed inset-0 z-30 bg-background/60 md:hidden" onClick={() => setSidebarOpen(false)} />
+      {/* Mobile chat bubble */}
+      <div className="lg:hidden fixed bottom-6 right-6 z-50">
+        {!mobileChatOpen && (
+          <button
+            onClick={() => setMobileChatOpen(true)}
+            className="w-14 h-14 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center hover:bg-primary/90 transition-colors"
+          >
+            <MessageCircle size={24} />
+          </button>
+        )}
+      </div>
+
+      {/* Mobile chat overlay */}
+      {mobileChatOpen && (
+        <div className="lg:hidden fixed inset-0 z-50 flex flex-col bg-background">
+          <div className="h-12 flex-shrink-0 flex items-center justify-between px-4 bg-primary border-b border-sidebar-border">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-semibold text-primary-foreground uppercase tracking-wide">
+                LetterMan
+              </span>
+              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+            </div>
+            <button
+              onClick={() => setMobileChatOpen(false)}
+              className="text-primary-foreground/60 hover:text-primary-foreground p-1"
+            >
+              <X size={18} />
+            </button>
+          </div>
+          <div className="flex-1 overflow-hidden">
+            <LetterManChat mode="overlay" onClose={() => setMobileChatOpen(false)} />
+          </div>
+        </div>
       )}
     </div>
   );
