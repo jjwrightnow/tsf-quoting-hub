@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useAppStore } from "@/stores/appStore";
+import { useSignStore } from "@/stores/signStore";
 import { useAuth } from "@/hooks/useAuth";
 import { useOperatorConfig } from "@/hooks/useOperatorConfig";
 import { useQuotePolling } from "@/hooks/usePolling";
@@ -9,6 +10,28 @@ import AppSidebar from "@/components/layout/AppSidebar";
 import MainPanel from "@/components/layout/MainPanel";
 import InputBar from "@/components/layout/InputBar";
 import ProjectShell from "@/components/shell/ProjectShell";
+
+/** Center panel content: hides InputBar during welcome phase for authenticated users */
+const DashboardContent = () => {
+  const chatPhase = useSignStore((s) => s.chatPhase);
+  const userTier = useAppStore((s) => s.userTier);
+  const wizardActive = useAppStore((s) => s.wizardActive);
+
+  const hideInputBar = chatPhase === 'welcome' && userTier === 2 && !wizardActive;
+
+  return (
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="min-h-0 flex-1 overflow-hidden">
+        <MainPanel />
+      </div>
+      {!hideInputBar && (
+        <div className="border-t border-border bg-background">
+          <InputBar />
+        </div>
+      )}
+    </div>
+  );
+};
 
 const Dashboard = () => {
   const { session, signOut } = useAuth();
@@ -73,14 +96,7 @@ const Dashboard = () => {
       <div className="relative flex flex-1 flex-col min-w-0">
         <div className="flex-1 overflow-hidden">
           <ProjectShell>
-            <div className="flex h-full min-h-0 flex-col">
-              <div className="min-h-0 flex-1 overflow-hidden">
-                <MainPanel />
-              </div>
-              <div className="border-t border-border bg-background">
-                <InputBar />
-              </div>
-            </div>
+            <DashboardContent />
           </ProjectShell>
         </div>
       </div>
