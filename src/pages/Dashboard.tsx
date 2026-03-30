@@ -99,13 +99,6 @@ const Dashboard = () => {
               </span>
               <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.5)]" />
             </div>
-            <div className={`rounded px-2 py-0.5 border text-[9px] font-bold uppercase tracking-tight ${
-              uiMode === 'pro'
-                ? 'bg-ring/10 border-ring/20 text-ring'
-                : 'bg-accent/10 border-accent/20 text-accent'
-            }`}>
-              {uiMode} Mode
-            </div>
           </div>
           <div className="flex-1 overflow-hidden">
             <LetterManChat mode="embedded" />
