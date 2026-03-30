@@ -39,8 +39,10 @@ export function UploadWorkspace() {
     if (e.target.files?.[0]) handleFile(e.target.files[0]);
   };
 
+  const isValidEmail = email.trim() !== '' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+
   const handleSubmit = async () => {
-    if (!file || !projectName.trim()) return;
+    if (!file || !projectName.trim() || !isValidEmail) return;
     setUploading(true);
 
     try {
