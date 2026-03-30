@@ -161,111 +161,6 @@ export type Database = {
         }
         Relationships: []
       }
-      catalog_finishes: {
-        Row: {
-          compatible_materials: string[] | null
-          finish_id: string
-          finish_name: string
-          id: string
-          is_active: boolean
-          swatch_url: string | null
-          updated_at: string
-        }
-        Insert: {
-          compatible_materials?: string[] | null
-          finish_id: string
-          finish_name: string
-          id?: string
-          is_active?: boolean
-          swatch_url?: string | null
-          updated_at?: string
-        }
-        Update: {
-          compatible_materials?: string[] | null
-          finish_id?: string
-          finish_name?: string
-          id?: string
-          is_active?: boolean
-          swatch_url?: string | null
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      catalog_last_updated: {
-        Row: {
-          table_name: string
-          updated_at: string
-        }
-        Insert: {
-          table_name: string
-          updated_at?: string
-        }
-        Update: {
-          table_name?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      catalog_materials: {
-        Row: {
-          id: string
-          is_active: boolean
-          material_id: string
-          material_name: string
-          sort_order: number | null
-          swatch_url: string | null
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          is_active?: boolean
-          material_id: string
-          material_name: string
-          sort_order?: number | null
-          swatch_url?: string | null
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          is_active?: boolean
-          material_id?: string
-          material_name?: string
-          sort_order?: number | null
-          swatch_url?: string | null
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      catalog_profiles: {
-        Row: {
-          defaults_json: Json | null
-          id: string
-          illustration_url: string | null
-          is_active: boolean
-          profile_code: string
-          profile_name: string
-          updated_at: string
-        }
-        Insert: {
-          defaults_json?: Json | null
-          id?: string
-          illustration_url?: string | null
-          is_active?: boolean
-          profile_code: string
-          profile_name: string
-          updated_at?: string
-        }
-        Update: {
-          defaults_json?: Json | null
-          id?: string
-          illustration_url?: string | null
-          is_active?: boolean
-          profile_code?: string
-          profile_name?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
       chat_messages: {
         Row: {
           bubble_id: string | null
@@ -513,6 +408,45 @@ export type Database = {
           },
         ]
       }
+      dam_taxonomy: {
+        Row: {
+          bible_base_match: string | null
+          category: string
+          created_at: string | null
+          display_name: string
+          id: number
+          is_ai_detectable: boolean | null
+          search_context: string | null
+          sku_code: string | null
+          sort_order: number | null
+          tag: string
+        }
+        Insert: {
+          bible_base_match?: string | null
+          category: string
+          created_at?: string | null
+          display_name: string
+          id?: number
+          is_ai_detectable?: boolean | null
+          search_context?: string | null
+          sku_code?: string | null
+          sort_order?: number | null
+          tag: string
+        }
+        Update: {
+          bible_base_match?: string | null
+          category?: string
+          created_at?: string | null
+          display_name?: string
+          id?: number
+          is_ai_detectable?: boolean | null
+          search_context?: string | null
+          sku_code?: string | null
+          sort_order?: number | null
+          tag?: string
+        }
+        Relationships: []
+      }
       default_thickness_rules: {
         Row: {
           created_at: string | null
@@ -570,30 +504,90 @@ export type Database = {
         }
         Relationships: []
       }
-      finishes: {
+      eagle_assets: {
         Row: {
-          airtable_id: string | null
-          created_at: string | null
-          finish_category: string | null
-          finish_name: string
+          annotation: string | null
+          brands: string[] | null
+          description: string | null
+          eagle_created_at: string | null
+          eagle_folders: string[] | null
+          embedding: string | null
+          file_ext: string | null
+          file_size: number | null
+          finish: string | null
+          height: number | null
           id: string
-          notes: string | null
+          illumination: string | null
+          material: string | null
+          mounting: string | null
+          name: string
+          palettes: Json | null
+          public_url: string | null
+          rating: number | null
+          sign_type: string | null
+          storage_path: string | null
+          synced_at: string | null
+          tags: string[] | null
+          thumbnail_path: string | null
+          updated_at: string | null
+          use_channels: string[] | null
+          width: number | null
         }
         Insert: {
-          airtable_id?: string | null
-          created_at?: string | null
-          finish_category?: string | null
-          finish_name: string
-          id?: string
-          notes?: string | null
+          annotation?: string | null
+          brands?: string[] | null
+          description?: string | null
+          eagle_created_at?: string | null
+          eagle_folders?: string[] | null
+          embedding?: string | null
+          file_ext?: string | null
+          file_size?: number | null
+          finish?: string | null
+          height?: number | null
+          id: string
+          illumination?: string | null
+          material?: string | null
+          mounting?: string | null
+          name: string
+          palettes?: Json | null
+          public_url?: string | null
+          rating?: number | null
+          sign_type?: string | null
+          storage_path?: string | null
+          synced_at?: string | null
+          tags?: string[] | null
+          thumbnail_path?: string | null
+          updated_at?: string | null
+          use_channels?: string[] | null
+          width?: number | null
         }
         Update: {
-          airtable_id?: string | null
-          created_at?: string | null
-          finish_category?: string | null
-          finish_name?: string
+          annotation?: string | null
+          brands?: string[] | null
+          description?: string | null
+          eagle_created_at?: string | null
+          eagle_folders?: string[] | null
+          embedding?: string | null
+          file_ext?: string | null
+          file_size?: number | null
+          finish?: string | null
+          height?: number | null
           id?: string
-          notes?: string | null
+          illumination?: string | null
+          material?: string | null
+          mounting?: string | null
+          name?: string
+          palettes?: Json | null
+          public_url?: string | null
+          rating?: number | null
+          sign_type?: string | null
+          storage_path?: string | null
+          synced_at?: string | null
+          tags?: string[] | null
+          thumbnail_path?: string | null
+          updated_at?: string | null
+          use_channels?: string[] | null
+          width?: number | null
         }
         Relationships: []
       }
@@ -689,6 +683,89 @@ export type Database = {
         }
         Relationships: []
       }
+      gemini_profile_crosswalk: {
+        Row: {
+          created_at: string | null
+          gemini_code: string | null
+          gemini_description: string | null
+          gemini_lighting: string | null
+          gemini_material: string | null
+          gemini_product_line: string
+          gemini_profile_name: string
+          id: number
+          sort_order: number | null
+          tsf_lighting_style: string | null
+          tsf_material: string | null
+          tsf_notes: string | null
+          tsf_profile_examples: string[] | null
+          tsf_profile_pattern: string | null
+          tsf_technology_class: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          gemini_code?: string | null
+          gemini_description?: string | null
+          gemini_lighting?: string | null
+          gemini_material?: string | null
+          gemini_product_line: string
+          gemini_profile_name: string
+          id?: number
+          sort_order?: number | null
+          tsf_lighting_style?: string | null
+          tsf_material?: string | null
+          tsf_notes?: string | null
+          tsf_profile_examples?: string[] | null
+          tsf_profile_pattern?: string | null
+          tsf_technology_class?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          gemini_code?: string | null
+          gemini_description?: string | null
+          gemini_lighting?: string | null
+          gemini_material?: string | null
+          gemini_product_line?: string
+          gemini_profile_name?: string
+          id?: number
+          sort_order?: number | null
+          tsf_lighting_style?: string | null
+          tsf_material?: string | null
+          tsf_notes?: string | null
+          tsf_profile_examples?: string[] | null
+          tsf_profile_pattern?: string | null
+          tsf_technology_class?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gemini_profile_crosswalk_tsf_technology_class_fkey"
+            columns: ["tsf_technology_class"]
+            isOneToOne: false
+            referencedRelation: "dam_taxonomy"
+            referencedColumns: ["tag"]
+          },
+        ]
+      }
+      lighting_code_to_dam_tags: {
+        Row: {
+          dam_display: string
+          dam_tags: string[]
+          description: string | null
+          lighting_code: string
+        }
+        Insert: {
+          dam_display: string
+          dam_tags: string[]
+          description?: string | null
+          lighting_code: string
+        }
+        Update: {
+          dam_display?: string
+          dam_tags?: string[]
+          description?: string | null
+          lighting_code?: string
+        }
+        Relationships: []
+      }
       lighting_styles: {
         Row: {
           display_name: string
@@ -758,48 +835,6 @@ export type Database = {
           finish_po?: boolean | null
           id?: string
           material?: string
-        }
-        Relationships: []
-      }
-      materials: {
-        Row: {
-          airtable_id: string | null
-          available_thicknesses: string | null
-          base_material: string
-          created_at: string | null
-          default_finish: string | null
-          grade: string | null
-          id: string
-          light_transmission: string | null
-          material_name: string
-          notes: string | null
-          outdoor_rated: boolean | null
-        }
-        Insert: {
-          airtable_id?: string | null
-          available_thicknesses?: string | null
-          base_material: string
-          created_at?: string | null
-          default_finish?: string | null
-          grade?: string | null
-          id?: string
-          light_transmission?: string | null
-          material_name: string
-          notes?: string | null
-          outdoor_rated?: boolean | null
-        }
-        Update: {
-          airtable_id?: string | null
-          available_thicknesses?: string | null
-          base_material?: string
-          created_at?: string | null
-          default_finish?: string | null
-          grade?: string | null
-          id?: string
-          light_transmission?: string | null
-          material_name?: string
-          notes?: string | null
-          outdoor_rated?: boolean | null
         }
         Relationships: []
       }
@@ -1079,57 +1114,6 @@ export type Database = {
         }
         Relationships: []
       }
-      product_specs: {
-        Row: {
-          category: string | null
-          created_at: string | null
-          dimensions: Json | null
-          edge_profile: string | null
-          embedding: string | null
-          environmental_suitability: string[] | null
-          id: string
-          lighting_style: string | null
-          materials: string[] | null
-          mounting_hardware: string[] | null
-          profile_image_url: string | null
-          sku: string
-          specs_text: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          category?: string | null
-          created_at?: string | null
-          dimensions?: Json | null
-          edge_profile?: string | null
-          embedding?: string | null
-          environmental_suitability?: string[] | null
-          id?: string
-          lighting_style?: string | null
-          materials?: string[] | null
-          mounting_hardware?: string[] | null
-          profile_image_url?: string | null
-          sku: string
-          specs_text?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          category?: string | null
-          created_at?: string | null
-          dimensions?: Json | null
-          edge_profile?: string | null
-          embedding?: string | null
-          environmental_suitability?: string[] | null
-          id?: string
-          lighting_style?: string | null
-          materials?: string[] | null
-          mounting_hardware?: string[] | null
-          profile_image_url?: string | null
-          sku?: string
-          specs_text?: string | null
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
       profile_components: {
         Row: {
           airtable_id: string | null
@@ -1170,6 +1154,13 @@ export type Database = {
             columns: ["component_id"]
             isOneToOne: false
             referencedRelation: "components"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profile_components_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profile_decoded"
             referencedColumns: ["id"]
           },
           {
@@ -2039,6 +2030,27 @@ export type Database = {
         }
         Relationships: []
       }
+      tech_code_to_dam_tag: {
+        Row: {
+          dam_display: string
+          dam_tag: string
+          description: string | null
+          tech_code: string
+        }
+        Insert: {
+          dam_display: string
+          dam_tag: string
+          description?: string | null
+          tech_code: string
+        }
+        Update: {
+          dam_display?: string
+          dam_tag?: string
+          description?: string | null
+          tech_code?: string
+        }
+        Relationships: []
+      }
       technology_classes: {
         Row: {
           code: string
@@ -2448,6 +2460,26 @@ export type Database = {
           },
         ]
       }
+      profile_decoded: {
+        Row: {
+          ai_searchable_text: string | null
+          chatbot_summary: string | null
+          display_name: string | null
+          id: string | null
+          is_active: boolean | null
+          lighting_code: string | null
+          lighting_dam_tags: string[] | null
+          lighting_description: string | null
+          lighting_display: string | null
+          profile_code: string | null
+          profile_name: string | null
+          technology: string | null
+          technology_dam_tag: string | null
+          technology_description: string | null
+          technology_display: string | null
+        }
+        Relationships: []
+      }
       profiles_display: {
         Row: {
           airtable_id: string | null
@@ -2550,6 +2582,31 @@ export type Database = {
         Returns: string
       }
       is_business_email: { Args: { p_email: string }; Returns: boolean }
+      search_eagle_assets: {
+        Args: {
+          filter_brands?: string[]
+          filter_channels?: string[]
+          filter_sign_type?: string
+          match_count?: number
+          match_threshold?: number
+          min_rating?: number
+          query_embedding: string
+        }
+        Returns: {
+          brands: string[]
+          description: string
+          finish: string
+          id: string
+          illumination: string
+          material: string
+          name: string
+          public_url: string
+          rating: number
+          sign_type: string
+          similarity: number
+          tags: string[]
+        }[]
+      }
       search_signage: {
         Args: {
           result_limit?: number
