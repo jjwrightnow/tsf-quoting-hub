@@ -11,6 +11,8 @@ export function UploadWorkspace() {
   const [email, setEmail] = useState('');
   const [uploading, setUploading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [successDetail, setSuccessDetail] = useState('');
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
