@@ -56,15 +56,39 @@ export function UploadWorkspace() {
         .upload(filePath, file);
       if (uploadErr) throw uploadErr;
 
-      const { error: dbErr } = await supabase
+      const { data: reviewSession, error: dbErr } = await supabase
         .from('review_sessions')
         .insert({
           upload_path: filePath,
           customer_name: projectName.trim(),
           customer_email: email.trim(),
           status: 'pending',
-        });
+        })
+        .select('id')
+        .single();
       if (dbErr) throw dbErr;
+
+      // Call split-pdf Edge Function
+      try {
+        const { data: splitResult } = await supabase.functions.invoke('split-pdf', {
+          body: {
+            session_id: reviewSession.id,
+            file_path: filePath,
+            project_name: projectName.trim(),
+          },
+        });
+
+        if (splitResult?.page_count) {
+          setSuccessMessage(`Project created! ${splitResult.page_count} page(s) detected.`);
+          setSuccessDetail('Your project is being prepared for review.');
+        } else {
+          setSuccessMessage('Project created!');
+          setSuccessDetail('Your artwork was uploaded. Our team will process it manually.');
+        }
+      } catch {
+        setSuccessMessage('Project created!');
+        setSuccessDetail('Your artwork was uploaded. Our team will process it manually.');
+      }
 
       setSubmitted(true);
       toast.success('Project submitted successfully!');
