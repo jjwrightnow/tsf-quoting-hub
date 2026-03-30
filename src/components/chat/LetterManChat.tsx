@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Send, X, MessageCircle, Paperclip, Loader2, FileCheck, FileCode, ImageIcon, CornerDownLeft } from 'lucide-react';
 import { useShellStore } from '@/stores/shellStore';
 import { supabase } from '@/integrations/supabase/client';
+import { streamChat, type ChatMsg } from '@/lib/letterman-chat';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
@@ -14,7 +15,6 @@ export const LetterManChat: React.FC<LetterManChatProps> = ({ mode, onClose }) =
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [systemPrompt, setSystemPrompt] = useState('');
   const [cannedQuestions, setCannedQuestions] = useState<any[]>([]);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -28,15 +28,13 @@ export const LetterManChat: React.FC<LetterManChatProps> = ({ mode, onClose }) =
       try {
         const { data } = await supabase
           .from('operator_config')
-          .select('context_instruction, chatbot_name, canned_questions')
+          .select('canned_questions')
           .single();
         if (data) {
-          setSystemPrompt(data.context_instruction || '');
           setCannedQuestions(Array.isArray(data.canned_questions) ? data.canned_questions : []);
         }
       } catch (err) {
         console.error('LetterManChat config fetch error:', err);
-        setSystemPrompt('You are a helpful AI assistant for a sign shop.');
       }
     };
     fetchConfig();
@@ -119,37 +117,33 @@ export const LetterManChat: React.FC<LetterManChatProps> = ({ mode, onClose }) =
     setLoading(true);
 
     try {
-      const fileContext = userMessage.metadata?.file_url
-        ? `\n\nThe user has uploaded a file: ${userMessage.metadata.file_name} (${userMessage.metadata.file_type}). URL: ${userMessage.metadata.file_url}. If it appears to be a raster format (jpg/png), mention that vector art (.AI, .EPS, .SVG) is required for fabrication and offer the Vector Redraw service.`
-        : '';
+      const chatSessionId = localStorage.getItem('chat_session_id');
+      const chatMessages: ChatMsg[] = updatedMessages.map((m: any) => ({
+        role: m.role as 'user' | 'assistant',
+        content: m.content + (m.metadata?.file_url
+          ? `\n\n[Uploaded file: ${m.metadata.file_name} (${m.metadata.file_type}). URL: ${m.metadata.file_url}]`
+          : ''),
+      }));
 
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': import.meta.env.VITE_ANTHROPIC_API_KEY,
-          'anthropic-version': '2023-06-01',
-          'anthropic-dangerous-direct-browser-access': 'true',
+      // Add streaming assistant message
+      const streamingId = Date.now() + 1;
+      setMessages(prev => [...prev, { id: streamingId, role: 'assistant', content: '' }]);
+
+      await streamChat({
+        messages: chatMessages,
+        sessionId: chatSessionId,
+        onDelta: (chunk) => {
+          setMessages(prev =>
+            prev.map(m => m.id === streamingId ? { ...m, content: m.content + chunk } : m)
+          );
         },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-5',
-          max_tokens: 1000,
-          system: systemPrompt + fileContext,
-          messages: updatedMessages.map((m: any) => ({ role: m.role, content: m.content })),
-        }),
+        onDone: () => {
+          // streamChat already persists the assistant message to chat_messages
+        },
       });
-      const data = await response.json();
-      const assistantContent = data?.content?.[0]?.text || 'Sorry, I could not process that.';
-      setMessages(prev => [...prev, { id: Date.now(), role: 'assistant', content: assistantContent }]);
-
-      const sessionId = localStorage.getItem('chat_session_id');
-      if (sessionId) {
-        await supabase.from('chat_messages').insert([
-          { session_id: sessionId, role: 'user', content: userMessage.content },
-          { session_id: sessionId, role: 'assistant', content: assistantContent },
-        ]);
-      }
-    } catch {
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Connection error';
+      toast.error(msg);
       setMessages(prev => [...prev, { id: Date.now(), role: 'assistant', content: 'Connection error. Please try again.' }]);
     } finally {
       setLoading(false);
