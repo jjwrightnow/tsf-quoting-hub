@@ -4,8 +4,8 @@ import type { Database } from './types';
 import { useShellStore } from '@/stores/shellStore';
 import { safeStorage } from '@/lib/safeStorage';
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://makjumchcwfhhkkzbtzy.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ha2p1bWNoY3dmaGhra3pidHp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyNTkyNzMsImV4cCI6MjA4NzgzNTI3M30.Rb7hYG6_fJPtl6g268R0543Hd1SNDkyY7LBtZnG24Oc';
 const authStorage = {
   getItem: (key: string) => safeStorage.getItem(key),
   setItem: (key: string, value: string) => safeStorage.setItem(key, value),
