@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Send, X, MessageCircle, Paperclip, Loader2, FileCheck, FileCode, ImageIcon, CornerDownLeft } from 'lucide-react';
 import { useShellStore } from '@/stores/shellStore';
 import { supabase } from '@/integrations/supabase/client';
+import { streamChat, type ChatMsg } from '@/lib/letterman-chat';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
