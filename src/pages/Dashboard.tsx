@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useOperatorConfig } from "@/hooks/useOperatorConfig";
 import { useQuotePolling } from "@/hooks/usePolling";
 import { useWizardAutoSave } from "@/hooks/useWizardAutoSave";
+import { supabase } from "@/integrations/supabase/client";
 import AppSidebar from "@/components/layout/AppSidebar";
 import MainPanel from "@/components/layout/MainPanel";
 import InputBar from "@/components/layout/InputBar";
