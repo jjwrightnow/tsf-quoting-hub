@@ -15,7 +15,6 @@ export const LetterManChat: React.FC<LetterManChatProps> = ({ mode, onClose }) =
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [systemPrompt, setSystemPrompt] = useState('');
   const [cannedQuestions, setCannedQuestions] = useState<any[]>([]);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -29,15 +28,13 @@ export const LetterManChat: React.FC<LetterManChatProps> = ({ mode, onClose }) =
       try {
         const { data } = await supabase
           .from('operator_config')
-          .select('context_instruction, chatbot_name, canned_questions')
+          .select('canned_questions')
           .single();
         if (data) {
-          setSystemPrompt(data.context_instruction || '');
           setCannedQuestions(Array.isArray(data.canned_questions) ? data.canned_questions : []);
         }
       } catch (err) {
         console.error('LetterManChat config fetch error:', err);
-        setSystemPrompt('You are a helpful AI assistant for a sign shop.');
       }
     };
     fetchConfig();
