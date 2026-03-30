@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Send, X, MessageCircle, Paperclip, Loader2, FileCheck, FileCode, ImageIcon, CornerDownLeft } from 'lucide-react';
-import { useShellStore } from '@/stores/shellStore';
 import { supabase } from '@/integrations/supabase/client';
 import { streamChat, type ChatMsg } from '@/lib/letterman-chat';
 import { Button } from '@/components/ui/button';
@@ -18,10 +17,8 @@ export const LetterManChat: React.FC<LetterManChatProps> = ({ mode, onClose }) =
   const [cannedQuestions, setCannedQuestions] = useState<any[]>([]);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
-  const store = useShellStore() as any;
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const isEmbedded = mode === 'embedded';
 
   useEffect(() => {
     const fetchConfig = async () => {
@@ -125,7 +122,6 @@ export const LetterManChat: React.FC<LetterManChatProps> = ({ mode, onClose }) =
           : ''),
       }));
 
-      // Add streaming assistant message
       const streamingId = Date.now() + 1;
       setMessages(prev => [...prev, { id: streamingId, role: 'assistant', content: '' }]);
 
@@ -137,9 +133,7 @@ export const LetterManChat: React.FC<LetterManChatProps> = ({ mode, onClose }) =
             prev.map(m => m.id === streamingId ? { ...m, content: m.content + chunk } : m)
           );
         },
-        onDone: () => {
-          // streamChat already persists the assistant message to chat_messages
-        },
+        onDone: () => {},
       });
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Connection error';
@@ -151,7 +145,7 @@ export const LetterManChat: React.FC<LetterManChatProps> = ({ mode, onClose }) =
   };
 
   return (
-    <div className={`flex flex-col h-full bg-secondary ${!isEmbedded ? 'rounded-t-2xl' : ''}`}>
+    <div className={`flex flex-col h-full bg-secondary ${mode !== 'embedded' ? 'rounded-t-2xl' : ''}`}>
       <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3">
         {messages.length === 0 && (
           <div className="flex flex-col gap-2 pt-4">
