@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 export function UploadWorkspace() {
   const [file, setFile] = useState<File | null>(null);
   const [projectName, setProjectName] = useState('');
+  const [email, setEmail] = useState('');
   const [uploading, setUploading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [dragOver, setDragOver] = useState(false);
