@@ -72,27 +72,29 @@ export function UploadWorkspace() {
       if (dbErr) throw dbErr;
 
       // Call split-pdf Edge Function
-      try {
-        const { data: splitResult } = await supabase.functions.invoke('split-pdf', {
-          body: {
-            session_id: reviewSession.id,
-            file_path: filePath,
-            project_name: projectName.trim(),
-          },
-        });
+      const splitResponse = await supabase.functions.invoke('split-pdf', {
+        body: {
+          session_id: reviewSession.id,
+          file_path: filePath,
+          project_name: projectName.trim(),
+        },
+      });
 
-        if (splitResult?.page_count) {
-          setSuccessMessage(`Project created! ${splitResult.page_count} page(s) detected.`);
-          setSuccessDetail('Your project is being prepared for review.');
-        } else {
-          setSuccessMessage('Project created!');
-          setSuccessDetail('Your artwork was uploaded. Our team will process it manually.');
-        }
+      console.log('split-pdf raw response:', splitResponse);
 
-        if (splitResult?.project_id) {
-          setProjectId(splitResult.project_id);
-        }
-      } catch {
+      const splitData = splitResponse.data;
+      const splitError = splitResponse.error;
+
+      if (splitError) {
+        console.error('split-pdf error:', splitError);
+      }
+
+      if (splitData && splitData.project_id) {
+        setProjectId(splitData.project_id);
+        setSuccessMessage(`Project created! ${splitData.page_count} page(s) detected.`);
+        setSuccessDetail('Your artwork has been split into individual signs. Click below to review and configure each one.');
+      } else {
+        console.warn('split-pdf did not return project_id:', splitData);
         setSuccessMessage('Project created!');
         setSuccessDetail('Your artwork was uploaded. Our team will process it manually.');
       }
