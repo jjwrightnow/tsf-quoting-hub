@@ -104,9 +104,9 @@ export function UploadWorkspace() {
       <div className="flex items-center justify-center h-full px-6">
         <div className="max-w-[500px] text-center space-y-4">
           <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto" />
-          <h2 className="text-xl font-semibold text-foreground">Project submitted!</h2>
+          <h2 className="text-xl font-semibold text-foreground">{successMessage}</h2>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            You will be notified when your artwork has been processed.
+            {successDetail}
           </p>
         </div>
       </div>
