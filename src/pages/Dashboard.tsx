@@ -56,10 +56,6 @@ const Dashboard = () => {
     }
   }, [session, setUserTier, isDevMode]);
 
-  const setUiMode = useCallback((mode: UiMode) => {
-    setUiModeState(mode);
-    safeStorage.setItem('signmaker_ui_mode', mode);
-  }, []);
 
   return (
     <div className="flex h-screen w-full flex-col overflow-hidden bg-background">
