@@ -66,7 +66,7 @@ export const LetterManChat: React.FC<LetterManChatProps> = ({ mode, onClose }) =
     setSelectedFile(file);
   };
 
-  const handleSend = async (text?: string) => {
+  const handleSend = async (text?: string, cannedAnswer?: string) => {
     const messageText = text || input.trim();
     if (!messageText && !selectedFile) return;
 
@@ -111,6 +111,13 @@ export const LetterManChat: React.FC<LetterManChatProps> = ({ mode, onClose }) =
     const updatedMessages = [...messages, userMessage];
     setMessages(updatedMessages);
     setInput('');
+
+    // If we have a canned answer, display it directly without calling the LLM
+    if (cannedAnswer) {
+      setMessages(prev => [...prev, { id: Date.now() + 1, role: 'assistant', content: cannedAnswer }]);
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -154,11 +161,12 @@ export const LetterManChat: React.FC<LetterManChatProps> = ({ mode, onClose }) =
               <p className="text-[10px] uppercase tracking-widest font-semibold text-foreground">Ask about materials, lighting, or upload artwork</p>
             </div>
             {cannedQuestions.map((q: any, i: number) => {
-              const questionText = typeof q === 'string' ? q : (q?.label || q?.value || '');
+              const questionText = typeof q === 'string' ? q : (q?.q || q?.label || q?.value || '');
+              const cannedAnswer = typeof q === 'object' ? q?.a : undefined;
               return (
                 <button
                   key={i}
-                  onClick={() => handleSend(questionText)}
+                  onClick={() => handleSend(questionText, cannedAnswer)}
                   className="text-left text-xs text-muted-foreground border border-border rounded-lg px-3 py-2 hover:border-ring/40 hover:text-foreground transition-colors bg-card"
                 >
                   {questionText}
