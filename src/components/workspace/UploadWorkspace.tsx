@@ -59,6 +59,7 @@ export function UploadWorkspace() {
         .insert({
           upload_path: filePath,
           customer_name: projectName.trim(),
+          customer_email: email.trim(),
           status: 'pending',
         });
       if (dbErr) throw dbErr;
