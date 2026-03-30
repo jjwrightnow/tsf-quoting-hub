@@ -66,24 +66,6 @@ const Dashboard = () => {
           <div className="w-1.5 h-1.5 rounded-full bg-ring" />
         </div>
         <div className="flex items-center gap-3">
-          <div className="flex bg-sidebar-accent p-0.5 rounded border border-sidebar-border">
-            <button
-              onClick={() => setUiMode('pro')}
-              className={`px-2.5 py-0.5 text-[10px] font-bold rounded transition-all ${
-                uiMode === 'pro' ? 'bg-ring text-primary-foreground' : 'text-primary-foreground/60 hover:text-primary-foreground'
-              }`}
-            >
-              Pro
-            </button>
-            <button
-              onClick={() => setUiMode('client')}
-              className={`px-2.5 py-0.5 text-[10px] font-bold rounded transition-all ${
-                uiMode === 'client' ? 'bg-accent text-accent-foreground' : 'text-primary-foreground/60 hover:text-primary-foreground'
-              }`}
-            >
-              Client
-            </button>
-          </div>
           {(session || isDevMode) && (
             <button
               onClick={signOut}
