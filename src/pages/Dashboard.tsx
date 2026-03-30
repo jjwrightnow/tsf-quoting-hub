@@ -73,14 +73,7 @@ const Dashboard = () => {
       <div className="relative flex flex-1 flex-col min-w-0">
         <div className="flex-1 overflow-hidden">
           <ProjectShell>
-            <div className="flex h-full min-h-0 flex-col">
-              <div className="min-h-0 flex-1 overflow-hidden">
-                <MainPanel />
-              </div>
-              <div className="border-t border-border bg-background">
-                <InputBar />
-              </div>
-            </div>
+            <DashboardContent />
           </ProjectShell>
         </div>
       </div>
