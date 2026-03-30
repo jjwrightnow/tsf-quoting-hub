@@ -2,16 +2,22 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 import { useShellStore } from '@/stores/shellStore';
+import { safeStorage } from '@/lib/safeStorage';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+const authStorage = {
+  getItem: (key: string) => safeStorage.getItem(key),
+  setItem: (key: string, value: string) => safeStorage.setItem(key, value),
+  removeItem: (key: string) => safeStorage.removeItem(key),
+};
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   auth: {
-    storage: localStorage,
+    storage: authStorage,
     persistSession: true,
     autoRefreshToken: true,
   },

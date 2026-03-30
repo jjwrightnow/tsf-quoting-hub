@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { safePersistStorage } from '@/lib/safeStorage';
 
 export interface WizardState {
   artworkPath: string | null;
@@ -90,6 +91,7 @@ export const useWizardStore = create<WizardState & WizardActions>()(
     }),
     {
       name: 'tsf-wizard-draft',
+      storage: safePersistStorage as never,
     }
   )
 );

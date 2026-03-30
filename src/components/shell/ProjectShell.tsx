@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useShellStore } from '@/stores/shellStore';
 import { LetterManChat } from '@/components/chat/LetterManChat';
 import { BookOpen, ChevronDown, ChevronUp, LogOut } from 'lucide-react';
+import { safeStorage } from '@/lib/safeStorage';
 
 interface TechClass {
   code: string;
@@ -17,6 +18,11 @@ interface LightingStyle {
   sku_label: string;
   hover_description: string;
 }
+
+const readUiMode = (): 'pro' | 'client' => {
+  const saved = safeStorage.getItem('signmaker_ui_mode');
+  return saved === 'client' ? 'client' : 'pro';
+};
 
 function ProductGuide() {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -114,10 +120,7 @@ interface ProjectShellProps {
 }
 
 export function ProjectShell({ children }: ProjectShellProps) {
-  const [uiMode, setUiModeState] = useState<'pro' | 'client'>(() => {
-    const saved = localStorage.getItem('signmaker_ui_mode');
-    return (saved as 'pro' | 'client') || 'pro';
-  });
+  const [uiMode, setUiModeState] = useState<'pro' | 'client'>(readUiMode);
   
   let store: any = { shellState: 'loading', activeProject: null, userEmail: '', signOut: null };
   try {
@@ -128,7 +131,7 @@ export function ProjectShell({ children }: ProjectShellProps) {
 
   const setUiMode = (mode: 'pro' | 'client') => {
     setUiModeState(mode);
-    localStorage.setItem('signmaker_ui_mode', mode);
+    safeStorage.setItem('signmaker_ui_mode', mode);
   };
 
   return (
