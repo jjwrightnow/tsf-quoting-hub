@@ -111,6 +111,13 @@ export const LetterManChat: React.FC<LetterManChatProps> = ({ mode, onClose }) =
     const updatedMessages = [...messages, userMessage];
     setMessages(updatedMessages);
     setInput('');
+
+    // If we have a canned answer, display it directly without calling the LLM
+    if (cannedAnswer) {
+      setMessages(prev => [...prev, { id: Date.now() + 1, role: 'assistant', content: cannedAnswer }]);
+      return;
+    }
+
     setLoading(true);
 
     try {
