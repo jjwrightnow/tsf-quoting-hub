@@ -9,12 +9,6 @@ import { safeStorage } from '@/lib/safeStorage';
 import { useAppStore } from '@/stores/appStore';
 
 type WorkspaceView = 'upload' | 'project';
-type UiMode = 'pro' | 'client';
-
-const readUiMode = (): UiMode => {
-  const saved = safeStorage.getItem('signmaker_ui_mode');
-  return saved === 'client' ? 'client' : 'pro';
-};
 
 const Dashboard = () => {
   const { session, signOut } = useAuth();
