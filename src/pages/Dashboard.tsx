@@ -13,18 +13,36 @@ const Dashboard = () => {
   const { session, signOut } = useAuth();
   const userTier = useAppStore((s) => s.userTier);
   const setUserTier = useAppStore((s) => s.setUserTier);
+  const setOperatorConfig = useAppStore((s) => s.setOperatorConfig);
   const sidebarOpen = useAppStore((s) => s.sidebarOpen);
   const setSidebarOpen = useAppStore((s) => s.setSidebarOpen);
+
+  const isDevMode = new URLSearchParams(window.location.search).get('dev') === 'true';
+
   useOperatorConfig();
 
-  // Sync auth session to tier
+  // Dev-mode bypass: fake tier 2 + default operator config
   useEffect(() => {
+    if (isDevMode) {
+      setUserTier(2);
+      setOperatorConfig({
+        brand_name: 'Dev SignMaker',
+        chatbot_name: 'LetterMan',
+        logo_url: null,
+        primary_color: null,
+        support_email: 'dev@example.com',
+        canned_questions: [],
+        context_instruction: null,
+      });
+      return;
+    }
+    // Normal auth-tier sync
     if (session) {
       if (userTier < 2) setUserTier(2);
     } else {
       if (userTier === 2) setUserTier(0);
     }
-  }, [session, userTier, setUserTier]);
+  }, [session, userTier, setUserTier, setOperatorConfig, isDevMode]);
 
   useQuotePolling(userTier === 2 && !!session);
   useWizardAutoSave();
