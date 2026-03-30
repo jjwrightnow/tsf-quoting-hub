@@ -1,20 +1,14 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useOperatorConfig } from '@/hooks/useOperatorConfig';
 import { LetterManChat } from '@/components/chat/LetterManChat';
 import { UploadWorkspace } from '@/components/workspace/UploadWorkspace';
 import { LogOut, MessageCircle, X } from 'lucide-react';
-import { safeStorage } from '@/lib/safeStorage';
+
 import { useAppStore } from '@/stores/appStore';
 
 type WorkspaceView = 'upload' | 'project';
-type UiMode = 'pro' | 'client';
-
-const readUiMode = (): UiMode => {
-  const saved = safeStorage.getItem('signmaker_ui_mode');
-  return saved === 'client' ? 'client' : 'pro';
-};
 
 const Dashboard = () => {
   const { session, signOut } = useAuth();
@@ -22,7 +16,6 @@ const Dashboard = () => {
   const setOperatorConfig = useAppStore((s) => s.setOperatorConfig);
 
   const [workspaceView] = useState<WorkspaceView>('upload');
-  const [uiMode, setUiModeState] = useState<UiMode>(readUiMode);
   const [mobileChatOpen, setMobileChatOpen] = useState(false);
 
   const isDevMode = new URLSearchParams(window.location.search).get('dev') === 'true';
@@ -63,10 +56,6 @@ const Dashboard = () => {
     }
   }, [session, setUserTier, isDevMode]);
 
-  const setUiMode = useCallback((mode: UiMode) => {
-    setUiModeState(mode);
-    safeStorage.setItem('signmaker_ui_mode', mode);
-  }, []);
 
   return (
     <div className="flex h-screen w-full flex-col overflow-hidden bg-background">
@@ -77,24 +66,6 @@ const Dashboard = () => {
           <div className="w-1.5 h-1.5 rounded-full bg-ring" />
         </div>
         <div className="flex items-center gap-3">
-          <div className="flex bg-sidebar-accent p-0.5 rounded border border-sidebar-border">
-            <button
-              onClick={() => setUiMode('pro')}
-              className={`px-2.5 py-0.5 text-[10px] font-bold rounded transition-all ${
-                uiMode === 'pro' ? 'bg-ring text-primary-foreground' : 'text-primary-foreground/60 hover:text-primary-foreground'
-              }`}
-            >
-              Pro
-            </button>
-            <button
-              onClick={() => setUiMode('client')}
-              className={`px-2.5 py-0.5 text-[10px] font-bold rounded transition-all ${
-                uiMode === 'client' ? 'bg-accent text-accent-foreground' : 'text-primary-foreground/60 hover:text-primary-foreground'
-              }`}
-            >
-              Client
-            </button>
-          </div>
           {(session || isDevMode) && (
             <button
               onClick={signOut}
@@ -127,13 +98,6 @@ const Dashboard = () => {
                 LetterMan
               </span>
               <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.5)]" />
-            </div>
-            <div className={`rounded px-2 py-0.5 border text-[9px] font-bold uppercase tracking-tight ${
-              uiMode === 'pro'
-                ? 'bg-ring/10 border-ring/20 text-ring'
-                : 'bg-accent/10 border-accent/20 text-accent'
-            }`}>
-              {uiMode} Mode
             </div>
           </div>
           <div className="flex-1 overflow-hidden">

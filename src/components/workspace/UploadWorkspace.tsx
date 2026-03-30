@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 export function UploadWorkspace() {
   const [file, setFile] = useState<File | null>(null);
   const [projectName, setProjectName] = useState('');
+  const [email, setEmail] = useState('');
   const [uploading, setUploading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [dragOver, setDragOver] = useState(false);
@@ -38,8 +39,10 @@ export function UploadWorkspace() {
     if (e.target.files?.[0]) handleFile(e.target.files[0]);
   };
 
+  const isValidEmail = email.trim() !== '' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+
   const handleSubmit = async () => {
-    if (!file || !projectName.trim()) return;
+    if (!file || !projectName.trim() || !isValidEmail) return;
     setUploading(true);
 
     try {
@@ -56,6 +59,7 @@ export function UploadWorkspace() {
         .insert({
           upload_path: filePath,
           customer_name: projectName.trim(),
+          customer_email: email.trim(),
           status: 'pending',
         });
       if (dbErr) throw dbErr;
@@ -160,10 +164,24 @@ export function UploadWorkspace() {
           />
         </div>
 
+        {/* Email */}
+        <div className="space-y-2">
+          <label htmlFor="email" className="text-sm font-medium text-foreground">
+            Email Address
+          </label>
+          <Input
+            id="email"
+            type="email"
+            placeholder="Where should we send updates about this project?"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </div>
+
         {/* Submit */}
         <Button
           onClick={handleSubmit}
-          disabled={!file || !projectName.trim() || uploading}
+          disabled={!file || !projectName.trim() || !isValidEmail || uploading}
           className="w-full h-12 text-sm font-semibold"
           size="lg"
         >
