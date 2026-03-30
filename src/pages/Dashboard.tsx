@@ -18,6 +18,15 @@ const Dashboard = () => {
 
   const [workspaceView] = useState<WorkspaceView>('upload');
   const [mobileChatOpen, setMobileChatOpen] = useState(false);
+  const [chatCollapsed, setChatCollapsed] = useState(() => safeStorage.getItem('letterman_collapsed') === 'true');
+
+  const toggleChat = () => {
+    setChatCollapsed(prev => {
+      const next = !prev;
+      safeStorage.setItem('letterman_collapsed', String(next));
+      return next;
+    });
+  };
 
   const isDevMode = new URLSearchParams(window.location.search).get('dev') === 'true';
   const devSignInAttempted = useRef(false);
